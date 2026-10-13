@@ -5,7 +5,7 @@
   const { esc } = ui;
 
   const st = { phase: 'p1', sel: null, kinds: new Set() };
-  const STATE_LABEL = { manual: 'By hand', sim: 'In prototype', real: 'Live', none: 'Not yet', reserved: 'Later' };
+  const STATE_LABEL = { manual: 'Done by hand', sim: 'Works in the demo', real: 'Live', none: 'Not yet', reserved: 'Planned for later' };
   const STATE_CLS = { manual: 'mock', sim: 'sim', real: 'live', none: '', reserved: 'ind' };
   const actorById = Object.fromEntries(content.actors.map((a) => [a.id, a]));
   const kindLabel = Object.fromEntries(content.valueKinds.map((k) => [k.id, k.label]));
@@ -77,7 +77,26 @@
   }
 
   function phaseRow(f) {
-    return `<div class="row" style="gap:6px">${content.phases.map((p) => `<span class="tag ${STATE_CLS[f.phase[p.id]]}" title="${esc(content.plainPhase[p.id].label)}">${esc(content.plainPhase[p.id].label)}: ${STATE_LABEL[f.phase[p.id]]}</span>`).join('')}</div>`;
+    return `<div class="row" style="gap:6px">${content.phases.map((p) => `<span class="tag ${STATE_CLS[f.phase[p.id]]}" title="${esc(content.plainPhase[p.id].label)}">${esc(content.plainPhase[p.id].short)}: ${STATE_LABEL[f.phase[p.id]]}</span>`).join('')}</div>`;
+  }
+
+  /* A group that has a story opens "Your path" on the homepage. UMO admin has no story, so it opens the admin page. */
+  function pathBtn(a) {
+    if (!a.role) return '';
+    const tab = content.storyTabs.find((t) => t.role === a.role);
+    if (tab) return `<button class="btn primary" data-act="path-role" data-role="${a.role}">See the ${esc(tab.label)} path</button>`;
+    return `<button class="btn primary" data-act="as" data-role="${a.role}" data-to="admin">See the admin screens</button>`;
+  }
+
+  /* Four steps, in time order. Replaces the old tab bar. Same underlying phases. */
+  function stepper() {
+    return `<div class="card when" id="when">
+      <span class="eyebrow">When does this work?</span>
+      <ol class="when-steps" role="group" aria-label="When does this work?">${content.phases.map((p, i) => {
+        const pp = content.plainPhase[p.id];
+        return `<li><button class="when-step" data-act="eco-phase" data-id="${p.id}" aria-pressed="${p.id === st.phase}"><span class="when-n">${i + 1}</span><span><b>${esc(pp.label)}</b><small>${esc(pp.meaning)}</small></span></button></li>`;
+      }).join('')}</ol>
+    </div>`;
   }
 
   function detail() {
@@ -86,12 +105,12 @@
       const f = content.flows.find((x) => x.id === sel.id);
       const A = actorById[f.from]; const B = actorById[f.to];
       return `<div class="card detail">
-        <div class="row between"><span class="eyebrow">Value flow · ${esc(f.stage)}</span><button class="btn small ghost" data-act="eco-clear">Clear</button></div>
+        <div class="row between"><span class="eyebrow">One exchange · ${esc(f.stage)}</span><button class="btn small ghost" data-act="eco-clear">Clear</button></div>
         <div class="row"><span class="vk vk-${f.kind}"></span><span class="label">${esc(kindLabel[f.kind])}</span></div>
         <h3>${esc(f.label)}</h3>
         <p class="ink"><b>${esc(A.label)}</b> → <b>${esc(B.label)}</b></p>
         <p>${esc(f.detail)}</p>
-        <div class="stack" style="gap:8px"><span class="label">How it runs over time</span>${phaseRow(f)}</div>
+        <div class="stack" style="gap:8px"><span class="label">When it works</span>${phaseRow(f)}</div>
         <div class="btn-row">${A.role ? `<button class="btn small" data-act="as" data-role="${A.role}" data-to="w-${A.role}">Walk as ${esc(A.label)}</button>` : ''}${B.role ? `<button class="btn small" data-act="as" data-role="${B.role}" data-to="w-${B.role}">Walk as ${esc(B.label)}</button>` : ''}</div>
       </div>`;
     }
@@ -104,37 +123,36 @@
       return `<div class="card detail">
         <div class="row between"><span class="eyebrow">${esc(a.group)}</span><button class="btn small ghost" data-act="eco-clear">Clear</button></div>
         <h3>${esc(a.label)}</h3>
-        ${s.why ? `<p class="ink">${esc(s.why)}</p>` : ''}
+        ${s.why ? `<div class="stack" style="gap:4px"><span class="label">Why they stay</span><p class="ink">${esc(s.why)}</p></div>` : ''}
         ${s.quote ? `<p class="quote" style="font-size:15px">${esc(s.quote)}</p>` : ''}
         <div class="grid g2" style="gap:10px">
-          <div class="stack" style="gap:6px"><span class="label">Gives</span><p>${esc(s.gives || '')}</p></div>
-          <div class="stack" style="gap:6px"><span class="label">Gets</span><p>${esc(s.gets || '')}</p></div>
+          <div class="stack" style="gap:6px"><span class="label">What they give</span><p>${esc(s.gives || '')}</p></div>
+          <div class="stack" style="gap:6px"><span class="label">What they get</span><p>${esc(s.gets || '')}</p></div>
         </div>
-        ${s.risk ? `<div class="msg warn"><span>Risk: ${esc(s.risk)}</span></div>` : ''}
-        <div><span class="label">Gives out · ${outs.length}</span><div class="flow-list">${outs.map((f) => li(f, f.to)).join('') || '<p class="muted">None in view.</p>'}</div></div>
-        <div><span class="label">Receives · ${ins.length}</span><div class="flow-list">${ins.map((f) => li(f, f.from)).join('') || '<p class="muted">None in view.</p>'}</div></div>
-        ${a.role ? `<button class="btn primary" data-act="as" data-role="${a.role}" data-to="w-${a.role}">Walk this role</button>` : ''}
+        ${s.risk ? `<div class="msg warn"><span><b>What could go wrong:</b> ${esc(s.risk)}</span></div>` : ''}
+        <div><span class="label">Goes out to others · ${outs.length}</span><div class="flow-list">${outs.map((f) => li(f, f.to)).join('') || '<p class="muted">None in view.</p>'}</div></div>
+        <div><span class="label">Comes in from others · ${ins.length}</span><div class="flow-list">${ins.map((f) => li(f, f.from)).join('') || '<p class="muted">None in view.</p>'}</div></div>
+        ${pathBtn(a)}
         ${a.href ? `<a class="btn" href="${a.href}" target="_blank" rel="noopener">Open ${esc(a.label)}</a>` : ''}
       </div>`;
     }
     const counts = { real: 0, sim: 0, manual: 0, none: 0, reserved: 0 };
     content.flows.forEach((f) => { counts[f.phase[st.phase]] += 1; });
+    const works = counts.real + counts.sim + counts.manual;
+    const later = counts.none + counts.reserved;
+    const pp = content.plainPhase[st.phase];
+    const parts = [counts.real ? `${counts.real} live` : '', counts.manual ? `${counts.manual} done by hand` : '', counts.sim ? `${counts.sim} work in the demo` : ''].filter(Boolean).join(' · ');
     return `<div class="card detail">
-      <span class="eyebrow">How to read the map</span>
-      <p>Each box is a party to the service. Each line is something of value moving from one party to another. Select a box or a line.</p>
+      <span class="eyebrow">How to read this</span>
+      <p>Each box is a group of people. Each line is something one group gives another. <b class="ink">Not sure where you fit? Pick any box.</b></p>
       <div class="legend" style="display:grid;gap:8px">
-        <span><span class="sw" style="color:var(--ink)"></span>Live now</span>
-        <span><span class="sw d" style="color:var(--ink)"></span>By hand: people and spreadsheets</span>
-        <span><span class="sw p" style="color:var(--ink)"></span>In this prototype only</span>
-        <span class="muted">Faint: not there yet</span>
+        <span><span class="sw" style="color:var(--ink)"></span>Works today</span>
+        <span><span class="sw d" style="color:var(--ink)"></span>Done by hand today, with people and spreadsheets</span>
+        <span><span class="sw p" style="color:var(--ink)"></span>You can try it in this demo</span>
+        <span class="muted">Faint line: planned for later</span>
       </div>
-      <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
-        <div class="kpi"><span class="label">Live</span><span class="v">${counts.real}</span></div>
-        <div class="kpi"><span class="label">In prototype</span><span class="v">${counts.sim}</span></div>
-        <div class="kpi"><span class="label">By hand</span><span class="v">${counts.manual}</span></div>
-        <div class="kpi"><span class="label">Not yet or later</span><span class="v">${counts.none + counts.reserved}</span></div>
-      </div>
-      <p class="muted" style="font-size:13px">Counts are for “${esc(content.plainPhase[st.phase].label)}”, across ${content.flows.length} exchanges.</p>
+      <p class="ink" id="eco-count"><b>${esc(pp.label)}:</b> ${works} of ${content.flows.length} exchanges work. ${later} ${later === 1 ? 'is' : 'are'} planned for later.</p>
+      ${parts ? `<p class="muted" style="font-size:13px">${esc(parts)}</p>` : ''}
     </div>`;
   }
 
@@ -181,15 +199,15 @@
         <span class="label">${esc(a.group)}</span>
         <h3>${esc(a.label)}</h3>
         <div class="grid" style="gap:8px;font-size:14px">
-          <div><span class="label">Gives</span><p>${esc(s.gives)}</p></div>
-          <div><span class="label">Gets</span><p>${esc(s.gets)}</p></div>
-          <div><span class="label">Stays because</span><p class="ink">${esc(s.why)}</p></div>
+          <div><span class="label">What they give</span><p>${esc(s.gives)}</p></div>
+          <div><span class="label">What they get</span><p>${esc(s.gets)}</p></div>
+          <div><span class="label">Why they stay</span><p class="ink">${esc(s.why)}</p></div>
         </div>
       </button>`;
     }).join('');
   }
 
-  LEAD.modelParts = { st, svg, detail, matrix, phaseTable, offerings, stayCards, STATE_LABEL, STATE_CLS };
+  LEAD.modelParts = { st, svg, detail, stepper, matrix, phaseTable, offerings, stayCards, STATE_LABEL, STATE_CLS };
 
   Object.assign(LEAD.act, {
     'eco-phase'(el) { st.phase = el.getAttribute('data-id'); LEAD.render({ keepScroll: true }); },

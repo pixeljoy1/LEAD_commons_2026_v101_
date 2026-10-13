@@ -13,6 +13,7 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - The homepage opens with a timed carousel. “Your path” stays folded until a role is picked.
 - Learning codes: `LM-<mode>-<n>` for a module (SP self-paced, IL instructor-led, PL peer circle, CB inside a challenge), `LP-n` for a Learning Path, `TP-n` open topic, `RQ-n` request, `OF-n` offer. Show the code on every card, step and button. Rules R20 to R22 live in `rules.js` with tests.
 - There is no UMO steward role. UMO admin runs the loop and the pricing. Never show “mock” on admin or persona labels; priced customer screens keep “Mock pricing. Not an offer.”
+- Homepage map section is titled “What is in it for you”. Its four steps are: Today, by hand · In this demo · Next: first pilots · Later: the full platform. The map drawing itself does not change.
 - Mobile first. Dark theme is the reference design; light theme must also pass.
 - Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum, R18–R22 added in rounds 4 and 5).
 - Prices, plans and coupons are data in the database, never hard-coded. Sign-up records store enumerated keys (addendum A4).

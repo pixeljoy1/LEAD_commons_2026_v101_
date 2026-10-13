@@ -752,3 +752,17 @@ ul.list { list-style: none; margin: 0; padding: 0; display: grid; }
 fieldset.q { border: 1px solid var(--line); border-radius: var(--r-m); padding: 12px 14px; display: grid; gap: 8px; margin: 0; }
 fieldset.q legend { padding: 0 6px; }
 @media (max-width: 640px) { .lesson { grid-template-columns: auto 1fr; } .lesson .btn, .lesson .tag { grid-column: 1 / -1; } }
+
+/* ---------- "What is in it for you" (round 6) ---------- */
+.eco-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--ink); }
+.eco-steps li { display: flex; gap: 8px; align-items: center; }
+.eco-steps b { font: 400 18px/1 var(--f-pixel); color: var(--ink); border: 1px solid var(--line); background: var(--panel-2); padding: 4px 7px; border-radius: 4px; }
+.eco-side { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.when-steps { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.when-step { width: 100%; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--panel-2); color: inherit; font: inherit; cursor: pointer; min-height: 44px; }
+.when-step b { display: block; font: 700 15px/1.2 var(--f-display); color: var(--ink); }
+.when-step small { display: block; color: var(--muted); }
+.when-n { font: 400 20px/1 var(--f-pixel); color: var(--ink); width: 28px; text-align: center; }
+.when-step:hover { border-color: var(--ink); }
+.when-step[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); }
+.when-step[aria-pressed="true"] b, .when-step[aria-pressed="true"] small, .when-step[aria-pressed="true"] .when-n { color: var(--bg); }

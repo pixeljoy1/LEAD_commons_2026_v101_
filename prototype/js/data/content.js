@@ -211,14 +211,14 @@
 
   /* ---------- ecosystem and value exchange ---------- */
   const valueKinds = [
-    { id: 'money', label: 'Money', note: 'Fees, sponsorship, honoraria' },
-    { id: 'problem', label: 'Problems', note: 'Real, scoped industry challenges' },
-    { id: 'capability', label: 'Capability', note: 'Learning, teaching, practice' },
-    { id: 'evidence', label: 'Evidence', note: 'Scores, Passports, outcomes' },
-    { id: 'talent', label: 'Talent', note: 'Roles, internships, hires' },
-    { id: 'time', label: 'Time', note: 'Mentor and assessor hours' },
-    { id: 'recognition', label: 'Recognition', note: 'Distinctions, credit, stage' },
-    { id: 'consent', label: 'Consent & data', note: 'Sharing choices, governed by the Codex' },
+    { id: 'money', label: 'Money', note: 'Who pays whom: fees, sponsorship, honoraria' },
+    { id: 'problem', label: 'Real problems', note: 'What companies bring: real, scoped challenges' },
+    { id: 'capability', label: 'Skills and learning', note: 'Learning, teaching and practice' },
+    { id: 'evidence', label: 'Proof of work', note: 'Scores, Passports and results' },
+    { id: 'talent', label: 'Jobs and hiring', note: 'Roles, internships and hires' },
+    { id: 'time', label: 'Hours given', note: 'Mentors, assessors and faculty giving time' },
+    { id: 'recognition', label: 'Credit and thanks', note: 'Distinctions, credit and a stage' },
+    { id: 'consent', label: 'Privacy and consent', note: 'Who may see what, set by the Codex rulebook' },
   ];
 
   /* x, y in a 1000 × 640 viewBox. */
@@ -325,11 +325,12 @@
 
   /* ---------- plain-language layer for the public homepage ---------- */
   const plainPhase = {
-    v0: { label: 'By hand today', when: 'Now', blurb: 'People and spreadsheets run the loop: one shared calendar, an intake form, a brief template, a Passport sheet and a mentor group. No software.' },
-    p1: { label: 'In this prototype', when: 'Ready for the 26 Oct sync', blurb: 'A clickable version with made-up people. Every role can walk its path. Prices are mock, and nothing is saved or charged.' },
-    v1: { label: 'First live pilots', when: 'After most checks pass', blurb: 'Real accounts and one real loop for a few campuses and companies. Fees are invoiced by hand.' },
-    p3: { label: 'Full platform', when: 'After the pilots prove the loop', blurb: 'Memberships, the open tier, Circles, a skills index, and scale.' },
+    v0: { label: 'Today, by hand', short: 'Today', meaning: 'People and spreadsheets do this now.', when: 'Now', blurb: 'People and spreadsheets run the loop: one shared calendar, an intake form, a brief template, a Passport sheet and a mentor group. No software.' },
+    p1: { label: 'In this demo', short: 'This demo', meaning: 'You can click through it here.', when: 'Ready for the 26 Oct sync', blurb: 'A clickable version with made-up people. Every role can walk its path. Prices are mock, and nothing is saved or charged.' },
+    v1: { label: 'Next: first pilots', short: 'Pilots', meaning: 'Real accounts for a few colleges and companies.', when: 'After most checks pass', blurb: 'Real accounts and one real loop for a few campuses and companies. Fees are invoiced by hand.' },
+    p3: { label: 'Later: the full platform', short: 'Full platform', meaning: 'Everything switched on.', when: 'After the pilots prove the loop', blurb: 'Memberships, the open tier, Circles, a skills index, and scale.' },
   };
+
   const plainGate = { G1: 'Companies bring problems', G2: 'Campuses commit', G3: 'Employers value the evidence', G4: 'Enough mentors', G5: 'UMO hosts the loop' };
 
   const S = (stage, when, head, body, route, cta, extra) => Object.assign({ stage, when, head, body, route, cta }, extra || {});
@@ -421,7 +422,7 @@
         { tile: 'Mentor', cap: 'A practitioner coaches the students.' },
         { tile: 'Passport', cap: 'Professionals score the work. The student earns a Passport.' },
         { tile: 'Job', cap: 'Employers hire from proof. Their next problem starts the loop again.' },
-      ], primary: ['Start as a student', 'student'], second: ['See who is in LEAD', 'ecosystem'] },
+      ], primary: ['Start as a student', 'student'], second: ['See what is in it for you', 'ecosystem'] },
     { id: 'student', kind: 'role', ms: 7000, role: 'student', label: 'Student', photo: 'hero', head: 'Do real design work before you graduate.', line: 'Take on a live brief from a real company, get coached by a practitioner, and leave with proof employers trust.', primary: ['Join as a student', 'student'] },
     { id: 'faculty', kind: 'role', ms: 7000, role: 'faculty', label: 'Faculty', photo: 'door-faculty', head: 'Teach with live briefs.', line: 'Bring a real company problem into your module without rewriting your course.', primary: ['Join as faculty', 'faculty'] },
     { id: 'head', kind: 'role', ms: 7000, role: 'head', label: 'College', photo: 'door-college', head: 'Show outcomes you can defend.', line: 'See validated work, placements and faculty hours for your college. Pledge seats for women students.', primary: ['Join as a college', 'head'] },

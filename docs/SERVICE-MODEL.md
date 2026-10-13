@@ -168,3 +168,8 @@ New rules: R18 (share is 0 to 50 percent, whole or half, computed on the amount 
 Giving back: mentors, company staff, faculty and college staff offer hours; students lead a peer circle after finishing a module; anyone proposes a topic or opens a request; others add "me too"; a teacher offers; a UMO admin approves and matches. Rules: R20 module codes, R21 progress (never backwards; done needs every lesson and a 2-of-3 check), R22 offers, requests and votes.
 
 The Lexicon is now the **Skills Guide**, in plain words with four levels per skill, linked to the modules that teach it. **UMO steward** is folded into **UMO admin** (operations strip on the admin page). Not built yet: a Passport line for finished modules.
+
+
+## Round 6 (v0.7): "What is in it for you"
+
+The homepage map section (was "Who is in LEAD") now answers two questions: what is in it for me, and how the whole system works. The map drawing is unchanged. The big tab bar is replaced by a four-step control in the side panel, "When does this work?": **Today, by hand** · **In this demo** · **Next: first pilots** · **Later: the full platform**. The value chips read Money · Real problems · Skills and learning · Proof of work · Jobs and hiring · Hours given · Credit and thanks · Privacy and consent. A selected group shows "What they give", "What they get" and "Why they stay", and its button opens that role's path.

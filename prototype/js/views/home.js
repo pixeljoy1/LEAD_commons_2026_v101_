@@ -131,18 +131,19 @@
   /* ---------- 4–7. the model, in plain words ---------- */
   function who() {
     const m = M();
-    return `<section class="section" id="ecosystem" aria-label="Who is in LEAD">
-      ${heading('Who is in LEAD', 'Each box is a group of people. Each line is something one group gives another. Pick a box or a line to read about it.')}
-      <div class="stack" style="gap:10px"><span class="label">Show the map as it runs</span>
-        <div class="phases" role="group" aria-label="Show the map as it runs">${content.phases.map((p) => `<button class="phase" data-act="eco-phase" data-id="${p.id}" aria-pressed="${p.id === m.st.phase}"><b>${esc(content.plainPhase[p.id].label)}</b><small>${esc(content.plainPhase[p.id].when)}</small></button>`).join('')}</div></div>
-      <div class="row" role="group" aria-label="Filter by what is given">${content.valueKinds.map((k) => `<button class="chip" data-act="eco-kind" data-id="${k.id}" aria-pressed="${m.st.kinds.has(k.id)}" title="${esc(k.note)}"><span class="vk vk-${k.id}"></span>${esc(k.label)}</button>`).join('')}${m.st.kinds.size ? '<button class="chip" data-act="eco-kind" data-id="">Show all</button>' : ''}</div>
-      <div class="eco"><div class="eco-canvas">${m.svg()}</div><div id="eco-detail">${m.detail()}</div></div>
+    return `<section class="section" id="ecosystem" aria-label="What is in it for you">
+      ${heading('What is in it for you', 'Every group in LEAD gives something and gets something back. Tap your group to see both. Tap a line to see one exchange.')}
+      <ol class="eco-steps" aria-label="How to use the map"><li><b>1</b> Tap a group</li><li><b>2</b> See what it gives and gets</li><li><b>3</b> Follow a line to the next group</li></ol>
+      <div class="stack" style="gap:8px"><span class="label">Show only what moves between groups</span>
+        <div class="row" role="group" aria-label="Show only what moves between groups">${content.valueKinds.map((k) => `<button class="chip" data-act="eco-kind" data-id="${k.id}" aria-pressed="${m.st.kinds.has(k.id)}" title="${esc(k.note)}" aria-label="${esc(k.label)}: ${esc(k.note)}"><span class="vk vk-${k.id}"></span>${esc(k.label)}</button>`).join('')}${m.st.kinds.size ? '<button class="chip" data-act="eco-kind" data-id="">Show all</button>' : ''}</div>
+        <span class="muted tiny" id="eco-hint">${m.st.kinds.size ? esc([...m.st.kinds].map((id) => content.valueKinds.find((k) => k.id === id).note).join(' · ')) : 'Pick one or more to dim the rest of the lines.'}</span></div>
+      <div class="eco"><div class="eco-canvas">${m.svg()}</div><div class="eco-side">${m.stepper()}<div id="eco-detail">${m.detail()}</div></div></div>
     </section>`;
   }
 
   function gives() {
     return `<section class="section" aria-label="What everyone gives and gets">
-      ${heading('What everyone gives and gets', 'Each coloured square is something one group gives another. Pick a square to read it.')}
+      ${heading('What everyone gives and gets', 'The same exchanges as a table. Each coloured square is something one group gives another. Pick a square to read it. Prefer a picture? See the map above.')}
       ${M().matrix()}
       <div class="legend">${content.valueKinds.map((k) => `<span class="row" style="gap:6px"><span class="vk vk-${k.id}"></span>${esc(k.label)} <span class="muted">· ${esc(k.note)}</span></span>`).join('')}</div>
     </section>`;

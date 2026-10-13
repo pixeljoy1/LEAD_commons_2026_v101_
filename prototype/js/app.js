@@ -113,7 +113,7 @@
         <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${[...new Map(LEAD.photos.list.map((p) => [p.by, p])).values()].map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
       </details>
       <div class="foot-base">
-        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.5 · Synthetic data only. No real people or student data.</span></span>
+        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.7 · Synthetic data only. No real people or student data.</span></span>
         <span class="uxi"><span>With</span><span class="logo-tile"><img src="../public/brand/UXINDIA_logo.png" alt="UXINDIA, Design Leadership Week 2026" width="523" height="102"></span></span>
       </div>
     </div></footer>`;
