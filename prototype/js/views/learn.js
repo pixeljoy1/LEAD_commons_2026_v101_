@@ -332,7 +332,7 @@
         ${ui.hero({ compact: true, eyebrow: `Learn · ${esc(WHO[r] || '')}`, title: 'Learn.', lede: esc(SHELF[r] || ''), meta: iCan() })}
         <div class="split rev">
           <aside class="stack" style="gap:16px">
-            <div class="card" id="learn-shelf"><span class="eyebrow">Your shelf</span><p class="ink">${esc(SHELF[r] || '')}</p><div class="stack" style="gap:8px">${seqOf().map((x) => byCode(x[0])).filter((m) => m && !prog(m).complete).slice(1, 5).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>
+            <div class="card" id="learn-shelf"><span class="eyebrow">Your shelf</span><p class="ink">${esc(SHELF[r] || '')}</p><div class="stack" style="gap:8px">${seqOf().map((x) => byCode(x[0])).filter((m) => m && !prog(m).complete).slice(0, 4).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>
             <div class="card"><span class="eyebrow">Skills Guide</span><p style="font-size:14px">Not sure what a skill means? Each one is explained in plain words, with four levels.</p><a class="btn small" href="#skills">Open the Skills Guide</a></div>
           </aside>
           <section class="stack" style="gap:18px">${yourSequence()}${yourLearning()}</section>

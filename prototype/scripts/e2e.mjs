@@ -105,7 +105,7 @@ const banned = ['Lifecycle', 'Retention', 'Blueprint', 'Lineage', 'Value exchang
 const hits = banned.filter((w) => homeText.includes(w)).concat(/\bgates?\b/i.test(homeText) ? ['gate'] : []);
 ok('Home: no internal jargon in the page body', hits.length === 0, hits.join(', '));
 const heads = await page.locator('main section:not(.car) h2').allTextContents();
-ok('Home: plain section headings in order (Your path stays folded)', ['Find your door', 'What is in it for you', 'What everyone gives and gets', 'Why people stay', 'Seven ways people work together', 'Ways to join and what they cost', 'Where LEAD is today', 'Built on what already works', 'Everything, in detail', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
+ok('Home: plain section headings in order (Your path stays folded)', ['Find your door', 'What is in it for you', 'What everyone gives and gets', 'Why people stay', 'Seven ways people work together', 'Ways to join and what they cost', 'Where LEAD is today', 'Everything, in detail', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
 ok('Carousel: eight leaves, the guided story first, one h1', await page.locator('#car .leaf').count() === 8 && await page.locator('#car .leaf:not([hidden]) .sb').count() === 1 && await page.locator('main h1').count() === 1);
 ok('Carousel: the story has five captions and no controls inside it', await page.locator('#car .sb-cap').count() === 5 && await page.locator('#car .sb button').count() === 0);
 ok('Path: folded until a role is picked', await page.locator('#path').count() === 0);
@@ -688,8 +688,8 @@ await page.evaluate(() => LEAD.store.resetDemo());
 
 /* ---------- round 10: Community, persona-led Learn, clean text, clean footer ---------- */
 await as(page, 'student'); await goRaw(page, 'community');
-const heads = await page.$$eval('main h1, main section[aria-label] h2', (n) => n.map((x) => x.textContent.trim()));
-ok('Community: the first heading is Community, then What is on, Circles and sessions, Give back', heads[0] === 'Community.' && heads.slice(1, 4).join('|') === 'What is on|Circles and sessions|Give back', heads.join('|'));
+const commHeads = await page.$$eval('main h1, main section[aria-label] h2', (n) => n.map((x) => x.textContent.trim()));
+ok('Community: the first heading is Community, then What is on, Circles and sessions, Give back', commHeads[0] === 'Community.' && commHeads.slice(1, 4).join('|') === 'What is on|Circles and sessions|Give back', commHeads.join('|'));
 ok('Community: the menu item opens it', page.url().endsWith('#community') && await page.locator('nav a[href="#community"][aria-current="page"]').count() === 1);
 await goRaw(page, 'calendar');
 ok('Community: the old calendar link lands on it', (await page.locator('h1').first().textContent()).trim() === 'Community.');
