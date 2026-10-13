@@ -1,4 +1,4 @@
-/* LEAD · working loop, part A: Demand Map (W1), live projects and briefs (R6), team workspace, sprints (W2), submission (R7). */
+/* LEAD · working loop, part A: Demand Map (W1), live projects and briefs, team workspace, sprints (W2), submission. */
 (function (root) {
   const LEAD = root.LEAD;
   const { ui, store, content, rules } = LEAD;
@@ -48,7 +48,7 @@
       const intake = r === 'industry' ? intakeForm() : '';
       const mine = r === 'industry' ? sig.filter((d) => d.orgId === me().orgId) : [];
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '01 · IDENTIFY · F-ID-01, F-ID-05, F-ID-06', title: 'Demand.', lede: 'What employers asked LEAD to build this term, in plain words. Industry states the need; the UMO team merges and publishes it.', meta: ui.simTag() })}
+        ${ui.hero({ compact: true, eyebrow: 'What employers need', title: 'Demand.', lede: 'What employers asked LEAD to build this term, in plain words. Industry states the need; the UMO team merges and publishes it.', meta: ui.simTag() })}
         <div class="split">
           <section class="section">
             ${ui.sectionHead('Skills Opportunity Map', 'Asked for this term')}
@@ -72,7 +72,7 @@
   function intakeForm() {
     const opts = L().capabilities.map((c) => `<option value="${c.slug}">${esc(c.name)}</option>`).join('');
     return `<form class="card" data-form="intake">
-      <span class="eyebrow">F-ID-05 · five minutes</span><h3>State your capability need</h3>
+      <span class="eyebrow">Five minutes</span><h3>State your capability need</h3>
       <label class="field">Capability<select id="in-cap" name="cap">${opts}</select></label>
       <label class="field">The problem, in your words<textarea id="in-problem" name="problem" required>Analysts accept the first framing of a problem and never test it.</textarea></label>
       <div class="form-grid"><label class="field">Needed by<input id="in-need" type="date" name="needBy" value="2027-03-31" required></label>
@@ -95,7 +95,7 @@
     const cols = ['Submitted', 'Reviewed', 'Merged', 'Published'];
     const themes = L().themes;
     return `<section class="section">
-      ${ui.sectionHead('UMO queue · F-ID-06', 'Review, merge, publish')}
+      ${ui.sectionHead('UMO queue', 'Review, merge, publish')}
       <div class="board">${cols.map((col) => {
         const items = L().demandSignals.filter((d) => d.status === col);
         return `<div class="col"><header><span class="label">${col}</span><span class="tnum muted">${items.length}</span></header>${items.map((d) => `<div class="item">
@@ -199,7 +199,7 @@
     render() {
       const list = visibleChallenges();
       if (list === null) {
-        return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '03 · APPLY', title: 'Live Projects.', lede: 'Campus live projects are for enrolled teams. The open community sees open-cohort live projects only.' })}
+        return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: 'Live Projects', title: 'Live Projects.', lede: 'Campus live projects are for enrolled teams. The open community sees open-cohort live projects only.' })}
           ${howItWorks(-1)}<div class="card"><h3>Open cohort · Framing project</h3><p>Applications open to the open community.</p><a class="btn primary" href="#jobs">Apply</a></div></div>`;
       }
       const r = role();
@@ -257,13 +257,13 @@
               ${c.status === 'Draft' && canEdit ? `<button class="btn primary" data-act="ch-shape" data-id="${c.id}" ${nda.ok ? '' : 'disabled'}>Mark shaped</button>` : ''}
             </div>
             ${r === 'admin' && ['Shaped', 'Matched', 'Live'].includes(c.status) ? `<form class="card" data-form="match" data-id="${c.id}">
-              <span class="eyebrow">F-AP-09 · Match to a campus</span>
+              <span class="eyebrow">Match to a campus</span>
               <div class="form-grid"><label class="field">Campus<select name="campus" id="mt-campus">${L().orgs.filter((o) => o.kind === 'institution').map((o) => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select></label>
               <label class="field">Faculty lead<select name="faculty" id="mt-fac">${L().users.filter((x) => x.role === 'faculty').map((f) => `<option value="${f.id}">${esc(f.name)} · ${esc(ui.orgName(f.orgId))}</option>`).join('')}</select></label></div>
               <button class="btn primary" type="submit">Match</button>
             </form>` : ''}
             ${myFacultyMatch ? `<form class="card" data-form="map" data-id="${myFacultyMatch.id}">
-              <span class="eyebrow">F-AP-03 · Live Project-in-a-course kit</span><h3>Map it to a module</h3>
+              <span class="eyebrow">Live Project-in-a-course kit</span><h3>Map it to a module</h3>
               <label class="field">Module<input name="module" id="map-mod" value="Studio 3" required></label>
               <label class="field">Credit window<select name="credit" id="map-credit"><option>Industry-taught credit window · 2 credits</option><option>Studio elective · 4 credits</option></select></label>
               <button class="btn primary" type="submit">Confirm mapping</button><span class="muted" style="font-size:13px">Confirming makes the live project Live for your campus.</span>
@@ -293,7 +293,7 @@
       const c = chById(el.dataset.id);
       const chk = rules.ndaSafe(c.nda);
       if (!chk.ok) { ui.toast(chk.reason); return; }
-      if (move('challenge', c, 'Shaped', 'Brief shaped (R6 passed)')) ui.toast('Shaped. Ready to match.');
+      if (move('challenge', c, 'Shaped', 'Brief shaped')) ui.toast('Shaped. Ready to match.');
     },
     'ch-assess'(el) { if (move('challenge', chById(el.dataset.id), 'In assessment')) ui.toast('Assessment open.'); },
     'ch-close'(el) {
@@ -344,7 +344,7 @@
         <div class="split">
           <section class="stack" style="gap:20px">
             <div class="card">
-              <div class="row between"><span class="eyebrow">F-AP-02 · Decision log · ${t.decisions.length} entries</span><span class="muted" style="font-size:13px">Defended at review</span></div>
+              <div class="row between"><span class="eyebrow">Decision log · ${t.decisions.length} entries</span><span class="muted" style="font-size:13px">Defended at review</span></div>
               ${canWrite ? `<form class="grid" style="gap:10px" data-form="decision" data-id="${t.id}">
                 <label class="field">Decision<input id="dl-dec" name="decision" placeholder="What did you choose?" required></label>
                 <div class="form-grid"><label class="field">Why<input id="dl-why" name="reason" placeholder="The reason, with evidence" required></label>
@@ -355,7 +355,7 @@
               </tbody></table></div>
             </div>
             <div class="card">
-              <div class="row between"><span class="eyebrow">F-ME-02 · Private feedback thread</span>${ui.tag('Team + assigned mentor only', 'ind')}</div>
+              <div class="row between"><span class="eyebrow">Private feedback thread</span>${ui.tag('Team + assigned mentor only', 'ind')}</div>
               <div class="thread">${t.thread.map((x) => { const u = store.user(x.by); return `<div class="bubble ${u && u.role === 'mentor' ? 'mentor' : ''}"><span class="label">${esc(u ? u.name : x.by)} · ${u ? esc(ui.roleName(u.role)) : ''} · ${ui.fmtDate(x.at)}</span><p>${esc(x.body)}</p></div>`; }).join('') || '<p class="muted">No messages yet.</p>'}</div>
               ${canThread ? `<form class="row" data-form="thread" data-id="${t.id}" style="flex-wrap:nowrap"><label class="sr" for="th-body">Message</label><input id="th-body" name="body" placeholder="Write to your ${r === 'mentor' ? 'team' : 'mentor'}" required><button class="btn" type="submit">Send</button></form>` : '<p class="muted" style="font-size:13px">You can read this thread, not write to it.</p>'}
             </div>
@@ -363,7 +363,7 @@
           <aside class="stack" style="gap:16px">
             <div class="card"><span class="eyebrow">Milestones</span>${t.milestones.map((x, i) => `<label class="check"><input type="checkbox" id="ms-${t.id}-${i}" data-on="milestone" data-id="${t.id}" data-i="${i}" ${x.done ? 'checked' : ''} ${canWrite ? '' : 'disabled'}> ${esc(x.t)}</label>`).join('')}${ui.meter(Math.round((doneN / Math.max(1, t.milestones.length)) * 100))}</div>
             <div class="card"><span class="eyebrow">Team</span><ul class="px-list">${t.memberIds.map((x) => `<li>${esc(ui.nameOf(x))}</li>`).join('')}</ul>${sprint ? `<p style="font-size:14px">Mentor: <b class="ink">${esc(ui.nameOf(sprint.mentorId))}</b> · sprint ${ui.status(sprint.status)}</p>` : ''}</div>
-            <div class="card"><span class="eyebrow">F-LE-01 · Path for this live project</span><ul class="px-list"><li>Problem framing · done</li><li>Interviewing stakeholders · in progress</li><li>Defending a decision · next</li></ul><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">Course content at UMO Design School</a></div>
+            <div class="card"><span class="eyebrow">Path for this live project</span><ul class="px-list"><li>Problem framing · done</li><li>Interviewing stakeholders · in progress</li><li>Defending a decision · next</li></ul><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">Course content at UMO Design School</a></div>
             <div class="btn-row"><a class="btn" href="#sprints">Mentor session</a>${r === 'student' ? `<a class="btn primary" href="#submit">${sub ? 'View submission' : 'Submit'}</a>` : ''}</div>
           </aside>
         </div>
@@ -409,12 +409,12 @@
         main = `<div class="stack">${L().sprints.map((s) => sprintCard(s, false, false, true)).join('')}</div>`;
       }
       const mentors = L().users.filter((x) => x.role === 'mentor');
-      const pool = r === 'admin' ? `<section class="section">${ui.sectionHead('F-ME-05 · Mentor pool and credit ledger', 'Mentor pool')}
+      const pool = r === 'admin' ? `<section class="section">${ui.sectionHead('Mentor pool and credit ledger', 'Mentor pool')}
         <div class="table-wrap"><table><thead><tr><th>Mentor</th><th>Practice</th><th>Verified</th><th class="num">Hours offered</th><th class="num">Hours logged</th><th class="num">Teams</th><th></th></tr></thead><tbody>
           ${mentors.map((x) => `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.title || '')}</td><td>${x.verified ? ui.status('Verified') : ui.status('Proposed', 'Not yet')}</td><td class="num">${x.hoursOffered || 0}</td><td class="num">${hoursOf(x.id).toFixed(1)}</td><td class="num">${L().sprints.filter((s) => s.mentorId === x.id).length}</td><td>${x.verified ? '' : `<button class="btn small" data-act="mentor-verify" data-id="${x.id}">Approve</button>`}</td></tr>`).join('')}
         </tbody></table></div><p class="muted" style="font-size:13px">Seed the pool from UMO Mentors & Catalysts, each person by consent.</p></section>` : '';
-      const ledger = r === 'mentor' ? `<div class="card"><span class="eyebrow">F-ME-04 · Hours ledger</span><div class="kpi" style="padding:0;background:none"><span class="v">${hoursOf(u.id).toFixed(1)} h</span><span class="d">This term · ${L().sprints.filter((s) => s.mentorId === u.id).length} teams</span></div>
-        <span class="label">Distinctions · F-CO-03 (P2)</span><div class="pill-list"><span class="chip">Mentor · ${Math.floor(hoursOf(u.id))} h</span><span class="chip">Assessor · 1 day</span></div></div>` : '';
+      const ledger = r === 'mentor' ? `<div class="card"><span class="eyebrow">Hours ledger</span><div class="kpi" style="padding:0;background:none"><span class="v">${hoursOf(u.id).toFixed(1)} h</span><span class="d">This term · ${L().sprints.filter((s) => s.mentorId === u.id).length} teams</span></div>
+        <span class="label">Distinctions</span><div class="pill-list"><span class="chip">Mentor · ${Math.floor(hoursOf(u.id))} h</span><span class="chip">Assessor · 1 day</span></div></div>` : '';
       return `<div class="page wrap">
         ${ui.hero({ compact: true, eyebrow: 'Live Projects · step 4 of 6', title: 'Mentor sessions.', lede: 'Three 45-minute sessions with a practitioner. Every hour is counted.', meta: ui.simTag() })}
         <div class="split"><section class="stack">${main}</section><aside class="stack">${ledger}<div class="card"><span class="eyebrow">Conflict rule · R5</span><p>A mentor never scores the team they mentored. The scoring screen checks this.</p></div></aside></div>

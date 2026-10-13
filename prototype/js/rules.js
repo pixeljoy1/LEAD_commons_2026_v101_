@@ -1,4 +1,4 @@
-/* LEAD · business rules R1–R25 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
+/* LEAD · business rules R1–R26 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
   const enums = isNode ? require('./enums.js') : root.LEAD.enums;
@@ -97,6 +97,13 @@
     if (drive.status === 'Closed') return no('This drive is already closed.');
     if (actorOrgId !== drive.orgId) return no('Only the college that opened a drive can close it.');
     return ok();
+  }
+
+  /* ---------- R26 The next step is the first module in your sequence you have not finished ---------- */
+  function nextStep(codes, doneCodes) {
+    const done = new Set(doneCodes || []);
+    const next = codes.find((c) => !done.has(c)) || null;
+    return { total: codes.length, doneCount: codes.filter((c) => done.has(c)).length, nextCode: next, complete: next === null && codes.length > 0, position: next ? codes.indexOf(next) + 1 : codes.length };
   }
 
   /* ---------- R4 Small groups stay hidden ---------- */
@@ -386,6 +393,6 @@
     lastPrice, setPrice, validatePlan,
     needsSecondApproval, validateCouponFields, createCoupon, approveCoupon, setCouponStatus,
     keyInUse, canRenameOrDelete, sellable, registry, validateWomenShare, validateHoursPerSeat,
-    moduleCode, validateModuleCode, markLesson, scoreCheck, recordCheck, moduleProgress, OFFER_ROLES, validateOffer, validateRequest, addVote,
+    moduleCode, validateModuleCode, markLesson, scoreCheck, recordCheck, moduleProgress, nextStep, OFFER_ROLES, validateOffer, validateRequest, addVote,
   };
 });

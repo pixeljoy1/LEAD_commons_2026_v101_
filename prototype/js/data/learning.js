@@ -35,8 +35,8 @@
     M('LM-PL-1', 'Studio circle: feedback on your work', 'Meet weekly, show work in progress and give each other direct, kind feedback. Led by a peer.', { for: ['student', 'open'], level: 'Starter', mins: 60, skills: ['soft-skills', 'design-decision'], path: 'LP-2', seats: 12, booked: 8, sessions: [{ at: '2026-10-29T18:00', where: 'Campus A', teacherId: 's5' }] }),
     M('LM-PL-2', 'Women in Design circle', 'A monthly circle for women in design, in Bengaluru and online. Hosted by a peer.', { for: ['student', 'open', 'faculty', 'mentor', 'industry'], level: 'Starter', mins: 90, women: true, skills: ['awareness', 'soft-skills'], seats: 30, booked: 14, sessions: [{ at: '2026-11-05T18:30', where: 'Bengaluru + online', teacherId: 'm3' }] }),
 
-    M('LM-CB-1', 'Learn inside a live challenge: onboarding drop-off', 'Learn framing and decisions while you work on a real company problem with a team and a mentor.', { for: ['student'], level: 'Core', mins: 480, skills: ['problem-framing', 'design-decision'], path: 'LP-1', challengeId: 'c1' }),
-    M('LM-CB-2', 'Open challenge: make dispatch exceptions clear', 'A live project open to people outside a campus. Learn by trying it, with feedback.', { for: ['open', 'student'], level: 'Starter', mins: 360, skills: ['economic-constraint'], challengeId: 'c2' }),
+    M('LM-CB-1', 'Learn inside a live project: onboarding drop-off', 'Learn framing and decisions while you work on a real company problem with a team and a mentor.', { for: ['student'], level: 'Core', mins: 480, skills: ['problem-framing', 'design-decision'], path: 'LP-1', challengeId: 'c1' }),
+    M('LM-CB-2', 'Open live project: make dispatch exceptions clear', 'A live project open to people outside a campus. Learn by trying it, with feedback.', { for: ['open', 'student'], level: 'Starter', mins: 360, skills: ['economic-constraint'], challengeId: 'c2' }),
   ];
 
   /* The one full demo course. Short on purpose: three one-page lessons and a three-question check. */
@@ -114,5 +114,26 @@
     };
   }
 
-  LEAD.learningData = { build, content };
+  /* The order each role learns in. Step 1 is the same for everyone. Each line says why the step matters to that role. */
+  const sequences = {
+    student: [['LM-SP-1', 'Start here. It says what employers mean by ready on day one.'], ['LM-SP-2', 'Framing is the skill every live project starts with.'], ['LM-PL-1', 'Show work in progress and get kind, direct feedback from peers.'], ['LM-SP-3', 'Learn to make a decision and defend it. You will do this in your team.'], ['LM-SP-4', 'Use AI with judgement, and say so. Your team and mentor will ask.'], ['LM-CB-1', 'Put it together on a real company problem, with a team and a mentor.']],
+    open: [['LM-SP-1', 'Start here. It says what employers mean by ready on day one.'], ['LM-SP-4', 'A short, free module you can finish in one sitting.'], ['LM-PL-1', 'Find your people. A weekly circle for feedback.'], ['LM-SP-2', 'Framing a problem is the first real design skill.'], ['LM-CB-2', 'Try an open live project, with feedback, outside a campus.'], ['LM-PL-2', 'Join the monthly women in design circle, or add a seat for someone.']],
+    faculty: [['LM-SP-1', 'Start here. The same list your students will be checked against.'], ['LM-IL-1', 'Fit a real company problem into your module without rewriting it.'], ['LM-IL-5', 'Set the term slot, map credit, and report outcomes.'], ['LM-SP-4', 'Set a clear line on AI use for your students.'], ['LM-IL-3', 'Score against the shared rubric, and compare with other scorers.']],
+    head: [['LM-SP-1', 'Start here. It sets out what your students need to show.'], ['LM-IL-5', 'Run LEAD in your college: term slot, credit, outcomes.'], ['LM-IL-1', 'Know what your faculty will be taught.'], ['LM-IL-4', 'Plan learning for faculty and staff, and know it worked.']],
+    industry: [['LM-SP-1', 'Start here. It is the standard your students are checked against.'], ['LM-IL-2', 'Coach a student team in three short sessions.'], ['LM-IL-3', 'Score blind and calibrate with other assessors.'], ['LM-IL-4', 'Plan learning for your own design team.']],
+    mentor: [['LM-SP-1', 'Start here. It says what your teams are aiming for.'], ['LM-IL-2', 'The three-session coaching pattern, with practice.'], ['LM-IL-3', 'Score blind against the shared rubric.'], ['LM-SP-4', 'Know what to say when a team uses AI.'], ['LM-PL-2', 'Give hours back to the women in design circle.']],
+    admin: [['LM-SP-1', 'The standard everything else is built on.'], ['LM-IL-3', 'See how scorers calibrate, so you can spot drift.'], ['LM-IL-5', 'See what colleges are asked to do.'], ['LM-IL-4', 'See how companies plan learning.']],
+  };
+  /* Lesson-by-lesson note for the signed-in role, shown under each lesson of LM-SP-1. */
+  const lens = {
+    student: { l1: 'You will be checked on real work in your live project. Keep what you make.', l2: 'Pick the one you are weakest at and aim to reach level 2 on it first.', l3: 'Your mentor and scorers use the same rubric you see here.' },
+    open: { l1: 'You do not need a campus. An open live project can show the same evidence.', l2: 'Start with framing. It is the easiest to practise alone.', l3: 'Open learners are checked the same way, through open live projects.' },
+    faculty: { l1: 'This is the bar your students are aiming for. Teach toward it.', l2: 'Map one of your own assignments to one of these four skills.', l3: 'You will score with the same rubric, so students hear one voice.' },
+    head: { l1: 'This is what you can report to your board without adding cost.', l2: 'Ask faculty which of the four skills they already teach.', l3: 'Outcomes are counted in groups, never by student name.' },
+    industry: { l1: 'This is the standard a graduate should meet before you hire.', l2: 'Tell us which of the four matter most to your team.', l3: 'You see only the evidence a student chooses to share.' },
+    mentor: { l1: 'Your coaching should move a team toward this bar.', l2: 'Use the four skills as the topics for your three sessions.', l3: 'You will score blind first, then see names.' },
+    admin: { l1: 'This is the standard you check every live project against.', l2: 'These four skills drive the demand map and the Skills Guide.', l3: 'You approve the second signature on every Passport entry.' },
+  };
+
+  LEAD.learningData = { build, content, sequences, lens };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

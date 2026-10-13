@@ -298,7 +298,7 @@ UMO Design Foundation · LEAD`;
       if (st.step !== 'cart') return packagePage('college');
       requote('college');
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'A10.1 · College onboarding · LEAD Campus', title: 'Campus.', lede: 'Student and faculty access, Live Projects, mentors and assessment days for your institution. The fee band is ₹5–15 lakh a year by size. It is a proposal and untested.', meta: steps(st.code ? 2 : 1) })}
+        ${ui.hero({ compact: true, eyebrow: 'College · LEAD Campus', title: 'Campus.', lede: 'Student and faculty access, Live Projects, mentors and assessment days for your institution. The fee band is ₹5–15 lakh a year by size. It is a proposal and untested.', meta: steps(st.code ? 2 : 1) })}
         <div class="split">
           <section class="card" style="gap:16px">
             <span class="eyebrow">Institution details</span>
@@ -330,7 +330,7 @@ UMO Design Foundation · LEAD`;
       requote('industry');
       const learners = Math.max(0, Number(st.seats) - Number(st.supervisors));
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'A10.2 · Industry partnership · Industry Membership', title: 'Partner.', lede: 'Seats for your team: sponsor live projects, send assessors, and see verified shortlists. Minimum two seats.', meta: steps(st.code ? 2 : 1) })}
+        ${ui.hero({ compact: true, eyebrow: 'Company · Industry membership', title: 'Partner.', lede: 'Seats for your team: sponsor live projects, send assessors, and see verified shortlists. Minimum two seats.', meta: steps(st.code ? 2 : 1) })}
         <div class="split">
           <section class="card" style="gap:16px">
             <span class="eyebrow">Organisation</span>
@@ -343,10 +343,10 @@ UMO Design Foundation · LEAD`;
               <label class="field">Seats<span class="hint">Minimum 2</span><input id="ji-seats" type="number" min="1" data-on="jf" data-flow="industry" data-k="seats" value="${esc(st.seats)}"></label>
               <label class="field">Supervisors<span class="hint">Admin, uses a seat</span><input id="ji-sup" type="number" min="0" data-on="jf" data-flow="industry" data-k="supervisors" value="${esc(st.supervisors)}"></label>
               <label class="field">Coordinators<span class="hint">Admin only, no seat</span><input id="ji-coord" type="number" min="0" data-on="jf" data-flow="industry" data-k="coordinators" value="${esc(st.coordinators)}"></label>
-              <label class="field">Assessor seats offered<span class="hint">Free; feeds gate G4</span><input id="ji-ass" type="number" min="0" data-on="jf" data-flow="industry" data-k="assessors" value="${esc(st.assessors)}"></label>
+              <label class="field">Assessor seats offered<span class="hint">Free</span><input id="ji-ass" type="number" min="0" data-on="jf" data-flow="industry" data-k="assessors" value="${esc(st.assessors)}"></label>
             </div>
             <div class="notice"><span class="px"></span><span><b class="ink">${learners}</b> member seats · <b class="ink">${esc(st.supervisors)}</b> supervisor · <b class="ink">${esc(st.coordinators)}</b> coordinator (no seat) · <b class="ink">${esc(st.assessors)}</b> assessor seats, not priced</span></div>
-            <div class="msg info">Privacy: your admins see seats used and Passport counts. They never see individual submissions or feedback (R3, R4).</div>
+            <div class="msg info">Privacy: your admins see seats used and Passport counts. They never see individual submissions or feedback.</div>
             ${womenBlock('industry')}
             ${couponField('industry')}
           </section>
@@ -370,7 +370,7 @@ UMO Design Foundation · LEAD`;
       if (!paths.some((p) => p.key === st.key) && paths[0]) st.key = paths[0].key;
       requote('path');
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'A10.3 · Path enrolment · LEARN', title: 'Learn.', lede: 'Short modules tied to a live project, weighted to practice with feedback, with one mentor session included.', meta: steps(st.code ? 2 : 1) })}
+        ${ui.hero({ compact: true, eyebrow: 'Learner · Learning Path', title: 'Learn.', lede: 'Short modules tied to a live project, weighted to practice with feedback, with one mentor session included.', meta: steps(st.code ? 2 : 1) })}
         <div class="split">
           <section class="card" style="gap:16px">
             <label class="field">Path<span class="hint">From the live plan registry</span><select id="jp-key" data-on="jpath">${paths.map((p) => `<option value="${p.key}" ${p.key === st.key ? 'selected' : ''}>${esc(p.name)} · ${esc(p.key)}</option>`).join('')}</select></label>
@@ -403,7 +403,7 @@ UMO Design Foundation · LEAD`;
       requote('sponsor');
       const chs = store.loop.challenges.filter((c) => c.status !== 'Closed');
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'A10.4 · Live Project sponsorship · APPLY', title: 'Sponsor.', lede: 'Bring a real, scoped problem into a term. The UMO team shapes it NDA-safe and matches it to campuses.', meta: steps(st.code ? 2 : 1) })}
+        ${ui.hero({ compact: true, eyebrow: 'Sponsor · Live Project', title: 'Sponsor.', lede: 'Bring a real, scoped problem into a term. The UMO team shapes it NDA-safe and matches it to campuses.', meta: steps(st.code ? 2 : 1) })}
         <div class="split">
           <section class="card" style="gap:16px">
             <div class="form-grid">
@@ -412,7 +412,7 @@ UMO Design Foundation · LEAD`;
               <label class="field">Live Project<select id="js-ch" data-on="jf" data-flow="sponsor" data-k="challenge">${chs.map((c) => `<option value="${c.id}" ${c.id === st.challenge ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}<option value="new" ${st.challenge === 'new' ? 'selected' : ''}>A new brief, shaped with the UMO team</option></select></label>
               <label class="field">Number of live projects<input id="js-n" type="number" min="1" data-on="jf" data-flow="sponsor" data-k="count" value="${esc(st.count)}"></label>
             </div>
-            <label class="check"><input type="checkbox" disabled> Split the price with co-sponsors <span class="muted">· reserved, not built (F-AP-08)</span></label>
+            <label class="check"><input type="checkbox" disabled> Split the price with co-sponsors <span class="muted">· not built yet</span></label>
             ${womenBlock('sponsor')}
             ${couponField('sponsor')}
           </section>

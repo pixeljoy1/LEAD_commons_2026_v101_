@@ -86,10 +86,9 @@ Gates: G1 Supply (3 companies, day 60) · G2 Demand (3 campuses, day 60) · G3 T
 | Screen | Route | What it shows |
 |---|---|---|
 | Homepage | `#home` (`#model` redirects here) | The whole service model in plain language, student-first. See “Homepage sections” below |
-| Verdict | `#verdict` | Gates with a live reading, the room's evidence, out-of-scope list, open decisions |
-| Access chooser and role homes | `#choose`, `#w-student` … `#w-admin` | All eight roles: journey, simulated screens, hand-offs, Sees / Can do / Cannot |
+| Role homes | `#w-student` … `#w-admin` | All eight roles: journey, simulated screens, hand-offs, Sees / Can do / Cannot |
 | Working loop | `#demand`, `#challenges`, `#team`, `#sprints`, `#submit`, `#assess`, `#passports`, `#passport-<code>`, `#jobs`, `#impact` | W1–W7 end to end with rules R1–R8 |
-| Community | `#lexicon`, `#calendar`, `#provisions` | Lexicon A–Z, Joint Design Calendar, Provisions board |
+| Community | `#community` (old `#calendar`, `#provisions` land here), `#skills` | Calendar, circles and sessions, ways to give back; Skills Guide A–Z |
 | Join | `#join`, `#join-college`, `#join-industry`, `#join-path`, `#join-sponsor`, `#join-open` | Five mock sign-up flows with live quotes, codes, availability and email preview |
 | Admin | `#admin` | One page: pricing models (set a price, new version each time), coupons (second approval by a different admin), recent sign-ups. Choosing the Admin persona goes straight here. Simplified from addendum A11 on UMO's instruction: no separate dashboard, enumerations, banner or audit screens. The change log is the steward and admin `#audit` view |
 
@@ -210,3 +209,12 @@ The 1 Million Women page shows the count, the split by source, and one card per 
 | 4 Referrals | Mentors and faculty | The student, then the employer |
 
 The signed-in persona's own lanes come first, tagged Yours. Signed out shows all four read-only. **R24:** a referral stays private until the student confirms it. **R25:** a drive reply moves Pending to Accepted or Declined, and only the college that opened a drive can close it. Every action writes an audit entry.
+
+
+## Round 10 (v1.0): Community, a sequence for each persona, a cleaner product
+
+**Community** (`#community`; `#calendar` and `#provisions` land on it) reads top to bottom: What is on (the calendar), Circles and sessions, Give back.
+
+**Learn follows the persona.** Each of the seven roles has its own ordered sequence of modules. Step 1 is LM-SP-1 for everyone. The first unfinished step is "Your next step" (R26). Module pages say "Step n of N for <role>", and the lessons in LM-SP-1 carry a short note for the role.
+
+**Removed.** The Verdict, Choose a role and Provisions pages, the workshop evidence table and "what the room adds" text, spec codes in headings, and the five-checks card on the homepage. The footer keeps links, photo credits and the small UXINDIA logo.

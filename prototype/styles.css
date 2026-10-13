@@ -814,3 +814,12 @@ fieldset.q legend { padding: 0 6px; }
 .women-words { font-size: 16px; line-height: 1.35; margin: 2px 0 0; text-transform: none; }
 .women-words b { font-family: var(--f-display); }
 .women-cheer { color: var(--body); font-size: 14.5px; line-height: 1.45; margin: 0; }
+
+/* Learn: the sequence for the signed-in role */
+.seq { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.seq-step { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.seq-step.next { border-color: var(--umo-blue); }
+.seq-step.done { opacity: .75; }
+.seq-n { font-size: 28px; min-width: 24px; }
+.seq-step .btn { align-self: center; }
+@media (max-width: 640px) { .seq-step { grid-template-columns: auto 1fr; } .seq-step .btn { grid-column: 1 / -1; } }

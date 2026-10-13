@@ -7,20 +7,23 @@
   const NAV = [
     ['learn', 'Learn'],
     ['projects', 'Live Projects'],
-    ['calendar', 'Community'],
+    ['community', 'Community'],
     ['jobs', 'Design Jobs'],
     ['impact', 'Impact'],
     ['women', '1M Women'],
   ];
   const NAV_MATCH = {
     learn: ['learn', 'skills', 'demand'], projects: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
-    calendar: ['calendar', 'provisions'], jobs: ['jobs', 'passports', 'passport'], impact: ['impact', 'audit'],
+    community: ['community'], jobs: ['jobs', 'passports', 'passport'], impact: ['impact', 'audit'],
   };
 
   /* token → [view, param] */
   function parse(token) {
     let t = !token || token === 'model' ? 'home' : token; // the homepage is the model
     if (t === 'lexicon' || t.startsWith('lexicon-')) t = 'skills' + t.slice(7); // the Lexicon is now the Skills Guide
+    if (t === 'verdict' || t === 'choose') t = 'home'; // spec-style pages were removed
+    if (t === 'calendar') t = 'community'; // the calendar is now part of the Community page
+    if (t === 'provisions') t = 'community';
     if (t === 'opportunities') t = 'jobs'; // Design Jobs were Opportunities; both routes work
     if (t === 'projects') t = 'challenges'; // Live Projects are the old Challenges; both routes work
     if (t.startsWith('project-')) t = 'challenge-' + t.slice(8);
@@ -110,18 +113,18 @@
           <li><a href="https://umo.design" target="_blank" rel="noopener">WiDesign Fest</a></li><li><a href="#women">1 Million Women in Design</a></li></ul></div>
         <div><h4>Support</h4><ul>
           <li><a href="#join-open">Volunteer</a></li><li><a href="#w-mentor">Become a mentor</a></li>
-          <li><a href="#join-industry">Partner with us</a></li><li><a href="#provisions">Provisions board</a></li></ul></div>
+          <li><a href="#join-industry">Partner with us</a></li></ul></div>
         <div><h4>Connect</h4><ul>
           <li><span class="muted">Email</span> <span class="ink" style="user-select:all">team@umo.design</span></li>
           <li><a href="https://uxin.co" target="_blank" rel="noopener">Find a job on UXIN</a></li>
-          <li><a href="#calendar">Joint Design Calendar</a></li><li><a href="#verdict">Is it worth building?</a></li></ul></div>
+          <li><a href="#community">Community calendar</a></li></ul></div>
       </div>
       <details class="foot-about"><summary>About the model and photo credits</summary>
         <p>LEAD borrows its structure from open learning communities such as the Interaction Design Foundation (IxDF), and adds real industry problems, mentoring and validation. No IxDF content, branding or text is used.</p>
         <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${[...new Map(LEAD.photos.list.map((p) => [p.by, p])).values()].map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
       </details>
       <div class="foot-base">
-        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.8 · Synthetic data only. No real people or student data.</span></span>
+        <span></span>
         <span class="uxi"><span>With</span><span class="logo-tile"><img src="../public/brand/UXINDIA_logo.png" alt="UXINDIA, Design Leadership Week 2026" width="523" height="102"></span></span>
       </div>
     </div></footer>`;

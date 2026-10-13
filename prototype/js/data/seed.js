@@ -202,25 +202,8 @@
       { id: 'e8', title: 'Women in Design circle · Bengaluru', at: '2026-11-05T18:30', kind: 'Circle', host: 'umo', visibility: 'public', where: 'Bengaluru', women: true },
       { id: 'e9', title: 'Faculty session · Running a studio where women lead', at: '2026-11-12T15:00', kind: 'Guest session', host: 'umo', visibility: 'public', where: 'Online', women: true },
       { id: 'e10', title: 'Mentor hour for women designers · open office', at: '2026-11-19T17:00', kind: 'Guest session', host: 'umo', visibility: 'public', where: 'Online', women: true },
-      { id: 'e7', title: '90-day review · gates G3, G4', at: '2026-12-18T11:00', kind: 'Sync', host: 'umo', visibility: 'public', where: 'Online' },
+      { id: 'e7', title: '90-day review', at: '2026-12-18T11:00', kind: 'Sync', host: 'umo', visibility: 'public', where: 'Online' },
     ];
-
-    const P = (title, why, plugs, status) => ({ title, why, plugs, status, by: 'Spec §14' });
-    const provisions = [
-      P('Student data and consent', 'Outcomes are shared with employers. Rules on consent, retention and sharing must exist before any Passport does. Check against India’s data protection law with counsel.', 'Codex', 'Needs an owner'),
-      P('IP and NDA for live project work', 'Who owns a student’s solution to a company’s problem?', 'Codex · APPLY', 'Needs an owner'),
-      P('Mentor and assessor economics', 'Honoraria or credit, conflict rules, quality control.', 'MENTOR · VALIDATE', 'Reserved'),
-      P('Faculty workload credit', 'Faculty time must count somewhere.', 'Faculty Toolkit', 'Needs an owner'),
-      P('Equity of access', 'Tier-2 and tier-3 campuses, scholarships, low bandwidth, regional languages, accessibility.', 'Open tier', 'Reserved'),
-      P('Credit recognition', 'The industry-taught credit window and NEP credit structures.', 'Faculty Toolkit', 'Needs an owner'),
-      P('AI-use policy', 'How AI may be used in live projects, and how it is assessed.', 'Codex', 'Reserved'),
-      P('Beyond design', '“Core is dying: pie-shaped and inter-disciplinary.” Extend the Skills Guide to product, engineering, business.', 'Skills Guide', 'Reserved'),
-      P('Awareness', 'The row that did not travel. Career-path awareness belongs in the open tier.', 'Open tier', 'Reserved'),
-      P('1 Million Women initiative', 'A cohort overlay with its own funding and metrics.', 'Cohort overlay', 'Reserved'),
-      P('Design Pitch', 'A showcase module.', 'CONNECT', 'Reserved'),
-      P('Funding model', 'Campus fee band (untested), pooled industry fund, sponsored live projects. No industry-side price exists.', 'Memberships', 'Needs an owner'),
-      P('Alumni loop', 'What happens after the hire? Feed outcomes back into the Demand Map.', 'Impact Ledger', 'Reserved'),
-    ].map((p, i) => Object.assign({ id: 'pv' + (i + 1) }, p));
 
     const consents = users.filter((u) => u.role === 'student' || u.role === 'open').flatMap((u) => [
       { userId: u.id, purpose: 'share_passport', granted: u.id === 's5', at: D('2026-09-01') },
@@ -231,7 +214,7 @@
     return {
       orgs, users, defaultUser, capabilities, levels, demandSignals, themes, challenges, matches, teams, sprints,
       rubric, submissions, scores, assessmentDays, passports, learningContracts, opportunities, applications, outcomes, drives, referrals,
-      problemRecords, events, provisions, consents, audit: [], follows: [], circles: [],
+      problemRecords, events, consents, audit: [], follows: [], circles: [],
       learning: LEAD.learningData.build(),
     };
   }

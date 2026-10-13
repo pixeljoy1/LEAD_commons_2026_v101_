@@ -76,3 +76,29 @@ test('R21 a module with no lessons is never complete', () => {
   assert.equal(R.moduleProgress(empty, null).complete, false);
   assert.equal(R.moduleProgress(empty, { done: [] }).pct, 0);
 });
+
+test('R26 the next step is the first unfinished module in the sequence', () => {
+  const seq = ['LM-SP-1', 'LM-SP-2', 'LM-PL-1'];
+  assert.deepEqual(R.nextStep(seq, []), { total: 3, doneCount: 0, nextCode: 'LM-SP-1', complete: false, position: 1 });
+  assert.equal(R.nextStep(seq, ['LM-SP-1']).nextCode, 'LM-SP-2');
+  assert.equal(R.nextStep(seq, ['LM-SP-2']).nextCode, 'LM-SP-1');
+  const all = R.nextStep(seq, seq);
+  assert.equal(all.complete, true); assert.equal(all.nextCode, null); assert.equal(all.doneCount, 3);
+  assert.equal(R.nextStep([], []).complete, false);
+});
+
+test('every role has a sequence of real modules that role may take', () => {
+  globalThis.LEAD = globalThis.LEAD || {};
+  require('../js/data/learning.js');
+  const d = globalThis.LEAD.learningData; const mods = d.build().modules;
+  for (const role of ['student', 'faculty', 'head', 'industry', 'mentor', 'open', 'admin']) {
+    assert.ok(d.sequences[role] && d.sequences[role].length >= 4, role);
+    assert.equal(d.sequences[role][0][0], 'LM-SP-1');
+    for (const [code] of d.sequences[role]) {
+      const m = mods.find((x) => x.code === code);
+      assert.ok(m, code);
+      if (role !== 'admin') assert.ok(m.for.includes(role), `${role} ${code}`);
+    }
+  }
+  assert.notDeepEqual(d.sequences.student.map((x) => x[0]), d.sequences.mentor.map((x) => x[0]));
+});

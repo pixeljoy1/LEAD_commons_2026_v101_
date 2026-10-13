@@ -16,6 +16,10 @@
   const rec = (code) => ((Lr().progress[uid()] || {})[code]) || null;
   const prog = (m) => rules.moduleProgress(m, rec(m.code));
   const forYou = (m) => role() === 'admin' || m.for.includes(role());
+  const seqOf = () => LEAD.learningData.sequences[role()] || LEAD.learningData.sequences.open;
+  const seqIdx = (code) => seqOf().findIndex((x) => x[0] === code);
+  const doneCodes = () => seqOf().map((x) => x[0]).filter((c) => { const m = byCode(c); return m && prog(m).complete; });
+  const nextCode = () => rules.nextStep(seqOf().map((x) => x[0]), doneCodes()).nextCode;
   const pathOf = (m) => (m.path ? Lr().paths.find((p) => p.code === m.path) : null);
   const completedAny = () => Lr().modules.some((m) => prog(m).complete);
   const nextNum = (list, prefix) => `${prefix}-${list.reduce((n, x) => Math.max(n, Number(String(x.id).split('-')[1]) || 0), 0) + 1}`;
@@ -50,23 +54,31 @@
     return `<a class="card tight lm-card" href="#learn-${m.code}" aria-label="${esc(m.code)} ${esc(m.title)}">
       <div class="row between">${codeChip(m)}${modeChip(m)}</div>
       <h4>${esc(m.title)}</h4><p>${esc(m.line)}</p>
-      <div class="row tiny muted">${m.pinned ? '<span class="tag info">Pinned · Start here</span>' : ''}<span>${esc(m.level)}</span><span>·</span><span>${esc(mins(m.mins))}</span>${m.women ? '<span class="tag">Women in Design</span>' : ''}</div>
+      <div class="row tiny muted">${seqIdx(m.code) >= 0 ? `<span class="tag info">Step ${seqIdx(m.code) + 1} for you</span>` : ''}<span>${esc(m.level)}</span><span>·</span><span>${esc(mins(m.mins))}</span>${m.women ? '<span class="tag">Women in Design</span>' : ''}</div>
       <div class="row between tiny"><span class="muted">For ${m.for.map((r) => esc(WHO[r])).slice(0, 3).join(', ')}${m.for.length > 3 ? '…' : ''}</span><b class="ink">${esc(priceText(m))}</b></div>
       ${started || pr.pct ? `<div class="stack" style="gap:4px">${ui.meter(pr.pct, { px: true })}<span class="tiny muted">${pr.complete ? 'Complete' : pr.pct + '% done'}</span></div>` : ''}
     </a>`;
   }
 
   /* ---------- the page ---------- */
-  function start() {
-    const m = byCode('LM-SP-1'); const pr = prog(m); const begun = !!rec(m.code);
-    return `<section class="card pinned" id="learn-start" aria-label="Start here">
-      <div class="row between"><div class="row">${codeChip(m)}${modeChip(m)}<span class="tag info">Pinned · Start here</span></div>${ui.tag('Free', 'live')}</div>
-      <h2 style="font-size:clamp(24px,3vw,32px)">${esc(m.title)}</h2>
-      <p>${esc(m.line)}</p>
-      <p class="muted tiny">${m.lessons.length} short lessons · about ${m.mins} minutes · a 3-question check at the end</p>
-      ${begun ? `<div class="stack" style="gap:6px">${ui.meter(pr.pct, { px: true })}<span class="tiny muted">${pr.complete ? 'Complete' : pr.pct + '% done'}</span></div>` : ''}
-      <div class="btn-row"><a class="btn primary" href="#learn-${m.code}" data-act="lm-open" data-code="${m.code}">${pr.complete ? 'Review' : begun ? 'Continue' : 'Start'}</a><a class="btn ghost" href="#learn-${m.code}">About this module</a></div>
-    </section>`;
+  /* The signed-in role's own order of learning. The first unfinished step is the next step. */
+  function yourSequence() {
+    const seq = seqOf(); const ns = rules.nextStep(seq.map((x) => x[0]), doneCodes());
+    const items = seq.map(([code, why], i) => {
+      const m = byCode(code); const pr = prog(m); const begun = !!rec(code);
+      const state = pr.complete ? 'Done' : code === ns.nextCode ? 'Next' : 'Later';
+      const full = !!LEAD.learningData.content[code];
+      const cta = full ? `<a class="btn ${state === 'Next' ? 'primary' : 'small ghost'}" href="#learn-${code}" data-act="lm-open" data-code="${code}">${pr.complete ? 'Review' : begun ? 'Continue' : 'Start'}</a>` : `<a class="btn ${state === 'Next' ? 'primary' : 'small ghost'}" href="#learn-${code}">${state === 'Next' ? 'Open' : 'About'}</a>`;
+      return `<li class="seq-step ${state.toLowerCase()}" data-code="${code}" data-state="${state}">
+        <span class="pxnum seq-n" aria-hidden="true">${i + 1}</span>
+        <div class="stack" style="gap:4px;min-width:0"><div class="row">${codeChip(m)}${modeChip(m)}<span class="tag ${state === 'Next' ? 'info' : state === 'Done' ? 'live' : ''}">${state === 'Next' ? 'Your next step' : state}</span></div>
+          <a href="#learn-${code}"><b class="ink">${esc(m.title)}</b></a><span class="muted tiny">${esc(why)}</span>
+          ${begun && !pr.complete ? `<div class="stack" style="gap:4px">${ui.meter(pr.pct, { px: true })}<span class="tiny muted">${pr.pct}% done</span></div>` : ''}</div>
+        ${cta}</li>`;
+    }).join('');
+    return `<section class="card pinned" id="learn-sequence" aria-label="Your learning sequence">
+      <div class="row between"><span class="eyebrow">Your learning sequence · ${esc(WHO[role()] || '')}</span><span class="tiny muted">${ns.doneCount} of ${ns.total} done</span></div>
+      <ol class="seq">${items}</ol></section>`;
   }
 
   function iCan() {
@@ -101,7 +113,7 @@
   function catalogue() {
     const q = f.q.trim().toLowerCase();
     let list = Lr().modules.filter((m) => (!f.mode || m.mode === f.mode) && (!f.skill || m.skills.includes(f.skill)) && (!q || (m.code + ' ' + m.title + ' ' + m.line + ' ' + m.skills.map(ui.capName).join(' ')).toLowerCase().includes(q)) && (f.all || forYou(m)));
-    list = list.slice().sort((a, b) => (b.pinned - a.pinned) || (forYou(b) - forYou(a)) || a.mode.localeCompare(b.mode) || a.n - b.n);
+    list = list.slice().sort((a, b) => ((seqIdx(a.code) < 0 ? 99 : seqIdx(a.code)) - (seqIdx(b.code) < 0 ? 99 : seqIdx(b.code))) || (forYou(b) - forYou(a)) || a.mode.localeCompare(b.mode) || a.n - b.n);
     return `<section class="section" id="catalogue" aria-label="Catalogue">${ui.sectionHead('', 'All learning', '', 'Every module has a code. Read it as: Learning Module · format · number.')}
       <div class="notice" id="code-key"><span class="px"></span><span><b class="ink lmcode">LM-SP-1</b> means Learning Module · <b class="ink">S</b>elf-<b class="ink">P</b>aced · number 1. The format letters: <span class="lmcode">SP</span> self-paced, <span class="lmcode">IL</span> instructor-led, <span class="lmcode">PL</span> peer circle, <span class="lmcode">CB</span> inside a live project. A <span class="lmcode">LP</span> code is a Learning Path: a bundle of modules with one price.</span></div>
       ${filters()}
@@ -227,6 +239,13 @@
     return `<div class="btn-row">${buy}</div>${p ? '<span class="muted tiny">Mock pricing. Not an offer.</span>' : ''}`;
   }
 
+  function forYouNotice(m) {
+    const i = seqIdx(m.code); const seq = seqOf();
+    if (i < 0) return `<div class="notice" id="lm-for-you"><span class="px"></span><span>This module is outside your sequence as ${esc((WHO[role()] || 'a learner').toLowerCase())}. <a href="#learn">See your sequence</a>.</span></div>`;
+    const nx = nextCode(); const here = nx === m.code;
+    return `<div class="notice" id="lm-for-you"><span class="px cyan"></span><span><b class="ink">Step ${i + 1} of ${seq.length} for ${esc(WHO[role()] || '')}.</b> ${esc(seq[i][1])} ${here ? 'This is your next step.' : nx ? `Your next step is <a href="#learn-${nx}">${esc(nx)}</a>.` : 'You have finished your sequence.'}</span></div>`;
+  }
+
   function modulePage(m) {
     const full = !!LEAD.learningData.content[m.code];
     const taught = m.skills.map((s) => `<a class="chip" href="#skills-${s}">${esc(ui.capName(s))}</a>`).join('');
@@ -234,6 +253,7 @@
     return `<div class="page wrap">
       <nav class="crumbs"><a href="#learn">Learn</a><span>/</span><span>${esc(m.code)}</span></nav>
       ${ui.hero({ compact: true, eyebrow: `${esc(m.code)} · ${esc(enums.ModeLabel[m.mode])}`, title: m.title, lede: esc(m.line), meta: `${m.pinned ? ui.tag('Pinned · Start here', 'info') : ''}${ui.tag(m.level)}${ui.tag(mins(m.mins))}${m.women ? ui.tag('Women in Design') : ''}${ui.tag(priceText(m), m.path ? 'mock' : 'live')}` })}
+      ${forYouNotice(m)}
       <div class="split">
         <section class="stack" style="gap:16px">
           ${m.mode === 'SP' ? `<div class="card"><span class="eyebrow">${m.lessons.length} lessons${full ? '' : ' · outline'}</span><ol class="lessons">${lessonCards(m)}</ol></div>` : ''}
@@ -247,6 +267,11 @@
           <div class="card"><span class="eyebrow">Teach or improve it</span><div class="btn-row"><button class="btn small" data-act="lm-teach-this" data-code="${m.code}">Teach this</button><button class="btn small ghost" data-act="lm-suggest" data-code="${m.code}">Suggest a change</button></div></div>
         </aside>
       </div></div>`;
+  }
+
+  function lensNote(m) {
+    const t = m.code === 'LM-SP-1' ? ((LEAD.learningData.lens[role()] || {})[play.lesson]) : '';
+    return t ? `<div class="notice you" id="lesson-for-you"><span class="px indigo"></span><span><b class="ink">For you as ${esc((WHO[role()] || '').toLowerCase())}:</b> ${esc(t)}</span></div>` : '';
   }
 
   /* ---------- the lesson player (LM-SP-1) ---------- */
@@ -265,6 +290,7 @@
         <p class="lede ink">${esc(l.intro)}</p>
         <ul class="px-list">${l.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
         <div class="notice"><span class="px cyan"></span><span>${esc(l.example)}</span></div>
+        ${lensNote(m)}
         ${bar}
         <div class="btn-row"><button class="btn primary" data-act="lm-done" data-code="${m.code}">${done ? 'Next' : 'Mark as done and continue'}</button>${i > 0 ? `<button class="btn" data-act="lm-prev" data-code="${m.code}">Previous lesson</button>` : ''}</div>
       </article></div>`;
@@ -281,7 +307,7 @@
       </form></div>`;
     }
     /* done */
-    const nexts = Lr().modules.filter((x) => x.code !== m.code && forYou(x) && !prog(x).complete).slice(0, 3);
+    const nexts = seqOf().map((x) => byCode(x[0])).filter((x) => x && x.code !== m.code && !prog(x).complete).slice(0, 3);
     return `<div class="page wrap">${head}<section class="card lesson-page">
       <span class="eyebrow">${esc(m.code)} · complete</span>
       <h1 style="font-size:clamp(28px,4vw,42px)">You finished Day 1 readiness.</h1>
@@ -303,13 +329,13 @@
       play.code = null; play.phase = 'list';
       const r = role();
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: `Learn · ${esc(WHO[r] || '')}`, title: 'Learn.', lede: 'Learn on your own, with a teacher, with peers, or inside a real live project. Teach what you know. Ask for what you want to learn.', meta: iCan() })}
+        ${ui.hero({ compact: true, eyebrow: `Learn · ${esc(WHO[r] || '')}`, title: 'Learn.', lede: esc(SHELF[r] || ''), meta: iCan() })}
         <div class="split rev">
           <aside class="stack" style="gap:16px">
-            <div class="card" id="learn-shelf"><span class="eyebrow">Your shelf</span><p class="ink">${esc(SHELF[r] || '')}</p><div class="stack" style="gap:8px">${Lr().modules.filter((m) => forYou(m) && !m.pinned).slice(0, 4).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>
+            <div class="card" id="learn-shelf"><span class="eyebrow">Your shelf</span><p class="ink">${esc(SHELF[r] || '')}</p><div class="stack" style="gap:8px">${seqOf().map((x) => byCode(x[0])).filter((m) => m && !prog(m).complete).slice(1, 5).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>
             <div class="card"><span class="eyebrow">Skills Guide</span><p style="font-size:14px">Not sure what a skill means? Each one is explained in plain words, with four levels.</p><a class="btn small" href="#skills">Open the Skills Guide</a></div>
           </aside>
-          <section class="stack" style="gap:18px">${start()}${yourLearning()}</section>
+          <section class="stack" style="gap:18px">${yourSequence()}${yourLearning()}</section>
         </div>
         ${catalogue()}
         ${giveBack()}

@@ -54,7 +54,7 @@ await page.goto(BASE + '#model'); // old link: must land on the homepage
 await page.waitForSelector('.eco-canvas svg');
 
 /* ---------- crawl: every route × every role ---------- */
-const ROUTES = ['home', 'model', 'verdict', 'choose', 'skills', 'skills-problem-framing', 'lexicon-problem-framing', 'learn', 'learn-LM-SP-1', 'learn-LM-IL-1', 'learn-LM-CB-1', 'learn-LM-PL-2', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'jobs', 'impact', 'women', 'calendar', 'provisions', 'audit',
+const ROUTES = ['home', 'model', 'verdict', 'choose', 'community', 'skills', 'skills-problem-framing', 'lexicon-problem-framing', 'learn', 'learn-LM-SP-1', 'learn-LM-IL-1', 'learn-LM-CB-1', 'learn-LM-PL-2', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'jobs', 'impact', 'women', 'calendar', 'provisions', 'audit',
   'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans'];
 const simulated = []; const oldWords = [];
 const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'open', 'admin'];
@@ -386,11 +386,9 @@ await page.click('button[data-act="pr"][data-r="solved"]');
 const solved = await page.evaluate(() => LEAD.store.loop.problemRecords.filter((p) => p.result === 'solved').length);
 ok('S8 Impact Ledger counts 1 problem solved and the hire', solved === 1 && (await page.locator('.pxnum:has-text("01")').count()) > 0);
 
-/* ---------- S10: provisions ---------- */
-await go(page, 'provisions');
-await page.fill('#pv-title', 'Regional-language Lexicon');
-await page.click('form[data-form="provision"] button[type="submit"]');
-ok('S10 provision appears on the board', await page.locator('h3:has-text("Regional-language Lexicon")').count() === 1);
+/* ---------- S10: removed spec-style pages redirect ---------- */
+await goRaw(page, 'verdict');
+ok('S10 the old verdict, choose and provisions links land on the homepage or Community', await page.locator('.home-hero').count() === 1 && (await goRaw(page, 'provisions'), (await page.locator('h1').first().textContent()).includes('Community')));
 
 /* ---------- S11–S13, S16, S17: admin and pricing ---------- */
 await as(page, 'admin');
@@ -610,7 +608,7 @@ await as(page, 'student'); await go(page, 'learn');
 await page.waitForSelector('#lm-list .lm-card');
 const codes = await page.locator('#lm-list .lm-card .lmcode').allTextContents();
 ok('S25 every catalogue card carries a code like LM-SP-1', codes.length >= 6 && codes.every((c) => /^LM-(SP|IL|PL|CB)-\d+$/.test(c.trim())), codes.join(','));
-ok('S25 LM-SP-1 is pinned first, with the code key on the page', codes[0].trim() === 'LM-SP-1' && await page.locator('#learn-start:has-text("Pinned")').count() === 1 && await page.locator('#code-key:has-text("Learning Module")').count() === 1);
+ok('S25 LM-SP-1 is step 1 for a student, with the code key on the page', codes[0].trim() === 'LM-SP-1' && await page.locator('#learn-sequence .seq-step').first().getAttribute('data-code') === 'LM-SP-1' && await page.locator('#code-key:has-text("Learning Module")').count() === 1);
 await page.click('[data-act="lm-mode"][data-k="PL"]');
 const plCodes = await page.locator('#lm-list .lm-card .lmcode').allTextContents();
 ok('S25 the format filter keeps only peer circles', plCodes.length >= 1 && plCodes.every((c) => c.includes('-PL-')), plCodes.join(','));
@@ -626,7 +624,7 @@ await page.click('form[data-form="offer-new"] button[type="submit"]');
 ok('S26 a student must finish a module before leading a circle', (await page.locator('form[data-form="offer-new"] >> text=Finish a module first').count()) >= 1);
 
 /* the demo course */
-await page.click('#learn-start a.btn.primary');
+await page.click('#learn-sequence .seq-step.next a.btn.primary');
 await page.waitForSelector('.lesson-page');
 for (let i = 0; i < 3; i++) { await page.click('[data-act="lm-done"]'); await page.waitForTimeout(120); }
 ok('S27 after three lessons the quick check opens', await page.locator('form[data-form="lm-check"]').count() === 1);
@@ -640,7 +638,7 @@ const saved = await page.evaluate(() => { const r = LEAD.store.loop.learning.pro
 ok('S27 progress is saved and every change is in the audit log', saved.done === 3 && saved.passed === true && saved.audit >= 5, JSON.stringify(saved));
 await page.click('.lesson-page [data-act="lm-leave"]');
 await page.waitForSelector('#lm-list');
-ok('S27 Learn then shows the module as complete', (await page.locator('#learn-start:has-text("Complete")').count()) === 1);
+ok('S27 Learn then shows the module as complete', (await page.locator('#learn-sequence .seq-step[data-code="LM-SP-1"][data-state="Done"]').count()) === 1 && (await page.locator('#learn-sequence .seq-step.next').first().getAttribute('data-code')) === 'LM-SP-2');
 await page.click('[data-act="lm-skill"][data-k=""]').catch(() => null);
 await page.click('[data-act="lrn-teach"]'); await page.fill('#of-hours', '2');
 await page.click('form[data-form="offer-new"] button[type="submit"]');
@@ -687,7 +685,37 @@ ok('S31 no steward role anywhere on the page', !oldRoles);
 
 /* ---------- screenshots and layout ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
-const SHOTS = ['home', 'women', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'learn', 'skills'];
+
+/* ---------- round 10: Community, persona-led Learn, clean text, clean footer ---------- */
+await as(page, 'student'); await goRaw(page, 'community');
+const heads = await page.$$eval('main h1, main section[aria-label] h2', (n) => n.map((x) => x.textContent.trim()));
+ok('Community: the first heading is Community, then What is on, Circles and sessions, Give back', heads[0] === 'Community.' && heads.slice(1, 4).join('|') === 'What is on|Circles and sessions|Give back', heads.join('|'));
+ok('Community: the menu item opens it', page.url().endsWith('#community') && await page.locator('nav a[href="#community"][aria-current="page"]').count() === 1);
+await goRaw(page, 'calendar');
+ok('Community: the old calendar link lands on it', (await page.locator('h1').first().textContent()).trim() === 'Community.');
+const seqs = {};
+for (const r of ['student', 'faculty', 'mentor', 'industry', 'head', 'open', 'admin']) {
+  await as(page, r); await goRaw(page, 'learn');
+  seqs[r] = (await page.locator('#learn-sequence .seq-step').evaluateAll((n) => n.map((x) => x.dataset.code))).join(',');
+}
+ok('Learn: each persona sees its own sequence, all starting at LM-SP-1', new Set(Object.values(seqs)).size === 7 && Object.values(seqs).every((v) => v.startsWith('LM-SP-1')) && seqs.student.includes('LM-CB-1') && seqs.mentor.includes('LM-IL-2') && !seqs.student.includes('LM-IL-2'), JSON.stringify(seqs));
+await as(page, 'mentor'); await goRaw(page, 'learn-LM-IL-2');
+ok('Learn: a module page says which step it is for the persona', (await page.locator('#lm-for-you').textContent()).includes('Step 2 of 5 for Mentor'));
+await goRaw(page, 'learn-LM-CB-1');
+ok('Learn: a module outside the persona sequence says so', (await page.locator('#lm-for-you').textContent()).includes('outside your sequence'));
+await as(page, 'faculty'); await goRaw(page, 'learn-LM-SP-1'); await page.click('[data-act="lm-open"]'); await page.waitForSelector('.lesson-page');
+ok('Learn: a lesson carries a note for the persona', (await page.locator('#lesson-for-you').textContent()).toLowerCase().includes('for you as faculty'));
+const BAD = [];
+for (const t of ['home', 'projects', 'jobs', 'learn', 'women', 'community', 'impact', 'passports', 'audit', 'demand']) {
+  await as(page, 'admin'); await goRaw(page, t);
+  const txt = (await page.locator('main, footer').allInnerTexts()).join(' ');
+  if (/the room|room said|room recorded|room’s|\bF-[A-Z]{2}-\d+|spec §|\bgates?\b/i.test(txt)) BAD.push(t);
+}
+ok('Copy: no page carries room-derived text, spec codes or gate talk', BAD.length === 0, BAD.join(','));
+ok('Footer: no red tag and no version or disclaimer line', await page.locator('.site-foot .tag.sim').count() === 0 && !(await page.locator('.site-foot').textContent()).includes('Prototype v') && !(await page.locator('.site-foot').textContent()).includes('Synthetic data only') && await page.locator('.site-foot .uxi img').count() === 1);
+await page.evaluate(() => LEAD.store.resetDemo());
+
+const SHOTS = ['home', 'women', 'community', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'learn', 'skills'];
 const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'admin', admin: 'admin', impact: 'admin', 'join-college': 'head' };
 for (const scheme of ['dark', 'light']) {
   const c = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: scheme });

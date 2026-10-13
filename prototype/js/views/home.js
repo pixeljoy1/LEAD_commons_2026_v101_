@@ -8,7 +8,6 @@
 
   const home = { tab: null, leaf: 0, hold: false };
   const roleChip = (id) => `<span class="chip">${esc(ui.roleName(id))}</span>`;
-  const MODE_PLAIN = { Replicate: 'Borrowed', Adapt: 'Adapted', New: 'New here' };
 
   /* A people photo: grayscale, indigo and cyan tint, a checker corner, and its caption. The caption is part of the figure. */
   function photo(slot, o) {
@@ -177,38 +176,14 @@
 
   /* ---------- 9. today ---------- */
   function today() {
-    const counts = LEAD.gateCounts || {};
-    const gates = content.gates.map((g) => Object.assign({}, g, { count: counts[g.id] != null ? counts[g.id] : g.count }));
-    const met = gates.filter((g) => g.count >= g.target).length;
-    const reading = met <= 2 ? 'Keep running the loop by hand.' : met <= 4 ? 'Build the first live pilots.' : 'Build the full platform.';
     return `<section class="section" id="today" aria-label="Where LEAD is today">
       ${heading('Where LEAD is today', 'LEAD grows in four steps. Each step starts only when the one before has proved itself.')}
       <div class="grid g4">${content.phases.map((p) => `<article class="card"><span class="eyebrow">${esc(content.plainPhase[p.id].when)}</span><h3>${esc(content.plainPhase[p.id].label)}</h3><p style="font-size:14px">${esc(content.plainPhase[p.id].blurb)}</p>
         <button class="btn small ghost" data-act="phase-map" data-id="${p.id}">Show on the map</button></article>`).join('')}</div>
-      <div class="card" style="gap:6px">
-        <div class="row between"><h3>Five checks before each next step</h3>${ui.tag(`${met} of 5 met`, met >= 3 ? 'live' : 'sim')}</div>
-        ${gates.map((g, i) => {
-          const pct = Math.round(Math.min(1, g.count / g.target) * 100);
-          return `<div class="gate-row"><span class="pxnum" style="font-size:30px">${i + 1}</span>
-            <div class="stack" style="gap:4px"><b class="ink">${esc(content.plainGate[g.id])}</b><span>${esc(g.test)}</span><span class="label">${esc(g.by)}</span></div>
-            <div class="stack" style="gap:6px"><span class="tnum ink"><b>${g.count}</b> of ${g.target} ${esc(g.unit)}</span>${ui.meter(pct, { px: true })}</div></div>`;
-        }).join('')}
-        <div class="notice"><span class="px ${met >= 3 ? 'cyan' : 'red'}"></span><span><b class="ink">${esc(reading)}</b> <span class="muted">Fewer than 3 checks: stay by hand. 3 or 4: pilots. All 5: the full platform.</span></span>
-          <a href="#verdict">See the evidence behind this</a></div>
-      </div>
     </section>`;
   }
 
   /* ---------- 10–11. lineage and detail ---------- */
-  function builtOn() {
-    return `<section class="section" aria-label="Built on what already works">
-      ${heading('Built on what already works', 'LEAD borrows its structure from open learning communities, then adds what the room asked for: real industry problems, mentoring and validation.')}
-      <div class="table-wrap"><table><thead><tr><th>What good learning communities do</th><th>What LEAD does</th><th>How we use it</th><th>What the room adds</th></tr></thead><tbody>
-        ${content.ixdf.map((r) => `<tr><td>${esc(r[0])}</td><td><b>${esc(r[1])}</b></td><td>${ui.mode(r[2]).replace(`>${r[2]}<`, `>${MODE_PLAIN[r[2]]}<`)}</td><td>${esc(r[3])}</td></tr>`).join('')}
-      </tbody></table></div>
-    </section>`;
-  }
-
   function detail() {
     return `<section class="section" aria-label="Everything, in detail">
       ${heading('Everything, in detail', 'For partners and the board: every exchange, and how it runs at each step.')}
@@ -234,7 +209,7 @@
   LEAD.views.home = {
     title: () => '',
     render() {
-      return `<div class="page wrap">${hero()}<div id="path-slot">${path()}</div>${doors()}${who()}${gives()}${stay()}${together()}${plans()}${today()}${builtOn()}${detail()}${questions()}${closing()}</div>`;
+      return `<div class="page wrap">${hero()}<div id="path-slot">${path()}</div>${doors()}${who()}${gives()}${stay()}${together()}${plans()}${today()}${detail()}${questions()}${closing()}</div>`;
     },
     after() { wireCarousel(); },
     onPricing() {

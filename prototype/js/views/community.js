@@ -1,4 +1,4 @@
-/* LEAD · Skills Guide (what each design skill means), Joint Design Calendar, Provisions board. */
+/* LEAD · Skills Guide (what each design skill means) and the Community page (calendar, circles, ways to give back). */
 (function (root) {
   const LEAD = root.LEAD;
   const { ui, store } = LEAD;
@@ -103,15 +103,24 @@
   }
   const canWriteCal = () => ['faculty', 'head', 'industry', 'admin'].includes(role());
 
-  LEAD.views.calendar = {
-    title: () => 'Joint Design Calendar',
+  LEAD.views.community = {
+    title: () => 'Community',
     render() {
       const evs = visibleEvents();
       const ed = cal.edit ? L().events.find((e) => e.id === cal.edit) : null;
       const months = {};
       evs.forEach((e) => { const k = new Date(e.at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); (months[k] = months[k] || []).push(e); });
+      const r = role(); const signed = store.session.signedIn;
+      const circles = L().events.filter((e) => ['Circle', 'Industry circle', 'Guest session'].includes(e.kind) && e.visibility === 'public').sort((x, y) => Date.parse(x.at) - Date.parse(y.at));
+      const give = [
+        ['Teach', 'Offer a session, a circle or a topic in Learn.', '#learn', 'Open Learn'],
+        ['Mentor', 'Give hours to a student team on a live project.', signed && r === 'mentor' ? '#sprints' : '#join-mentor', signed && r === 'mentor' ? 'Open mentor sessions' : 'Offer your hours'],
+        ['Fund a seat', 'Add a seat for a woman in design, or give hours.', '#women', 'Open 1 Million Women'],
+      ];
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '07 · CONNECT · F-CO-01 · the room’s own idea', title: 'Calendar.', lede: 'One calendar of industry and campus touchpoints. First touchpoint at 30 days, then 90, then regular virtual meetings.', meta: `${ui.tag('Real in Phase 1', 'live')}<a class="btn small" href="#provisions">Provisions board</a>` })}
+        ${ui.hero({ compact: true, eyebrow: 'Community', title: 'Community.', lede: 'Where students, faculty, colleges, companies and mentors meet. See what is on, find a circle, and give something back.' })}
+        <section class="section" id="community-on" aria-label="What is on">
+          ${ui.sectionHead('', 'What is on', '', 'One calendar for campus and industry. First meeting at 30 days, then 90, then regular online meetings.')}
         <div class="split">
           <section class="stack" style="gap:16px">
             <div class="row" role="group" aria-label="Filter by kind"><button class="chip" data-act="cal-kind" data-k="" aria-pressed="${!cal.kind}">All</button>${KINDS.map((k) => `<button class="chip" data-act="cal-kind" data-k="${k}" aria-pressed="${cal.kind === k}">${k}</button>`).join('')}</div>
@@ -131,6 +140,16 @@
             <div class="btn-row"><button class="btn primary" type="submit">${ed ? 'Save' : 'Add event'}</button>${ed ? '<button class="btn ghost" type="button" data-act="cal-cancel">Cancel</button><button class="btn danger" type="button" data-act="cal-del">Delete</button>' : ''}</div>
           </form>` : `<div class="card"><span class="eyebrow">Your access</span><p>${esc(ui.roleName(role()))} can read the calendar. Faculty, institution heads, industry and the UMO team add events.</p></div>`}</aside>
         </div>
+        </section>
+        <section class="section" id="community-circles" aria-label="Circles and sessions">
+          ${ui.sectionHead('', 'Circles and sessions', '', 'Open to everyone. Small groups that learn and share together.')}
+          <div class="card"><ul class="list">${circles.map((e) => `<li class="row between give-row"><span><b class="ink">${esc(e.title)}</b><br><span class="muted tiny">${esc(ui.fmtDate(e.at))} · ${esc(e.where)}</span></span>${e.women ? ui.tag('Women in design', 'info') : ''}</li>`).join('') || '<li class="muted">No circles yet.</li>'}</ul>
+            <div class="btn-row"><a class="btn small" href="#learn-LM-PL-2">Women in Design circle · LM-PL-2</a><a class="btn small ghost" href="#learn">All peer circles in Learn</a></div></div>
+        </section>
+        <section class="section" id="community-give" aria-label="Give back">
+          ${ui.sectionHead('', 'Give back', '', 'Three ways to put something in.')}
+          <div class="grid g3">${give.map(([t, d, href, cta]) => `<article class="card"><h3>${esc(t)}</h3><p>${esc(d)}</p><a class="btn" href="${href}">${esc(cta)}</a></article>`).join('')}</div>
+        </section>
       </div>`;
     },
   };
@@ -158,38 +177,4 @@
     }
   };
 
-  /* ================= Provisions board ================= */
-  LEAD.views.provisions = {
-    title: () => 'Provisions',
-    render() {
-      const P = L().provisions;
-      const steward = role() === 'admin';
-      return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'Governance · F-GV-05 · spec §14', title: 'Provisions.', lede: 'Reserved slots for things that are easy to miss and costly to bolt on later. Add your own.', meta: `${ui.tag(`${P.filter((p) => p.status === 'Needs an owner').length} need an owner`, 'mock')}${ui.tag('Stays for this session only', 'sim')}` })}
-        <div class="split">
-          <section class="grid g2">${P.map((p, i) => `<article class="card">
-            <div class="row between"><span class="pxnum" style="font-size:26px">${String(i + 1).padStart(2, '0')}</span>${ui.status(p.status)}</div>
-            <h3>${esc(p.title)}</h3><p style="font-size:14px">${esc(p.why)}</p>
-            <div class="row between"><span class="label">Plugs into · ${esc(p.plugs)}</span><span class="muted" style="font-size:12px">${esc(p.by)}</span></div>
-            ${steward ? `<div class="row"><select id="pv-${p.id}" data-on="pv-status" data-id="${p.id}" aria-label="Status of ${esc(p.title)}">${['Reserved', 'Needs an owner', 'Owned'].map((s) => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>` : ''}
-          </article>`).join('')}</section>
-          <aside><form class="card" data-form="provision"><span class="eyebrow">Add a provision</span>
-            <label class="field">Title<input id="pv-title" name="title" required placeholder="For example: regional-language Skills Guide"></label>
-            <label class="field">Why it matters<textarea id="pv-why" name="why" placeholder="One or two sentences"></textarea></label>
-            <label class="field">Plugs into<input id="pv-plugs" name="plugs" placeholder="Skills Guide, Codex, a stage…"></label>
-            <button class="btn primary" type="submit">Add</button></form></aside>
-        </div>
-      </div>`;
-    },
-  };
-  LEAD.forms.provision = (fd) => {
-    const p = { id: uid('pv'), title: String(fd.get('title')).trim(), why: String(fd.get('why') || '').trim() || 'Added in the demo.', plugs: String(fd.get('plugs') || '').trim() || 'Not set', status: 'Needs an owner', by: me().name };
-    if (!p.title) { ui.toast('Give it a title.'); return; }
-    store.commit('Provision added', 'provision', p.id, () => { L().provisions.unshift(p); return p; });
-    ui.toast('Added to the board.');
-  };
-  LEAD.on['pv-status'] = (el) => {
-    const p = L().provisions.find((x) => x.id === el.dataset.id);
-    store.commit('Provision status changed', 'provision', p, () => { p.status = el.value; return p; });
-  };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
