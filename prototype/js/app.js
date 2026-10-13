@@ -20,7 +20,8 @@
   /* token → [view, param] */
   function parse(token) {
     const t = token || 'model';
-    const prefixes = ['w-', 'lexicon-', 'challenge-', 'team-', 'passport-', 'join-path-', 'join-sponsor-', 'admin-plan-'];
+    if (/^admin-/.test(t)) return ['admin', null]; // old admin routes now live on one page
+    const prefixes = ['w-', 'lexicon-', 'challenge-', 'team-', 'passport-', 'join-path-', 'join-sponsor-'];
     for (const p of prefixes) if (t.startsWith(p)) return [p.slice(0, -1), t.slice(p.length)];
     return [t, null];
   }
@@ -40,40 +41,53 @@
     return `<div class="banner" data-banner><div class="wrap"><span>${esc(b.text)}</span>${b.link ? `<a href="${esc(b.link)}">Join</a>` : ''}</div></div>`;
   }
 
+  const CARET = '<svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 4.5l4 4 4-4"/></svg>';
+  const menu = { open: false };
+
+  function setMenu(open) {
+    menu.open = open;
+    const m = document.getElementById('persona-menu');
+    const b = document.querySelector('.persona-btn');
+    if (m) m.hidden = !open;
+    if (b) b.setAttribute('aria-expanded', String(open));
+  }
+
   function headerHTML(view) {
     const active = Object.keys(NAV_MATCH).find((k) => NAV_MATCH[k].includes(view));
     const s = store.session;
     const me = store.me();
     const org = me && me.orgId ? store.org(me.orgId) : null;
+    const r = content.roleById[s.role];
     const theme = document.documentElement.getAttribute('data-theme');
-    const roleOpts = content.roles.map((r) => `<option value="${r.id}" ${r.id === s.role ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
+    const items = content.roles.map((x) => `<button class="persona-item" role="menuitemradio" aria-checked="${x.id === s.role}" data-act="as" data-role="${x.id}" data-to="${x.id === 'admin' ? 'admin' : 'w-' + x.id}">
+        ${ui.glyph(x.id)}<span><b>${esc(x.name)}</b><small>${esc(x.lens)} lens</small></span>${x.id === s.role ? '<span class="px cyan" aria-hidden="true"></span>' : ''}</button>`).join('');
     return `${bannerHTML()}
     <header class="site-head">
       <div class="wrap head-row">
-        <a class="brand" href="#model" aria-label="LEAD by UMO Design Foundation, home">
+        <a class="brand" href="#model" aria-label="LEAD Commons, by UMO Design Foundation. Home">
           <span class="logo-tile"><img src="../public/brand/UMO_logo.png" alt="UMO Design" width="309" height="129"></span>
-          <span class="brand-word"><b>LEAD</b><span>Commons · by UMO</span></span>
+          <span class="brand-div" aria-hidden="true"></span>
+          <b class="brand-name">LEAD Commons</b>
         </a>
-        <nav class="nav" aria-label="Main">${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}</nav>
+        <nav class="nav" aria-label="Main">${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}<a class="nav-join" href="#join">Join</a></nav>
         <div class="head-tools">
-          <button class="icon-btn" data-act="theme" aria-label="Switch theme (now ${theme || 'system'})" title="Theme">${theme === 'light' ? MOON : SUN}</button>
-          <a class="btn join" href="#join">Join</a>
+          <button class="btn small demo-btn" data-act="demo-toggle" aria-pressed="${s.demo}" title="Walk the current persona through the loop">${s.demo ? 'Exit demo' : 'Demo'}</button>
+          <div class="persona-wrap">
+            <button class="persona-btn" data-act="persona-menu" aria-haspopup="menu" aria-expanded="${menu.open}" aria-controls="persona-menu" title="Switch persona">
+              ${ui.glyph(s.role)}<span class="pname">${esc(r.short)}</span>${CARET}
+            </button>
+            <div class="persona-menu" id="persona-menu" role="menu" aria-label="Switch persona" ${menu.open ? '' : 'hidden'}>
+              <div class="persona-head"><span class="label">Acting as</span><b class="ink">${esc(me ? me.name : '')}</b>${org && org.kind !== 'open' ? `<span class="muted">${esc(org.name)}</span>` : ''}${ui.tag('Demo only · nothing saved or charged', 'sim')}</div>
+              ${items}
+              <div class="divider"></div>
+              <button class="persona-item" role="menuitem" data-act="theme"><span class="glyph-gap">${theme === 'light' ? MOON : SUN}</span><span><b>Switch theme</b><small>Now ${theme || 'system'}</small></span></button>
+              <button class="persona-item" role="menuitem" data-act="reset"><span class="glyph-gap"></span><span><b>Reset demo</b><small>Clear demo data and start again</small></span></button>
+            </div>
+          </div>
+          <a class="btn join head-join" href="#join">Join</a>
         </div>
       </div>
-    </header>
-    <div class="rolebar"><div class="wrap">
-      <label class="role-pick"><span class="label">Acting as</span>
-        <select id="role-select" data-on="role" aria-label="Acting as role">${roleOpts}</select></label>
-      ${s.role === 'admin'
-        ? `<div class="seg" role="group" aria-label="Acting admin">${['Admin A', 'Admin B'].map((a) => `<button data-act="admin-actor" data-actor="${a}" aria-pressed="${s.adminActor === a}">${a}</button>`).join('')}</div>`
-        : `<span class="who">${esc(me ? me.name : '')}${org && org.kind !== 'open' ? ` · <span class="muted">${esc(org.name)}</span>` : ''}</span>`}
-      <a class="btn small ghost" href="#w-${s.role}">My home</a>
-      ${s.role === 'admin' ? '<a class="btn small ghost" href="#admin">Admin</a>' : ''}
-      <span class="spacer"></span>
-      ${ui.tag('Demo only · nothing saved or charged', 'sim')}
-      <button class="btn small ${s.demo ? 'primary' : ''}" data-act="demo-toggle" aria-pressed="${s.demo}">Demo script</button>
-      <button class="btn small ghost" data-act="reset" title="Clear demo data and start again">Reset demo</button>
-    </div></div>`;
+    </header>`;
   }
 
   function footerHTML() {
@@ -94,23 +108,30 @@
           <li><a href="#calendar">Joint Design Calendar</a></li><li><a href="#verdict">Is it worth building?</a></li></ul></div>
       </div>
       <div class="foot-base">
-        <span>UMO Design Foundation · LEAD · Prototype v0.2 · Synthetic data only. No real people or student data.</span>
+        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.3 · Synthetic data only. No real people or student data.</span></span>
         <span class="uxi"><span>With</span><span class="logo-tile"><img src="../public/brand/UXINDIA_logo.png" alt="UXINDIA, Design Leadership Week 2026" width="523" height="102"></span></span>
       </div>
     </div></footer>`;
   }
 
+  /* ---------- demo mode, run by persona ---------- */
+  const script = (role) => content.demoByRole[role] || [];
+  const nextPersona = (role) => { const o = content.demoOrder; return o[o.indexOf(role) + 1] || null; };
+
   function demoHTML() {
     const s = store.session;
     if (!s.demo) return '';
-    const steps = content.demo;
+    const steps = script(s.role);
     const i = Math.min(s.demoStep, steps.length - 1);
     const st = steps[i];
-    return `<div class="demo" role="region" aria-label="Demo script">
-      <span class="n">${String(i + 1).padStart(2, '0')}/${steps.length}</span>
-      <p>${esc(st.say)}</p>
+    const last = i === steps.length - 1;
+    const nxt = nextPersona(s.role);
+    const r = content.roleById[s.role];
+    return `<div class="demo" role="region" aria-label="Demo, ${esc(r.name)}">
+      <span class="n">${i + 1}/${steps.length}</span>
+      <p><b>${esc(r.name)} · ${esc(st.stage)}.</b> ${esc(st.say)}</p>
       <button class="btn small" data-act="demo-step" data-d="-1" ${i === 0 ? 'disabled' : ''} aria-label="Previous step">Back</button>
-      <button class="btn small primary" data-act="demo-step" data-d="1">${i === steps.length - 1 ? 'Finish' : 'Next'}</button>
+      <button class="btn small primary" data-act="demo-step" data-d="1">${last ? (nxt ? 'Hand off to ' + esc(content.roleById[nxt].short) : 'Finish') : 'Next'}</button>
     </div>`;
   }
 
@@ -119,6 +140,7 @@
   let lastView = null;
 
   function render(opts) {
+    if (/^admin-/.test(decodeURIComponent(location.hash.slice(1)))) history.replaceState(null, '', '#admin');
     const [view, param] = current();
     const v = LEAD.views[view] || LEAD.views.notfound;
     const focusId = document.activeElement && document.activeElement.id;
@@ -165,6 +187,7 @@
 
   /* ---------- event delegation ---------- */
   document.addEventListener('click', (ev) => {
+    if (menu.open && !ev.target.closest('.persona-wrap')) setMenu(false);
     const a = ev.target.closest('[data-act]');
     if (a && !a.disabled) {
       const fn = LEAD.act[a.getAttribute('data-act')];
@@ -191,7 +214,16 @@
   document.addEventListener('change', (ev) => { const el = ev.target.closest('[data-on]'); if (el && el.tagName === 'SELECT') onInput(ev); });
   document.addEventListener('keydown', (ev) => {
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('[data-act][role="button"]')) { ev.preventDefault(); ev.target.click(); }
+    if (!menu.open) return;
+    if (ev.key === 'Escape') { setMenu(false); const b = document.querySelector('.persona-btn'); if (b) b.focus(); return; }
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      const items = [...document.querySelectorAll('#persona-menu button')];
+      const i = items.indexOf(document.activeElement);
+      const n = ev.key === 'ArrowDown' ? (i + 1) % items.length : (i <= 0 ? items.length - 1 : i - 1);
+      ev.preventDefault(); items[n].focus();
+    }
   });
+  document.addEventListener('focusin', (ev) => { if (menu.open && !ev.target.closest('.persona-wrap')) setMenu(false); });
 
   /* ---------- shell actions ---------- */
   Object.assign(LEAD.act, {
@@ -204,24 +236,38 @@
       render({ keepScroll: true });
     },
     as(el) {
-      store.setRole(el.getAttribute('data-role'), el.getAttribute('data-user') || undefined);
+      setMenu(false);
+      const role = el.getAttribute('data-role');
+      store.setRole(role, el.getAttribute('data-user') || undefined);
+      if (store.session.demo) { store.session.demoStep = 0; go(script(role)[0].route); return; }
       const to = el.getAttribute('data-to');
       if (to) go(to); else render({ keepScroll: true });
     },
     'admin-actor'(el) { store.session.adminActor = el.getAttribute('data-actor'); render({ keepScroll: true }); ui.toast(`Acting as ${store.session.adminActor}.`); },
+    'persona-menu'() {
+      setMenu(!menu.open);
+      if (menu.open) { const cur = document.querySelector('.persona-item[aria-checked="true"]'); if (cur) cur.focus(); }
+    },
     'demo-toggle'() {
-      store.session.demo = !store.session.demo;
-      if (store.session.demo) { const st = content.demo[store.session.demoStep]; go(st.route, st.role); } else render({ keepScroll: true });
+      if (store.session.demo) { store.session.demo = false; render({ keepScroll: true }); return; }
+      store.session.demo = true; store.session.demoStep = 0;
+      go(script(store.session.role)[0].route);
     },
     'demo-step'(el) {
-      const d = Number(el.getAttribute('data-d'));
-      const n = store.session.demoStep + d;
-      if (n >= content.demo.length) { store.session.demo = false; store.session.demoStep = 0; render({ keepScroll: true }); ui.toast('Demo complete.'); return; }
-      store.session.demoStep = Math.max(0, n);
-      const st = content.demo[store.session.demoStep];
-      go(st.route, st.role);
+      const s = store.session;
+      const n = s.demoStep + Number(el.getAttribute('data-d'));
+      if (n >= script(s.role).length) {
+        const nxt = nextPersona(s.role);
+        if (!nxt) { s.demo = false; s.demoStep = 0; render({ keepScroll: true }); ui.toast('Demo complete.'); return; }
+        store.setRole(nxt); s.demoStep = 0;
+        go(script(nxt)[0].route);
+        ui.toast(`Handed off to ${content.roleById[nxt].name}.`);
+        return;
+      }
+      s.demoStep = Math.max(0, n);
+      go(script(s.role)[s.demoStep].route);
     },
-    reset() { store.resetDemo(); },
+    reset() { setMenu(false); store.resetDemo(); },
   });
   LEAD.on.role = (el) => { store.setRole(el.value); };
 

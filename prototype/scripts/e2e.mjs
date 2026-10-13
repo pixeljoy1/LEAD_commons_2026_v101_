@@ -33,7 +33,11 @@ const page = await ctx.newPage();
 watch(page);
 
 async function go(p, token) { await p.evaluate((t) => { if (location.hash.slice(1) === t) LEAD.render(); else location.hash = t; }, token); await p.waitForTimeout(120); }
-async function as(p, role) { await p.selectOption('#role-select', role); await p.waitForTimeout(80); }
+async function as(p, role) {
+  await p.click('.persona-btn');
+  await p.click(`.persona-item[data-role="${role}"]`);
+  await p.waitForTimeout(120);
+}
 
 await page.goto(BASE + '#model');
 await page.evaluate(() => { try { localStorage.clear(); } catch (e) { /* ignore */ } });
@@ -42,7 +46,7 @@ await page.waitForSelector('.eco-canvas svg');
 
 /* ---------- crawl: every route × every role ---------- */
 const ROUTES = ['model', 'verdict', 'choose', 'lexicon', 'lexicon-problem-framing', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'calendar', 'provisions', 'audit',
-  'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans', 'admin-plan-CAMPUS_STANDARD', 'admin-coupons', 'admin-signups', 'admin-enums', 'admin-banner', 'admin-audit'];
+  'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans'];
 const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'steward', 'open', 'admin'];
 for (const r of ROLES) {
   await as(page, r);
@@ -59,6 +63,26 @@ const indShared = await page.locator('.passport').count();
 ok('S9 employer sees only shared Passport entries (R3)', indShared === 1, `${indShared} visible`);
 await as(page, 'student'); await go(page, 'admin');
 ok('S9 student cannot open the pricing admin', await page.locator('text=is not open to Student').count() > 0);
+
+/* ---------- header: one lockup, persona menu, one Demo button ---------- */
+await go(page, 'model');
+await page.click('.persona-btn');
+const menuItems = await page.locator('.persona-item[data-role]').count();
+await page.keyboard.press('Escape');
+ok('Header: persona menu lists 8 personas and closes on Escape', menuItems === 8 && await page.locator('#persona-menu').isHidden());
+await as(page, 'admin');
+ok('Header: choosing Admin goes straight to the single admin page', page.url().endsWith('#admin') && await page.locator('h1:has-text("Pricing.")').count() === 1);
+ok('Header: one logo lockup, no repeated wordmark, no role bar', (await page.locator('.brand-name').count()) === 1 && (await page.locator('.brand-word').count()) === 0 && (await page.locator('.rolebar').count()) === 0 && (await page.locator('.demo-btn').count()) === 1);
+await as(page, 'industry');
+await page.click('.demo-btn');
+const demoText = await page.locator('.demo').textContent();
+for (let i = 0; i < 4; i++) { await page.click('.demo [data-act="demo-step"][data-d="1"]'); await page.waitForTimeout(200); }
+const handLabel = await page.locator('.demo [data-act="demo-step"][data-d="1"]').textContent();
+await page.click('.demo [data-act="demo-step"][data-d="1"]');
+const handedTo = await page.evaluate(() => LEAD.store.session.role);
+ok('Header: Demo runs by persona and hands off to the next', demoText.includes('Industry leader') && handLabel.includes('Hand off to') && handedTo === 'steward', `${handLabel.trim()} → ${handedTo}`);
+await page.click('.demo-btn');
+ok('Header: Exit demo removes the strip', await page.locator('.demo').count() === 0);
 
 /* ---------- S1: intake → merge → publish ---------- */
 await as(page, 'industry'); await go(page, 'demand');
@@ -162,22 +186,26 @@ await page.fill('#pv-title', 'Regional-language Lexicon');
 await page.click('form[data-form="provision"] button[type="submit"]');
 ok('S10 provision appears on the board', await page.locator('h3:has-text("Regional-language Lexicon")').count() === 1);
 
-/* ---------- S11–S13, S16–S18: admin and pricing ---------- */
-await as(page, 'admin'); await go(page, 'admin-plans');
-await page.click('form[data-form="plan-new"] button[type="submit"]');
-await page.fill('#pp-price', '9000');
-await page.click('form[data-form="price"] button[type="submit"]');
-await go(page, 'admin-enums');
-ok('S11 new plan PATH_TEST appears in enumerations', await page.locator('.code:has-text("PATH_TEST")').count() > 0);
-await go(page, 'join-path');
-ok('S11 new plan appears in the path dropdown', await page.locator('#jp-key option[value="PATH_TEST"]').count() === 1);
+/* ---------- S11–S13, S16, S17: admin and pricing ---------- */
+await as(page, 'admin');
+await page.fill('#pp-PATH_DECISIONS', '15000');
+await page.click('form[data-form="price"][data-key="PATH_DECISIONS"] button[type="submit"]');
+await go(page, 'join-path-PATH_DECISIONS');
+ok('S11 a price set on the admin page shows on the sign-up screen', (await page.locator('#q-path >> text=15,000').count()) > 0);
+await as(page, 'admin');
+await page.fill('#pp-PATH_FRAMING', '30000');
+await page.click('form[data-form="price"][data-key="PATH_FRAMING"] button[type="submit"]');
+ok('S11 a change over 30% is refused without a note (R12)', (await page.locator('#plan-PATH_FRAMING >> text=Add a note').count()) > 0 && await page.locator('#pp-PATH_FRAMING').inputValue() === '30000');
+await page.fill('#pn-PATH_FRAMING', 'Pilot price reset');
+await page.click('form[data-form="price"][data-key="PATH_FRAMING"] button[type="submit"]');
+ok('S11 the same change saves with a note', (await page.locator('#plan-PATH_FRAMING >> text=Saved PATH_FRAMING-v2').count()) > 0);
 
 await go(page, 'join-college');
 await page.fill('#cp-college', 'FOUNDING20');
 await page.waitForTimeout(450);
 ok('S12 FOUNDING20 discounts the college quote', await page.locator('#q-college >> text=20% off').count() === 1);
 
-await as(page, 'admin'); await go(page, 'admin-coupons');
+await as(page, 'admin');
 await page.click('form[data-form="coupon-new"] button[type="submit"]');
 const big = () => page.evaluate(() => LEAD.store.pricing.coupons.find((c) => c.code === 'BIG70').status);
 const s1 = await big();
@@ -208,23 +236,15 @@ await page.click('#go-industry'); await page.click('button[data-act="join-again"
 await page.fill('#ji-name', 'Repeat Org'); await page.fill('#cp-industry', 'FOUNDING20'); await page.waitForTimeout(450);
 ok('S17 same organisation cannot reuse a max-per-org coupon', await page.locator('#cm-industry >> text=Already used by your organisation.').count() === 1);
 
-await as(page, 'admin'); await go(page, 'admin-plan-INDUSTRY_TEAM');
-await page.click('button[data-act="plan-archive"]');
-await page.fill('#pr-key', 'INDUSTRY_RENAMED');
-await page.click('form[data-form="plan-rename"] button[type="submit"]');
-ok('S18 archived used key is refused a rename and stays in the log', (await page.locator('text=cannot be renamed or deleted').count()) > 0 && (await page.evaluate(() => LEAD.store.pricing.signups.some((s) => s.planKey === 'INDUSTRY_TEAM'))));
-await page.click('button[data-act="plan-unarchive"]');
-await page.click('button[data-act="plan-toggle"]');
-
-/* ---------- S14, S15, S19, S20: live propagation across tabs ---------- */
+/* ---------- S14, S15, S20: live propagation across tabs ---------- */
 const tab2 = await ctx.newPage(); watch(tab2);
 await tab2.goto(BASE + '#join-industry');
 await tab2.waitForSelector('#q-industry');
 await tab2.fill('#ji-name', 'Tab Two Ltd'); await tab2.waitForTimeout(400);
 const t0 = Date.now();
-await go(page, 'admin-plan-INDUSTRY_TEAM');
-await page.fill('#pp-price', '42000');
-await page.click('form[data-form="price"] button[type="submit"]');
+await as(page, 'admin');
+await page.fill('#pp-INDUSTRY_TEAM', '42000');
+await page.click('form[data-form="price"][data-key="INDUSTRY_TEAM"] button[type="submit"]');
 await tab2.waitForFunction(() => document.querySelector('#q-industry') && document.querySelector('#q-industry').textContent.includes('42,000'), null, { timeout: 6000 }).catch(() => null);
 const dt = Date.now() - t0;
 ok('S14/S20 second tab shows the new price without reload', (await tab2.locator('#q-industry >> text=42,000').count()) > 0 && dt < 5000, `${dt} ms`);
@@ -232,23 +252,17 @@ ok('S14/S20 second tab shows the new price without reload', (await tab2.locator(
 await tab2.fill('#cp-industry', 'STUDENT10'); await tab2.waitForTimeout(400);
 await tab2.fill('#cp-industry', ''); await tab2.waitForTimeout(400);
 await tab2.fill('#ji-name', 'Stale Quote Ltd'); await tab2.fill('#cp-industry', 'FOUNDING20'); await tab2.waitForTimeout(450);
-await go(page, 'admin-coupons');
+await go(page, 'admin');
 await page.locator('article:has-text("FOUNDING20") button[data-act="cp-status"][data-to="PAUSED"]').click();
 await tab2.waitForTimeout(600);
 const said = await tab2.locator('#sum-industry >> text=Price updated.').count();
 const total = await tab2.evaluate(() => document.querySelector('#q-industry').textContent);
 ok('S15 after the admin pauses the coupon, the open quote shows the new total and asks again', said === 1 && !total.includes('20% off'));
 
-await go(page, 'admin-banner');
-await page.fill('#bn-text', 'Assessment day on 14 Nov. Book an assessor seat.');
-await page.click('form[data-form="banner"] button[type="submit"]');
-await tab2.waitForFunction(() => (document.querySelector('[data-banner]') || {}).textContent?.includes('14 Nov'), null, { timeout: 6000 }).catch(() => null);
-ok('S19 banner reaches the other tab', await tab2.locator('[data-banner] >> text=14 Nov').count() === 1);
-
 /* ---------- screenshots and layout ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
-const SHOTS = ['model', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin-coupons', 'lexicon'];
-const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'steward', 'admin-coupons': 'admin', impact: 'steward', 'join-college': 'head' };
+const SHOTS = ['model', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'lexicon'];
+const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'steward', admin: 'admin', impact: 'steward', 'join-college': 'head' };
 for (const scheme of ['dark', 'light']) {
   const c = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: scheme });
   const p = await c.newPage(); watch(p);
@@ -273,7 +287,7 @@ for (const r of ['steward', 'student', 'admin']) {
   }
 }
 ok('Mobile 390px: no horizontal page scroll', wide.length === 0, wide.slice(0, 8).join(' '));
-for (const s of ['model', 'join-college', 'w-student', 'admin-coupons']) { if (roleFor[s]) await as(mp, roleFor[s]); await go(mp, s); await mp.waitForTimeout(250); await mp.screenshot({ path: `${shots}/mobile-${s}.png`, fullPage: false }); }
+for (const s of ['model', 'join-college', 'w-student', 'admin']) { if (roleFor[s]) await as(mp, roleFor[s]); await go(mp, s); await mp.waitForTimeout(250); await mp.screenshot({ path: `${shots}/mobile-${s}.png`, fullPage: false }); }
 
 ok('No script errors in any scenario', errors.length === 0, errors.slice(0, 5).join(' | '));
 await browser.close();

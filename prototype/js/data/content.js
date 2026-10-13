@@ -182,13 +182,13 @@
       id: 'admin', name: 'UMO admin (mock)', short: 'Admin', lens: 'UXINDIA Chair', person: 'Admin A or Admin B',
       goal: 'Set prices and offers once, and see them reach every sign-up safely.', access: 'Admin, pricing (mock)',
       sees: ['Plans, price history and tiers', 'Coupons and redemptions', 'Every mock sign-up', 'The audit log'],
-      can: ['Create plans and set prices', 'Create coupons by name and percent', 'Approve another admin’s coupon', 'Set the announcement banner'],
-      cannot: ['Approve a coupon they created', 'Edit a price in place (a new version is made)', 'Rename or delete a key a sign-up used'],
+      can: ['Set a price for any plan (a new version is made)', 'Create coupons by name and percent', 'Approve another admin’s coupon', 'Watch a change reach a second open tab'],
+      cannot: ['Approve a coupon they created', 'Edit a price in place', 'See anything outside pricing and sign-ups'],
       journey: [
-        J('IDENTIFY', 'Before launch', ['F-PR-01', 'F-PR-02'], 'Plans', [['Live plans', '6'], ['Demo prices', 'All but the campus band'], ['Unpriced', '0']], 'Set a price', ['steward'], 'admin-plans'),
-        J('APPLY', 'Any time', ['F-PR-04', 'F-PR-05'], 'Coupons', [['Active', '3'], ['Waiting for approval', '1'], ['Threshold', '50%']], 'Create coupon', ['admin'], 'admin-coupons'),
-        J('CONNECT', 'Campaigns', ['F-PR-12', 'F-PR-07'], 'Banner', [['Status', 'On'], ['Reaches', 'Every page'], ['Propagation', 'Under 5 seconds']], 'Edit banner', [], 'admin-banner'),
-        J('GET OPPORTUNITY', 'Weekly', ['F-PR-14'], 'Sign-ups', [['Mock sign-ups', 'Live count'], ['Snapshots', 'Kept'], ['Charged', 'Nothing']], 'Open log', ['steward'], 'admin-signups'),
+        J('IDENTIFY', 'Before launch', ['F-PR-01', 'F-PR-02'], 'Pricing models', [['Live plans', '6'], ['Demo prices', 'All but the campus band'], ['Unpriced', '0']], 'Set a price', ['steward'], 'admin'),
+        J('APPLY', 'Any time', ['F-PR-04', 'F-PR-05'], 'Coupons', [['Active', '3'], ['Waiting for approval', '1'], ['Threshold', '50%']], 'Create a coupon', ['admin'], 'admin'),
+        J('CONNECT', 'Live', ['F-PR-07'], 'Live updates', [['Reaches', 'Every open sign-up screen'], ['Propagation', 'Under 5 seconds'], ['Stale quote', 'Asks again before confirming']], 'Preview a sign-up', [], 'join-college'),
+        J('GET OPPORTUNITY', 'Weekly', ['F-PR-14'], 'Sign-ups', [['Mock sign-ups', 'Live count'], ['Snapshots', 'Kept'], ['Charged', 'Nothing']], 'Open the log', ['steward'], 'admin'),
       ],
     },
   ];
@@ -318,25 +318,22 @@
     ['No equivalent', 'Challenges · Sprints · Assessment Days · Opportunity Board · Impact Ledger', 'New', 'Where the room’s evidence points'],
   ];
 
-  /* ---------- demo script (§18.2 + A16 9a–9c) ---------- */
-  const demo = [
-    { role: 'steward', route: 'verdict', say: 'Verdict: worth testing, not yet worth building. Tick the gates.' },
-    { role: 'steward', route: 'model', say: 'The service model: who gives what to whom, and what each phase makes real.' },
-    { role: 'industry', route: 'choose', say: 'Access chooser. Pick Industry leader.' },
-    { role: 'industry', route: 'demand', say: 'As Industry leader, submit a capability intake.' },
-    { role: 'steward', route: 'demand', say: 'As Steward, review the intake, merge it and publish the theme.' },
-    { role: 'steward', route: 'challenges', say: 'Shape the brief (NDA-safe check) and match it to Campus A.' },
-    { role: 'student', route: 'team', say: 'As Student: open the challenge workspace, log a decision.' },
-    { role: 'student', route: 'sprints', say: 'Book a mentor sprint.' },
-    { role: 'mentor', route: 'assess', say: 'As Mentor & assessor, score blind. Names stay hidden until scores lock.' },
-    { role: 'steward', route: 'passports', say: 'As Steward, give the second approval.' },
-    { role: 'student', route: 'passports', say: 'As Student, share the Passport and open the verification link.' },
-    { role: 'industry', route: 'opportunities', say: 'As Industry leader, shortlist and see problems solved.' },
-    { role: 'admin', route: 'admin-coupons', say: '9a · As UMO admin, create coupon FOUNDING20 (or a new one).' },
-    { role: 'head', route: 'join-college', say: '9b · Open the college sign-up in a second tab, enter the code, watch the price drop.' },
-    { role: 'admin', route: 'admin-coupons', say: '9c · As Admin A create BIG70; switch to Admin B and approve it.' },
-    { role: 'steward', route: 'provisions', say: 'Provisions board: add one item live. Close on the open gates.' },
+  /* ---------- demo mode, run by persona ---------- */
+  /* One script per persona: one step per journey stage. The last step hands off to the next persona. */
+  const demoOrder = ['industry', 'steward', 'student', 'mentor', 'faculty', 'head', 'open', 'admin'];
+  const demoByRole = {};
+  roles.forEach((r) => {
+    demoByRole[r.id] = r.journey.map((j) => {
+      const s = stages.find((x) => x.id === j.stage);
+      return { route: j.route, stage: `${s.n} ${s.id}`, say: `${j.moment}. ${j.screen.title}. Try “${j.screen.cta}”.` };
+    });
+  });
+  demoByRole.admin = [
+    { route: 'admin', stage: 'Pricing', say: 'Set a price. Pick a plan, change the price and save. It becomes a new version.' },
+    { route: 'admin', stage: 'Coupons', say: 'Create BIG70 at 70%. It waits for a second admin.' },
+    { route: 'admin', stage: 'Coupons', say: 'Switch to Admin B in the coupons block and approve BIG70.' },
+    { route: 'join-college', stage: 'Sign-up', say: 'Open the college sign-up in a second tab, enter a code and watch the price drop.' },
   ];
 
-  Object.assign(LEAD, { content: { stages, features, featureById, roles, roleById, evidence, gates, phases, valueKinds, actors, flows, stays, workflows, ixdf, demo } });
+  Object.assign(LEAD, { content: { stages, features, featureById, roles, roleById, evidence, gates, phases, valueKinds, actors, flows, stays, workflows, ixdf, demoByRole, demoOrder } });
 })(typeof globalThis !== 'undefined' ? globalThis : this);
