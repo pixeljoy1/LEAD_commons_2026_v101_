@@ -1,0 +1,12 @@
+{
+  "name": "lead-platform-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LEAD service-model prototype for UMO Design Foundation. Static HTML, no build step.",
+  "scripts": {
+    "test": "node --test prototype/tests/*.test.cjs",
+    "serve": "python3 -m http.server 4173",
+    "build:artifact": "node prototype/scripts/bundle.mjs",
+    "e2e": "node prototype/scripts/e2e.mjs"
+  }
+}

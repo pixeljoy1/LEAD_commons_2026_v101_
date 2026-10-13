@@ -1,0 +1,191 @@
+/* LEAD · Lexicon (F-ID-07, F-ID-02), Joint Design Calendar (F-CO-01), Provisions board (F-GV-05). */
+(function (root) {
+  const LEAD = root.LEAD;
+  const { ui, store } = LEAD;
+  const { esc } = ui;
+  const L = () => store.loop;
+  const me = () => store.me();
+  const role = () => store.session.role;
+  const uid = (p) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+
+  const lex = { q: '' };
+  const LEVEL_TEXT = [
+    (n) => `Not yet: can describe ${n.toLowerCase()} when shown an example.`,
+    (n) => `Developing: applies ${n.toLowerCase()} with guidance on a scoped brief.`,
+    (n) => `Secure: applies ${n.toLowerCase()} unaided on a real, ambiguous problem.`,
+    (n) => `Strong: defends choices about ${n.toLowerCase()} to industry reviewers and coaches others.`,
+  ];
+  const asksOf = (c) => c.asks + L().demandSignals.filter((d) => d.capSlug === c.slug).length;
+
+  /* ================= Lexicon ================= */
+  LEAD.views.lexicon = {
+    title: (slug) => (slug ? ui.capName(slug) : 'Lexicon'),
+    render(slug) {
+      if (slug) return detail(slug);
+      const q = lex.q.trim().toLowerCase();
+      const list = L().capabilities.filter((c) => !q || (c.name + ' ' + c.definition).toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+      const groups = {};
+      list.forEach((c) => { const k = c.name[0].toUpperCase(); (groups[k] = groups[k] || []).push(c); });
+      return `<div class="page wrap">
+        ${ui.hero({ compact: true, eyebrow: '01 · IDENTIFY · F-ID-07 · EXPLORE', title: 'Lexicon.', lede: 'Plain definitions of what “core” means, co-signed by industry and academia. Each one carries how many employers asked for it.', meta: `${ui.tag('All definitions are drafts for co-signing', 'mock')}<a class="btn small" href="#demand">See demand</a>` })}
+        <div class="split rev">
+          <aside class="stack" style="gap:16px">
+            <div class="card"><span class="eyebrow">F-ID-02 · Readiness profile</span><h3>Day 1 readiness, defined</h3>
+              <p style="font-size:14px">A graduate is Day 1 ready when they show, on real work, at level 2 or above:</p>
+              <ul class="px-list">${['Problem framing', 'Design Decision Training', 'Trust and Compliance', 'Soft-skills + Ownership'].map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
+              <span class="muted" style="font-size:12.5px">Draft. Co-signing: 1 of 2 sides. The room used the phrase; neither side had defined it.</span></div>
+            <div class="card"><span class="eyebrow">A–Z</span><div class="pill-list">${Object.keys(groups).map((k) => `<a class="chip" href="#lx-${k}" data-act="lx-jump" data-k="${k}">${k}</a>`).join('')}</div></div>
+          </aside>
+          <section class="stack" style="gap:18px">
+            <label class="field"><span class="sr">Search the Lexicon</span><input id="lex-q" type="search" data-on="lexq" placeholder="Search capabilities, for example framing" value="${esc(lex.q)}"></label>
+            ${Object.keys(groups).map((k) => `<div class="stack" id="lx-${k}" style="gap:10px"><span class="pxnum" style="font-size:34px">${k}</span><div class="grid g2">${groups[k].map((c) => `<a class="card tight" href="#lexicon-${c.slug}">
+              <div class="row between"><span class="label">${esc(c.position)}</span>${ui.status(c.status, c.status === 'cosigned' ? 'Co-signed' : 'Draft')}</div>
+              <h4 style="font-size:17px">${esc(c.name)}</h4><p style="font-size:14px">${esc(c.definition)}</p>
+              <span class="muted" style="font-size:12.5px">Asked by ${asksOf(c)} companies${L().follows.some((f) => f.slug === c.slug && f.userId === me().id) ? ' · following' : ''}</span></a>`).join('')}</div></div>`).join('') || '<div class="empty">Nothing matches. Try a shorter word.</div>'}
+          </section>
+        </div>
+      </div>`;
+    },
+  };
+
+  function detail(slug) {
+    const c = L().capabilities.find((x) => x.slug === slug);
+    if (!c) return LEAD.views.notfound.render();
+    const following = L().follows.some((f) => f.slug === slug && f.userId === me().id);
+    const chs = L().challenges.filter((x) => x.caps.includes(slug) && ['Live', 'In assessment', 'Closed'].includes(x.status));
+    return `<div class="page wrap">
+      <nav class="crumbs"><a href="#lexicon">Lexicon</a><span>/</span><span>${esc(c.name)}</span></nav>
+      ${ui.hero({ compact: true, eyebrow: `${esc(c.position)} · asked by ${asksOf(c)} companies`, title: c.name, lede: esc(c.definition), meta: `${ui.status(c.status, c.status === 'cosigned' ? 'Co-signed' : 'Draft for co-signing')}${role() !== 'admin' ? `<button class="btn ${following ? '' : 'primary'}" data-act="follow" data-slug="${slug}">${following ? 'Following' : 'Follow'}</button>` : ''}${role() === 'steward' && c.status !== 'cosigned' ? `<button class="btn" data-act="cosign" data-slug="${slug}">Record co-signing</button>` : ''}` })}
+      <div class="split">
+        <section class="card"><span class="eyebrow">Four levels · plain descriptors</span>
+          ${LEVEL_TEXT.map((f, i) => `<div class="score-row"><span class="row" style="gap:12px;flex-wrap:nowrap"><span class="pxnum" style="font-size:28px">${i + 1}</span><span>${esc(f(c.name))}</span></span>${ui.lvlDots(i + 1)}</div>`).join('')}
+        </section>
+        <aside class="stack" style="gap:16px">
+          <div class="card"><span class="eyebrow">Co-signed by</span>${ui.kv([['Industry', c.cosignedIndustry || 'Not yet'], ['Academia', c.cosignedAcademia || 'Not yet']])}</div>
+          <div class="card"><span class="eyebrow">Practised in</span>${chs.map((x) => `<a href="#challenge-${x.id}">${esc(x.title)}</a>`).join('<br>') || '<p class="muted">No live challenge yet.</p>'}</div>
+          <div class="card"><span class="eyebrow">Learn more</span><p style="font-size:14px">Course content lives at the UMO Design School. LEAD links to it, and does not host it.</p><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">UMO Design School</a></div>
+        </aside>
+      </div>
+    </div>`;
+  }
+
+  LEAD.on.lexq = (el) => { lex.q = el.value; LEAD.render({ keepScroll: true }); };
+  Object.assign(LEAD.act, {
+    'lx-jump'(el) { const t = document.getElementById('lx-' + el.dataset.k); if (t) t.scrollIntoView({ behavior: 'smooth' }); },
+    follow(el) {
+      const slug = el.dataset.slug; const u = me();
+      const i = L().follows.findIndex((f) => f.slug === slug && f.userId === u.id);
+      store.commit(i >= 0 ? 'Unfollowed capability' : 'Followed capability', 'follow', slug, () => { if (i >= 0) L().follows.splice(i, 1); else L().follows.push({ slug, userId: u.id }); return { slug }; });
+    },
+    cosign(el) {
+      const c = L().capabilities.find((x) => x.slug === el.dataset.slug);
+      store.commit('Definition co-signed', 'capability', c, () => { c.status = 'cosigned'; c.cosignedIndustry = c.cosignedIndustry || 'Northwind Bank'; c.cosignedAcademia = c.cosignedAcademia || 'Campus A'; return c; });
+      ui.toast('Co-signed by industry and academia.');
+    },
+  });
+
+  /* ================= Joint Design Calendar ================= */
+  const cal = { kind: '', edit: null };
+  const KINDS = ['Industry circle', 'Guest session', 'Assessment day', 'Challenge milestone', 'Circle', 'Sync'];
+  function visibleEvents() {
+    const r = role(); const u = me();
+    return L().events.filter((e) => {
+      if (e.visibility === 'public') return true;
+      if (r === 'steward') return true;
+      if (['student', 'faculty', 'head'].includes(r)) return e.host === u.orgId;
+      if (r === 'industry' || r === 'mentor') return e.host === u.orgId || e.kind === 'Assessment day';
+      return false;
+    }).filter((e) => !cal.kind || e.kind === cal.kind).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+  }
+  const canWriteCal = () => ['faculty', 'head', 'industry', 'steward'].includes(role());
+
+  LEAD.views.calendar = {
+    title: () => 'Joint Design Calendar',
+    render() {
+      const evs = visibleEvents();
+      const ed = cal.edit ? L().events.find((e) => e.id === cal.edit) : null;
+      const months = {};
+      evs.forEach((e) => { const k = new Date(e.at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }); (months[k] = months[k] || []).push(e); });
+      return `<div class="page wrap">
+        ${ui.hero({ compact: true, eyebrow: '07 · CONNECT · F-CO-01 · the room’s own idea', title: 'Calendar.', lede: 'One calendar of industry and campus touchpoints. First touchpoint at 30 days, then 90, then regular virtual meetings.', meta: `${ui.tag('Real in Phase 1', 'live')}<a class="btn small" href="#provisions">Provisions board</a>` })}
+        <div class="split">
+          <section class="stack" style="gap:16px">
+            <div class="row" role="group" aria-label="Filter by kind"><button class="chip" data-act="cal-kind" data-k="" aria-pressed="${!cal.kind}">All</button>${KINDS.map((k) => `<button class="chip" data-act="cal-kind" data-k="${k}" aria-pressed="${cal.kind === k}">${k}</button>`).join('')}</div>
+            ${Object.keys(months).map((m) => `<div class="card"><span class="eyebrow">${esc(m)}</span>${months[m].map((e) => { const d = ui.fmtDay(e.at); return `<div class="cal-row">
+              <div class="stack" style="gap:2px"><span class="cal-day">${d.day}</span><span class="label">${d.wk} · ${d.time}</span></div>
+              <div class="stack" style="gap:4px;min-width:0"><b class="ink">${esc(e.title)}</b><span class="muted" style="font-size:13px">${esc(e.kind)} · ${esc(e.where)} · host ${esc(ui.orgName(e.host))}</span></div>
+              <div class="row">${ui.tag(e.visibility === 'public' ? 'Public' : 'Campus', e.visibility === 'public' ? 'info' : 'ind')}${canWriteCal() && (role() === 'steward' || e.host === me().orgId) ? `<button class="btn small ghost" data-act="cal-edit" data-id="${e.id}">Edit</button>` : ''}<button class="btn small" data-act="toast" data-msg="RSVP saved for ${esc(e.title)}.">RSVP</button></div>
+            </div>`; }).join('')}</div>`).join('') || '<div class="empty">No events for this filter.</div>'}
+          </section>
+          <aside>${canWriteCal() ? `<form class="card" data-form="event" ${ed ? `data-id="${ed.id}"` : ''}>
+            <span class="eyebrow">${ed ? 'Edit event' : 'Add event'}</span>
+            <label class="field">Title<input id="ev-title" name="title" required value="${esc(ed ? ed.title : 'Industry circle · Business context')}"></label>
+            <div class="form-grid"><label class="field">Date and time<input id="ev-at" type="datetime-local" name="at" required value="${esc(ed ? ed.at.slice(0, 16) : '2026-11-04T17:30')}"></label>
+            <label class="field">Kind<select id="ev-kind" name="kind">${KINDS.map((k) => `<option ${ed && ed.kind === k ? 'selected' : ''}>${k}</option>`).join('')}</select></label></div>
+            <div class="form-grid"><label class="field">Where<input id="ev-where" name="where" value="${esc(ed ? ed.where : 'Online')}"></label>
+            <label class="field">Who can see it<select id="ev-vis" name="visibility"><option value="public" ${ed && ed.visibility === 'public' ? 'selected' : ''}>Public</option><option value="campus" ${ed && ed.visibility === 'campus' ? 'selected' : ''}>My organisation</option></select></label></div>
+            <div class="btn-row"><button class="btn primary" type="submit">${ed ? 'Save' : 'Add event'}</button>${ed ? '<button class="btn ghost" type="button" data-act="cal-cancel">Cancel</button><button class="btn danger" type="button" data-act="cal-del">Delete</button>' : ''}</div>
+          </form>` : `<div class="card"><span class="eyebrow">Your access</span><p>${esc(ui.roleName(role()))} can read the calendar. Faculty, institution heads, industry and the steward add events.</p></div>`}</aside>
+        </div>
+      </div>`;
+    },
+  };
+  Object.assign(LEAD.act, {
+    'cal-kind'(el) { cal.kind = el.dataset.k; LEAD.render({ keepScroll: true }); },
+    'cal-edit'(el) { cal.edit = el.dataset.id; LEAD.render({ keepScroll: true }); },
+    'cal-cancel'() { cal.edit = null; LEAD.render({ keepScroll: true }); },
+    'cal-del'() {
+      const i = L().events.findIndex((e) => e.id === cal.edit);
+      if (i >= 0) store.commit('Event deleted', 'calendar_event', L().events[i].id, () => L().events.splice(i, 1)[0]);
+      cal.edit = null; ui.toast('Event deleted.');
+    },
+  });
+  LEAD.forms.event = (fd, form) => {
+    const data = { title: String(fd.get('title')).trim(), at: fd.get('at'), kind: fd.get('kind'), where: fd.get('where'), visibility: fd.get('visibility') };
+    if (!data.title || !data.at) { ui.toast('Add a title and a time.'); return; }
+    if (form.dataset.id) {
+      const e = L().events.find((x) => x.id === form.dataset.id);
+      store.commit('Event edited', 'calendar_event', e, () => Object.assign(e, data));
+      cal.edit = null; ui.toast('Saved.');
+    } else {
+      const e = Object.assign({ id: uid('e'), host: me().orgId }, data);
+      store.commit('Event added', 'calendar_event', e.id, () => { L().events.push(e); return e; });
+      ui.toast('Added to the Joint Design Calendar.');
+    }
+  };
+
+  /* ================= Provisions board ================= */
+  LEAD.views.provisions = {
+    title: () => 'Provisions',
+    render() {
+      const P = L().provisions;
+      const steward = role() === 'steward';
+      return `<div class="page wrap">
+        ${ui.hero({ compact: true, eyebrow: 'Governance · F-GV-05 · spec §14', title: 'Provisions.', lede: 'Reserved slots for things that are easy to miss and costly to bolt on later. Add your own.', meta: `${ui.tag(`${P.filter((p) => p.status === 'Needs an owner').length} need an owner`, 'mock')}${ui.tag('Stays for this session only', 'sim')}` })}
+        <div class="split">
+          <section class="grid g2">${P.map((p, i) => `<article class="card">
+            <div class="row between"><span class="pxnum" style="font-size:26px">${String(i + 1).padStart(2, '0')}</span>${ui.status(p.status)}</div>
+            <h3>${esc(p.title)}</h3><p style="font-size:14px">${esc(p.why)}</p>
+            <div class="row between"><span class="label">Plugs into · ${esc(p.plugs)}</span><span class="muted" style="font-size:12px">${esc(p.by)}</span></div>
+            ${steward ? `<div class="row"><select id="pv-${p.id}" data-on="pv-status" data-id="${p.id}" aria-label="Status of ${esc(p.title)}">${['Reserved', 'Needs an owner', 'Owned'].map((s) => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>` : ''}
+          </article>`).join('')}</section>
+          <aside><form class="card" data-form="provision"><span class="eyebrow">Add a provision</span>
+            <label class="field">Title<input id="pv-title" name="title" required placeholder="For example: regional-language Lexicon"></label>
+            <label class="field">Why it matters<textarea id="pv-why" name="why" placeholder="One or two sentences"></textarea></label>
+            <label class="field">Plugs into<input id="pv-plugs" name="plugs" placeholder="Lexicon, Codex, a stage…"></label>
+            <button class="btn primary" type="submit">Add</button></form></aside>
+        </div>
+      </div>`;
+    },
+  };
+  LEAD.forms.provision = (fd) => {
+    const p = { id: uid('pv'), title: String(fd.get('title')).trim(), why: String(fd.get('why') || '').trim() || 'Added in the demo.', plugs: String(fd.get('plugs') || '').trim() || 'Not set', status: 'Needs an owner', by: me().name };
+    if (!p.title) { ui.toast('Give it a title.'); return; }
+    store.commit('Provision added', 'provision', p.id, () => { L().provisions.unshift(p); return p; });
+    ui.toast('Added to the board.');
+  };
+  LEAD.on['pv-status'] = (el) => {
+    const p = L().provisions.find((x) => x.id === el.dataset.id);
+    store.commit('Provision status changed', 'provision', p, () => { p.status = el.value; return p; });
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
