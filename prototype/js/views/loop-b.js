@@ -22,17 +22,17 @@
 
   /* ================= Assessment day ================= */
   LEAD.views.assess = {
-    title: () => 'Assessment day',
+    title: () => 'Scoring',
     render() {
       const r = role(); const u = me();
-      if (!['mentor', 'industry', 'admin', 'faculty'].includes(r)) return ui.guard(['mentor', 'industry', 'admin'], 'Assessment day');
+      if (!['mentor', 'industry', 'admin', 'faculty'].includes(r)) return ui.guard(['mentor', 'industry', 'admin'], 'Scoring');
       const ad = L().assessmentDays[0];
       const subs = L().submissions.filter((s) => ['In scoring', 'Scored', 'Moderated'].includes(s.status) && challengeOf(teamOf(s)).id === ad.challengeId);
       const scorer = r === 'mentor' || r === 'industry';
       const rubric = L().rubric;
       const body = scorer ? subs.map((s, i) => scoreCard(s, i, u)).join('') : moderation(subs);
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: `06 · VALIDATE · F-VA-01, F-VA-03, F-VA-04, F-VA-05 · ${ui.fmtDate(ad.date)} · ${esc(ad.mode)}`, title: 'Assess.', lede: 'Industry assessors score against a shared rubric, published in advance. Names and institutions stay hidden until each assessor locks every score (R1).', meta: ui.simTag() })}
+        ${ui.hero({ compact: true, eyebrow: `Live Projects · step 6 of 6 · ${ui.fmtDate(ad.date)} · ${esc(ad.mode)}`, title: 'Scoring.', lede: 'Industry assessors score against a shared rubric, published in advance. Names and institutions stay hidden until each assessor locks every score .', meta: ui.simTag() })}
         <div class="split">
           <section class="stack" style="gap:16px">${body || '<div class="empty">No submissions in scoring yet. A team submits first.</div>'}</section>
           <aside class="stack" style="gap:16px">
@@ -131,7 +131,7 @@
       <div class="row between"><span class="eyebrow">Skills Passport · F-VA-08</span>${ui.status(p.status)}</div>
       <div class="stack" style="gap:4px"><h3 style="font-size:22px">${esc(ui.capName(p.capSlug))}</h3><span class="ink">${opts.anon ? 'Student hidden (aggregate)' : esc(ui.nameOf(p.studentId))} · ${esc(ui.orgName(store.user(p.studentId).orgId))}</span></div>
       <div class="row between"><span class="lvl" aria-label="Level ${p.level} of 4">${[1, 2, 3, 4].map((i) => `<i class="${i <= p.level ? 'on' : ''}"></i>`).join('')}</span><b class="ink">${LEVELS[p.level - 1]}</b></div>
-      <div class="kv" style="font-size:13.5px"><span>Challenge</span><span>${esc(c ? c.title : '')}</span><span>Sponsor</span><span>${esc(c ? ui.orgName(c.sponsorOrgId) : '')}</span><span>Assessed by</span><span>${esc(ui.nameOf(p.assessorId))} (blind)</span><span>Second approval</span><span>${p.approverId ? esc(ui.nameOf(p.approverId)) : 'Pending'}</span></div>
+      <div class="kv" style="font-size:13.5px"><span>Live Project</span><span>${esc(c ? c.title : '')}</span><span>Sponsor</span><span>${esc(c ? ui.orgName(c.sponsorOrgId) : '')}</span><span>Assessed by</span><span>${esc(ui.nameOf(p.assessorId))} (blind)</span><span>Second approval</span><span>${p.approverId ? esc(ui.nameOf(p.approverId)) : 'Pending'}</span></div>
       ${p.code ? `<div class="row between"><span class="code">${esc(p.code)}</span><a href="#passport-${esc(p.code)}">Open verification link</a></div>` : ''}
       ${opts.actions || ''}
     </article>`;
@@ -231,8 +231,8 @@
           <div class="row between"><span class="eyebrow">LEAD Skills Passport · verified</span>${ui.status('Verified', 'Valid')}</div>
           <span class="code" style="font-size:28px;font-family:var(--f-pixel);background:none;padding:0">${esc(p.code)}</span>
           <h1 style="font-size:clamp(30px,5vw,48px)">${esc(ui.capName(p.capSlug))}</h1>
-          <p class="ink" style="font-size:17px">${esc(ui.nameOf(p.studentId))} showed this capability at level ${p.level} of 4, <b>${LEVELS[p.level - 1]}</b>, on a real industry challenge.</p>
-          <div class="kv"><span>Challenge</span><span>${esc(c.title)}</span><span>Sponsor</span><span>${esc(ui.orgName(c.sponsorOrgId))}</span><span>Scored</span><span>Blind-first, shared rubric</span><span>Approved by</span><span>UMO admin (second approval)</span><span>Evidence</span><span><a href="${esc(sub ? sub.deliverable : '#')}" target="_blank" rel="noopener">Deliverable</a> · decision log</span><span>Issued</span><span>${ui.fmtDate(p.at)}</span></div>
+          <p class="ink" style="font-size:17px">${esc(ui.nameOf(p.studentId))} showed this capability at level ${p.level} of 4, <b>${LEVELS[p.level - 1]}</b>, on a real industry live project.</p>
+          <div class="kv"><span>Live Project</span><span>${esc(c.title)}</span><span>Sponsor</span><span>${esc(ui.orgName(c.sponsorOrgId))}</span><span>Scored</span><span>Blind-first, shared rubric</span><span>Approved by</span><span>UMO admin (second approval)</span><span>Evidence</span><span><a href="${esc(sub ? sub.deliverable : '#')}" target="_blank" rel="noopener">Deliverable</a> · decision log</span><span>Issued</span><span>${ui.fmtDate(p.at)}</span></div>
           <p class="muted" style="font-size:13px">Issued under the LEAD Codex by UMO Design Foundation. Synthetic demo record.</p>
         </div></div>`;
     },
@@ -360,10 +360,10 @@
       return `<div class="page wrap">
         ${ui.hero({ compact: true, eyebrow: 'Measurement layer · F-OP-05, F-OP-06 · “What do you measure??”', title: 'Impact.', lede: 'The headline is industry problems solved, confirmed by the sponsor’s named owner. Programmes run do not count.', meta: `${ui.tag(`Scope: ${scope}`, 'ind')}${ui.simTag()}` })}
         <section class="section">
-          <div class="row between"><div class="stack" style="gap:2px"><span class="eyebrow">Headline</span><span class="pxnum" style="font-size:clamp(56px,8vw,96px)">${String(solved).padStart(2, '0')}</span><b class="ink" style="font-size:20px">industry problems solved</b><span class="muted">${partly} partly solved, counted separately. Each challenge counts once.</span></div>
+          <div class="row between"><div class="stack" style="gap:2px"><span class="eyebrow">Headline</span><span class="pxnum" style="font-size:clamp(56px,8vw,96px)">${String(solved).padStart(2, '0')}</span><b class="ink" style="font-size:20px">industry problems solved</b><span class="muted">${partly} partly solved, counted separately. Each live project counts once.</span></div>
           ${r === 'admin' ? '<button class="btn primary" data-act="report">Publish day-30 report</button>' : ''}</div>
           ${ui.kpis([
-            { label: 'Challenges live', v: byState('Live') + byState('In assessment'), d: `${D.challenges.length} posted · ${byState('Closed')} closed` },
+            { label: 'Live Projects live', v: byState('Live') + byState('In assessment'), d: `${D.challenges.length} posted · ${byState('Closed')} closed` },
             { label: 'Verified Passports', v: verified, d: 'Verified or shared' },
             { label: 'Shortlisted', v: shortlisted }, { label: 'Hired or deployed', v: hired },
             { label: 'Mentor hours', v: (mins / 60).toFixed(1) }, { label: 'Calendar touchpoints', v: D.events.length },
@@ -381,7 +381,7 @@
           </div>`).join('')}<div class="legend"><span><span class="vk" style="background:var(--red)"></span> Demand</span><span><span class="vk" style="background:var(--cyan)"></span> Verified supply</span></div></div>
         </section>
         ${r === 'head' || r === 'admin' ? `<section class="section">${ui.sectionHead('F-VA-07 · Outcomes · cohort A', 'Outcomes view', ui.simTag(), 'No student names. Groups under 5 are hidden (R4).')}
-          ${ui.kpis([{ label: 'Passports validated', v: '38 of 60' }, { label: 'Challenges completed', v: 12 }, { label: 'Faculty hours', v: 54 }, (() => { const a = rules.aggregate(D.passports.filter((p) => store.user(p.studentId).orgId === 'campus-c').length); return { label: 'Campus C · live entries', v: a.value, hidden: a.hidden }; })()])}</section>` : ''}
+          ${ui.kpis([{ label: 'Passports validated', v: '38 of 60' }, { label: 'Live Projects completed', v: 12 }, { label: 'Faculty hours', v: 54 }, (() => { const a = rules.aggregate(D.passports.filter((p) => store.user(p.studentId).orgId === 'campus-c').length); return { label: 'Campus C · live entries', v: a.value, hidden: a.hidden }; })()])}</section>` : ''}
       </div>`;
     },
   };

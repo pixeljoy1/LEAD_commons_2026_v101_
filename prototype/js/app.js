@@ -6,14 +6,14 @@
 
   const NAV = [
     ['learn', 'Learn'],
-    ['challenges', 'Challenges'],
+    ['projects', 'Live Projects'],
     ['calendar', 'Community'],
     ['opportunities', 'Opportunities'],
     ['impact', 'Impact'],
     ['women', '1M Women'],
   ];
   const NAV_MATCH = {
-    learn: ['learn', 'skills', 'demand'], challenges: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
+    learn: ['learn', 'skills', 'demand'], projects: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
     calendar: ['calendar', 'provisions'], opportunities: ['opportunities', 'passports', 'passport'], impact: ['impact', 'audit'],
   };
 
@@ -21,6 +21,8 @@
   function parse(token) {
     let t = !token || token === 'model' ? 'home' : token; // the homepage is the model
     if (t === 'lexicon' || t.startsWith('lexicon-')) t = 'skills' + t.slice(7); // the Lexicon is now the Skills Guide
+    if (t === 'projects') t = 'challenges'; // Live Projects are the old Challenges; both routes work
+    if (t.startsWith('project-')) t = 'challenge-' + t.slice(8);
     if (/^admin-/.test(t)) return ['admin', null]; // old admin routes now live on one page
     const prefixes = ['w-', 'learn-', 'skills-', 'challenge-', 'team-', 'passport-', 'join-path-', 'join-sponsor-'];
     for (const p of prefixes) if (t.startsWith(p)) return [p.slice(0, -1), t.slice(p.length)];
@@ -69,10 +71,10 @@
     return `${bannerHTML()}
     <header class="site-head">
       <div class="wrap head-row">
-        <a class="brand" href="#home" aria-label="LEAD Commons, by UMO Design Foundation. Home">
+        <a class="brand" href="#home" aria-label="LEAD by UMO Design. Home">
+          <b class="brand-lead">LEAD</b>
+          <span class="brand-by" aria-hidden="true">by</span>
           <span class="logo-tile"><img src="../public/brand/UMO_logo.png" alt="UMO Design" width="309" height="129"></span>
-          <span class="brand-div" aria-hidden="true"></span>
-          <b class="brand-name">LEAD Commons</b>
         </a>
         <nav class="nav" aria-label="Main">${myPath ? `<a class="nav-path" href="#${myPath[0]}" ${pathActive ? 'aria-current="page"' : ''}>${myPath[1]}</a>` : ''}${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}${on ? '<a class="nav-join nav-out" href="#home" data-act="logout">Log out</a>' : '<a class="nav-join" href="#join" data-act="sheet" data-role="student">Join</a>'}</nav>
         <div class="head-tools">
@@ -154,6 +156,7 @@
     if (/^admin-/.test(rawHash)) history.replaceState(null, '', '#admin');
     if (rawHash === 'model') history.replaceState(null, '', '#home');
     const [view, param] = current();
+    LEAD.prevView = lastView; LEAD.curView = view;
     const v = LEAD.views[view] || LEAD.views.notfound;
     const focusId = document.activeElement && document.activeElement.id;
     const sel = focusId && document.activeElement.selectionStart != null ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
@@ -171,7 +174,7 @@
       if (el) { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) { try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* not text */ } } }
     }
     const pageTitle = v.title ? v.title(param) : '';
-    document.title = pageTitle ? `${pageTitle} · LEAD Commons` : 'LEAD Commons';
+    document.title = pageTitle ? `${pageTitle} · LEAD by UMO Design` : 'LEAD by UMO Design';
     lastView = view;
   }
   LEAD.render = render;

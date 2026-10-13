@@ -70,27 +70,27 @@
 
     const challenges = [
       {
-        id: 'c0', title: 'Explain bank fees in plain words', sponsorOrgId: 'northwind', owner: 'Rohan Mehta', caps: ['problem-framing', 'design-decision'], status: 'Closed',
+        id: 'c0', code: 'PJ-1', title: 'Explain bank fees in plain words', sponsorOrgId: 'northwind', owner: 'Rohan Mehta', caps: ['problem-framing', 'design-decision'], status: 'Closed',
         context: 'Customers call support to ask what a fee means.', problem: 'Fee notices are written for compliance, not for people.', solved: 'Support calls about fees fall in a test group.',
         constraints: 'Regulatory wording must remain available.', data: 'Sanitised fee notices; no customer data.', ambiguity: 'Which customers matter most is left open.',
         seats: 2, nda: { noPersonal: true, noConfidential: true, sanitised: true, ipTerms: true }, ipTerms: 'Sponsor licence, student credit', term: 'Monsoon 2026',
       },
       {
-        id: 'c1', title: 'Reduce drop-off in onboarding', sponsorOrgId: 'northwind', owner: 'Rohan Mehta', caps: ['problem-framing', 'design-decision'], status: 'Live',
+        id: 'c1', code: 'PJ-2', title: 'Reduce drop-off in onboarding', sponsorOrgId: 'northwind', owner: 'Rohan Mehta', caps: ['problem-framing', 'design-decision'], status: 'Live',
         context: 'Northwind’s account opening loses 4 in 10 applicants before the identity step.', problem: 'The company sees a form problem. The data hints at a trust problem.',
         solved: 'A tested flow that a pilot group completes more often than the current one, with the reasons written down.',
         constraints: 'KYC steps are fixed by regulation. Two sprints of engineering time.', data: 'Aggregated funnel numbers only. No customer records.', ambiguity: 'The brief does not say which applicants to design for. Teams must decide and defend it.',
         seats: 3, nda: { noPersonal: true, noConfidential: true, sanitised: true, ipTerms: true }, ipTerms: 'Sponsor licence, student credit', term: 'Winter 2026',
       },
       {
-        id: 'c2', title: 'Make dispatch exceptions understandable to a new hire', sponsorOrgId: 'harbor', owner: 'Karan Singh', caps: ['economic-constraint', 'fluency'], status: 'Shaped',
+        id: 'c2', code: 'PJ-3', title: 'Make dispatch exceptions understandable to a new hire', sponsorOrgId: 'harbor', owner: 'Karan Singh', caps: ['economic-constraint', 'fluency'], status: 'Shaped',
         context: 'Harbor’s dispatch screen shows 40 exception codes.', problem: 'New hires take three weeks to act on exceptions without help.',
         solved: 'A new hire resolves the five most common exceptions unaided in a test.', constraints: 'Existing screen framework. Shift workers on shared terminals.',
         data: 'Exception codes and anonymised frequency counts.', ambiguity: 'Whether to change the screen or the training is open.',
         seats: 2, nda: { noPersonal: true, noConfidential: true, sanitised: true, ipTerms: true }, ipTerms: 'Shared licence', term: 'Winter 2026',
       },
       {
-        id: 'c3', title: 'Explain a lab result to someone who is anxious', sponsorOrgId: 'lumen', owner: 'Nikhil Jain', caps: ['trust-compliance', 'soft-skills'], status: 'Draft',
+        id: 'c3', code: 'PJ-4', title: 'Explain a lab result to someone who is anxious', sponsorOrgId: 'lumen', owner: 'Nikhil Jain', caps: ['trust-compliance', 'soft-skills'], status: 'Draft',
         context: 'Patients see results in the app before a clinician calls.', problem: 'Abnormal flags cause panic and calls at night.',
         solved: 'Clinicians agree the explanation is accurate, and test readers report less worry.', constraints: 'Medical wording reviewed by a clinician.',
         data: 'Not yet sanitised.', ambiguity: 'How much to say before the clinician calls.',
@@ -172,7 +172,7 @@
       { id: 'op1', orgId: 'northwind', title: 'Associate product designer', kind: 'role', caps: ['problem-framing', 'design-decision'], status: 'Shortlisting', open: false, note: 'Shares your Passport' },
       { id: 'op2', orgId: 'northwind', title: 'Design internship · 3 months', kind: 'internship', caps: ['problem-framing'], status: 'Open', learningContractId: 'lc1', open: false },
       { id: 'op3', orgId: 'harbor', title: 'Service design intern', kind: 'internship', caps: ['economic-constraint'], status: 'Open', learningContractId: 'lc1', open: false },
-      { id: 'op4', orgId: 'umo', title: 'Open cohort · Framing challenge', kind: 'open cohort', caps: ['problem-framing'], status: 'Open', open: true, note: 'Applications open to the open community' },
+      { id: 'op4', orgId: 'umo', title: 'Open cohort · Framing project', kind: 'open cohort', caps: ['problem-framing'], status: 'Open', open: true, note: 'Applications open to the open community' },
     ];
     const applications = [
       { id: 'ap1', opportunityId: 'op1', studentId: 's5', passportIds: ['pe5'], shortlisted: true, at: D('2026-10-03') },
@@ -183,8 +183,8 @@
 
     const events = [
       { id: 'e1', title: 'Industry circle · “Readiness, defined”', at: '2026-10-21T17:30', kind: 'Industry circle', host: 'northwind', visibility: 'public', where: 'Online' },
-      { id: 'e2', title: 'Mentor sprint · Team Kestrel · session 3', at: '2026-10-20T16:00', kind: 'Challenge milestone', host: 'campus-a', visibility: 'campus', where: 'Online' },
-      { id: 'e3', title: '30-day sync · LEAD Commons', at: '2026-10-26T10:00', kind: 'Sync', host: 'umo', visibility: 'public', where: 'Bengaluru + online' },
+      { id: 'e2', title: 'Mentor sprint · Team Kestrel · session 3', at: '2026-10-20T16:00', kind: 'Project milestone', host: 'campus-a', visibility: 'campus', where: 'Online' },
+      { id: 'e3', title: '30-day sync · LEAD by UMO Design', at: '2026-10-26T10:00', kind: 'Sync', host: 'umo', visibility: 'public', where: 'Bengaluru + online' },
       { id: 'e4', title: 'Assessment day · Reduce drop-off in onboarding', at: '2026-11-14T09:30', kind: 'Assessment day', host: 'campus-a', visibility: 'campus', where: 'Campus A' },
       { id: 'e5', title: 'Guest session · Defending a decision', at: '2026-11-21T15:00', kind: 'Guest session', host: 'umo', visibility: 'public', where: 'Online' },
       { id: 'e6', title: 'Circle · Bengaluru', at: '2026-10-28T18:30', kind: 'Circle', host: 'umo', visibility: 'public', where: 'Bengaluru' },
@@ -197,17 +197,17 @@
     const P = (title, why, plugs, status) => ({ title, why, plugs, status, by: 'Spec §14' });
     const provisions = [
       P('Student data and consent', 'Outcomes are shared with employers. Rules on consent, retention and sharing must exist before any Passport does. Check against India’s data protection law with counsel.', 'Codex', 'Needs an owner'),
-      P('IP and NDA for challenge work', 'Who owns a student’s solution to a company’s problem?', 'Codex · APPLY', 'Needs an owner'),
+      P('IP and NDA for live project work', 'Who owns a student’s solution to a company’s problem?', 'Codex · APPLY', 'Needs an owner'),
       P('Mentor and assessor economics', 'Honoraria or credit, conflict rules, quality control.', 'MENTOR · VALIDATE', 'Reserved'),
       P('Faculty workload credit', 'Faculty time must count somewhere.', 'Faculty Toolkit', 'Needs an owner'),
       P('Equity of access', 'Tier-2 and tier-3 campuses, scholarships, low bandwidth, regional languages, accessibility.', 'Open tier', 'Reserved'),
       P('Credit recognition', 'The industry-taught credit window and NEP credit structures.', 'Faculty Toolkit', 'Needs an owner'),
-      P('AI-use policy', 'How AI may be used in challenges, and how it is assessed.', 'Codex', 'Reserved'),
+      P('AI-use policy', 'How AI may be used in live projects, and how it is assessed.', 'Codex', 'Reserved'),
       P('Beyond design', '“Core is dying: pie-shaped and inter-disciplinary.” Extend the Skills Guide to product, engineering, business.', 'Skills Guide', 'Reserved'),
       P('Awareness', 'The row that did not travel. Career-path awareness belongs in the open tier.', 'Open tier', 'Reserved'),
       P('1 Million Women initiative', 'A cohort overlay with its own funding and metrics.', 'Cohort overlay', 'Reserved'),
       P('Design Pitch', 'A showcase module.', 'CONNECT', 'Reserved'),
-      P('Funding model', 'Campus fee band (untested), pooled industry fund, sponsored challenges. No industry-side price exists.', 'Memberships', 'Needs an owner'),
+      P('Funding model', 'Campus fee band (untested), pooled industry fund, sponsored live projects. No industry-side price exists.', 'Memberships', 'Needs an owner'),
       P('Alumni loop', 'What happens after the hire? Feed outcomes back into the Demand Map.', 'Impact Ledger', 'Reserved'),
     ].map((p, i) => Object.assign({ id: 'pv' + (i + 1) }, p));
 

@@ -158,7 +158,7 @@
 
   function matrix() {
     const core = content.actors.filter((a) => !a.ext);
-    const short = (a) => a.label.replace('Institution head', 'Inst. head').replace('Mentor & assessor', 'Mentor').replace('Industry leader', 'Industry').replace('Industry Challenge', 'Challenge').replace('Open community', 'Open').replace('UMO admin', 'Admin');
+    const short = (a) => a.label.replace('Institution head', 'Inst. head').replace('Mentor & assessor', 'Mentor').replace('Industry leader', 'Industry').replace('Live Project', 'Live Project').replace('Open community', 'Open').replace('UMO admin', 'Admin');
     const head = `<tr><th>Gives ↓ · Gets →</th>${core.map((a) => `<th>${esc(short(a))}</th>`).join('')}</tr>`;
     const rows = core.map((g) => `<tr><td><b>${esc(short(g))}</b></td>${core.map((r) => {
       if (g.id === r.id) return '<td class="self"></td>';
@@ -180,7 +180,7 @@
     return plans.map((p) => {
       const from = P.fromPrice(p);
       const r = route[p.kind] === 'join-path-' ? 'join-path-' + p.key : route[p.kind];
-      const per = { TIERED_BY_SIZE: 'a year, by size', PER_SEAT: p.kind === 'PATH_ENROLMENT' ? 'per learner, per term' : 'per seat, a year', PER_CHALLENGE: 'per challenge', FREE: '', FLAT: '', PER_COHORT: 'per cohort' }[p.pricingModel];
+      const per = { TIERED_BY_SIZE: 'a year, by size', PER_SEAT: p.kind === 'PATH_ENROLMENT' ? 'per learner, per term' : 'per seat, a year', PER_CHALLENGE: 'per live project', FREE: '', FLAT: '', PER_COHORT: 'per cohort' }[p.pricingModel];
       return `<article class="card plan-card">
         <div class="row between"><span class="label">${esc(p.kind.replace(/_/g, ' '))}</span>${p.isDemo && p.kind !== 'CAMPUS_LICENCE' ? ui.tag('Demo price', 'mock') : (p.kind === 'CAMPUS_LICENCE' ? ui.tag('Band sourced · untested', 'info') : '')}</div>
         <h3>${esc(p.name)}</h3>

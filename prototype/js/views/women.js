@@ -49,7 +49,7 @@
         line: 'Pledge seats for your women students in the campus sign-up. Each seat you pledge adds 1.',
         btns: ['<a class="btn primary" href="#join-college">Pledge seats at sign-up</a>'] },
       { role: 'industry', name: 'Industry', slot: 'women-work', total: seatWord(by.sponsor), what: 'Seats in sponsored cohorts',
-        line: 'Sponsor a women’s cohort on a real challenge. One cohort adds 10 seats.',
+        line: 'Sponsor a women’s cohort on a real live project. One cohort adds 10 seats.',
         btns: ['<a class="btn primary" href="#join-sponsor">Sponsor a cohort</a>'] },
       { role: 'mentor', name: 'Mentor', slot: 'women-tea', total: seatWord(by.hours), what: 'Hours given by mentors and faculty',
         line: 'Offer an office hour or a talk for women designers. Every 10 hours adds a seat once a UMO admin marks it done.',

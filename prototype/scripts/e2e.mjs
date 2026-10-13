@@ -76,7 +76,7 @@ await page.keyboard.press('Escape');
 ok('Header: persona menu lists 7 personas (no steward) and closes on Escape', menuItems === 7 && await page.locator('#persona-menu').isHidden());
 await as(page, 'admin');
 ok('Header: choosing Admin goes straight to the single admin page', page.url().endsWith('#admin') && await page.locator('h1:has-text("Admin.")').count() === 1);
-ok('Header: one logo lockup, no repeated wordmark, no role bar', (await page.locator('.brand-name').count()) === 1 && (await page.locator('.brand-word').count()) === 0 && (await page.locator('.rolebar').count()) === 0 && (await page.locator('.demo-btn').count()) === 1);
+ok('Header: one logo lockup, no repeated wordmark, no role bar', (await page.locator('.brand-lead').count()) === 1 && (await page.locator('.brand-word').count()) === 0 && (await page.locator('.rolebar').count()) === 0 && (await page.locator('.demo-btn').count()) === 1);
 await as(page, 'industry');
 await page.click('.demo-btn');
 const demoText = await page.locator('.demo').textContent();

@@ -45,9 +45,9 @@
           <div class="notice"><span class="px ${met >= 3 ? 'cyan' : 'red'}"></span><b class="ink">${esc(r.k)}.</b> ${esc(r.d)} <span class="muted">0–2 gates: stay manual · 3–4: thin v1 · 5: commission the platform.</span></div>
         </section>
         <section class="section">
-          ${ui.sectionHead('Evidence', 'What the room said', '', 'LEAD Commons Roundtable, 26 Sep 2026, Srishti Manipal Institute, Bengaluru. 18–19 of 20 invited leaders present.')}
+          ${ui.sectionHead('Evidence', 'What the room said', '', 'LEAD Roundtable, 26 Sep 2026, Srishti Manipal Institute, Bengaluru. 18–19 of 20 invited leaders present.')}
           <div class="table-wrap"><table><thead><tr><th>#</th><th>The room said</th><th>What it means for the build</th><th>Reading</th></tr></thead><tbody>
-            ${content.evidence.map((e) => `<tr><td class="tnum">${e.n}</td><td><b>${esc(e.quote)}</b></td><td>${esc(e.means)}</td><td>${ui.tag(e.reading, e.reading === 'Supports' ? 'live' : e.reading === 'Challenges' ? 'sim' : '')}</td></tr>`).join('')}
+            ${content.evidence.map((e) => `<tr><td class="tnum">${e.n}</td><td><b>${esc(e.quote)}</b></td><td>${esc(e.means)}</td><td>${ui.tag(e.reading, e.reading === 'Supports' ? 'live' : e.reading === 'Live Projects' ? 'sim' : '')}</td></tr>`).join('')}
           </tbody></table></div>
         </section>
         <section class="section">
@@ -79,11 +79,11 @@
   const ACCESS = [
     ['Skills Guide', 'R', 'R', 'R', 'R', 'R', 'RW', 'R'],
     ['Demand Map', 'R themes', 'R', 'R', 'RW own intakes', 'R', 'RW', 'R public'],
-    ['Challenge, published', 'R own campus', 'R', 'R own campus', 'RW own', 'R assigned', 'RW', 'R open cohort'],
-    ['Challenge brief, draft', '—', '—', '—', 'RW own', '—', 'RW', '—'],
-    ['Team workspace', 'RW own team', 'R own cohort', '—', '—', 'R assigned', 'R agg', '—'],
+    ['Live Project, published', 'R own campus', 'R', 'R own campus', 'RW own', 'R assigned', 'RW', 'R open cohort'],
+    ['Live Project brief, draft', '—', '—', '—', 'RW own', '—', 'RW', '—'],
+    ['My team', 'RW own team', 'R own cohort', '—', '—', 'R assigned', 'R agg', '—'],
     ['Feedback thread', 'RW own team', 'R own cohort', '—', '—', 'RW assigned', '—', '—'],
-    ['Submission', 'RW own team', 'R own cohort', 'R agg', 'R anonymised', 'R, blind until lock', 'R', '—'],
+    ['Hand-in', 'RW own team', 'R own cohort', 'R agg', 'R anonymised', 'R, blind until lock', 'R', '—'],
     ['Passport entry', 'R own; share', 'R if consented', 'R agg', 'R if shared', 'R I assessed', 'RW 2nd approval', '—'],
     ['Opportunities', 'R; apply', 'R', 'R', 'RW own', '—', 'RW', 'R open board'],
     ['Impact Ledger', 'R own', 'R cohort', 'R own inst.', 'R own org', 'R own hours', 'RW', 'R public'],
@@ -127,16 +127,16 @@
         return [{ label: 'My Passport entries', v: mine.length, d: `${mine.filter((p) => p.shared).length} shared` }, { label: 'Team decisions', v: team ? team.decisions.length : 0, d: team ? team.name : '' }, { label: 'Applications', v: L.applications.filter((a) => a.studentId === me.id).length }];
       }
       case 'admin': return [{ label: 'Intakes to review', v: L.demandSignals.filter((d) => d.status === 'Submitted').length }, { label: 'Briefs to shape or match', v: L.challenges.filter((c) => ['Draft', 'Shaped'].includes(c.status)).length }, { label: 'Pending second approval', v: pend }, { label: 'Live plans', v: store.pricing.plans.filter((p) => p.active && !p.archived).length }];
-      case 'industry': return [{ label: 'My intakes', v: L.demandSignals.filter((d) => d.orgId === me.orgId).length }, { label: 'My challenges', v: L.challenges.filter((c) => c.sponsorOrgId === me.orgId).length }, { label: 'Shared Passports', v: L.passports.filter((p) => rules.employerCanSee(p)).length }];
+      case 'industry': return [{ label: 'My intakes', v: L.demandSignals.filter((d) => d.orgId === me.orgId).length }, { label: 'My live projects', v: L.challenges.filter((c) => c.sponsorOrgId === me.orgId).length }, { label: 'Shared Passports', v: L.passports.filter((p) => rules.employerCanSee(p)).length }];
       case 'mentor': {
         const mins = L.sprints.filter((s) => s.mentorId === me.id).flatMap((s) => s.sessions.filter((x) => x.done)).reduce((a, x) => a + x.minutes, 0);
         return [{ label: 'Teams mentored', v: L.sprints.filter((s) => s.mentorId === me.id).length }, { label: 'Hours logged', v: (mins / 60).toFixed(1) }, { label: 'Submissions to score', v: L.submissions.filter((s) => s.status === 'In scoring').length }];
       }
-      case 'faculty': return [{ label: 'Challenges mapped', v: L.matches.filter((m) => m.facultyId === me.id && m.mapped).length }, { label: 'Teams in cohort', v: L.teams.filter((t) => L.matches.find((m) => m.id === t.matchId && m.facultyId === me.id)).length }, { label: 'Events this month', v: L.events.length }];
+      case 'faculty': return [{ label: 'Live Projects mapped', v: L.matches.filter((m) => m.facultyId === me.id && m.mapped).length }, { label: 'Teams in cohort', v: L.teams.filter((t) => L.matches.find((m) => m.id === t.matchId && m.facultyId === me.id)).length }, { label: 'Events this month', v: L.events.length }];
       case 'head': {
         const n = L.passports.filter((p) => ['Verified', 'Shared'].includes(p.status) && store.user(p.studentId).orgId === me.orgId).length;
         const a = rules.aggregate(n);
-        return [{ label: 'Verified Passports · live', v: a.value, hidden: a.hidden }, { label: 'Challenges this term', v: L.matches.filter((m) => m.institutionId === me.orgId).length }, { label: 'Mock sign-ups', v: store.pricing.signups.length }];
+        return [{ label: 'Verified Passports · live', v: a.value, hidden: a.hidden }, { label: 'Live Projects this term', v: L.matches.filter((m) => m.institutionId === me.orgId).length }, { label: 'Mock sign-ups', v: store.pricing.signups.length }];
       }
       case 'open': return [{ label: 'Capabilities followed', v: L.follows.filter((f) => f.userId === me.id).length }, { label: 'Open opportunities', v: L.opportunities.filter((o) => o.open).length }, { label: 'Public events', v: L.events.filter((e) => e.visibility === 'public').length }];
       default: return [];

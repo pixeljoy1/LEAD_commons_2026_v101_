@@ -36,7 +36,7 @@
     M('LM-PL-2', 'Women in Design circle', 'A monthly circle for women in design, in Bengaluru and online. Hosted by a peer.', { for: ['student', 'open', 'faculty', 'mentor', 'industry'], level: 'Starter', mins: 90, women: true, skills: ['awareness', 'soft-skills'], seats: 30, booked: 14, sessions: [{ at: '2026-11-05T18:30', where: 'Bengaluru + online', teacherId: 'm3' }] }),
 
     M('LM-CB-1', 'Learn inside a live challenge: onboarding drop-off', 'Learn framing and decisions while you work on a real company problem with a team and a mentor.', { for: ['student'], level: 'Core', mins: 480, skills: ['problem-framing', 'design-decision'], path: 'LP-1', challengeId: 'c1' }),
-    M('LM-CB-2', 'Open challenge: make dispatch exceptions clear', 'A challenge open to people outside a campus. Learn by trying it, with feedback.', { for: ['open', 'student'], level: 'Starter', mins: 360, skills: ['economic-constraint'], challengeId: 'c2' }),
+    M('LM-CB-2', 'Open challenge: make dispatch exceptions clear', 'A live project open to people outside a campus. Learn by trying it, with feedback.', { for: ['open', 'student'], level: 'Starter', mins: 360, skills: ['economic-constraint'], challengeId: 'c2' }),
   ];
 
   /* The one full demo course. Short on purpose: three one-page lessons and a three-question check. */

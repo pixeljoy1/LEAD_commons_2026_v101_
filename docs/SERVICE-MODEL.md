@@ -117,7 +117,7 @@ The homepage is the model itself, written for anyone who lands on LEAD. About 90
 
 **Photos.** People photos are illustrative Unsplash stock, shown in grayscale with an indigo and cyan tint and a checker corner, each captioned “Illustrative · not the person”. Photographers are credited in the footer. Each slot is a named file in `prototype/assets/photos/`, so any photo can be replaced with a real UMO or UXINDIA one.
 
-**Header:** one lockup (UMO Design logo and "LEAD Commons"), the nav, then one **Demo** button, the **persona menu** and **Join**. The persona menu holds the eight personas, the theme switch and Reset demo. **Demo runs by persona:** it walks the current persona through their own journey, one step per stage, and the last step hands off to the next persona (Industry, Steward, Student, Mentor, Faculty, Institution head, Open, Admin).
+**Header:** one lockup ("LEAD", "by", then the UMO Design logo), the nav, then one **Demo** button, the **persona menu** and **Join**. The persona menu holds the eight personas, the theme switch and Reset demo. **Demo runs by persona:** it walks the current persona through their own journey, one step per stage, and the last step hands off to the next persona (Industry, Steward, Student, Mentor, Faculty, Institution head, Open, Admin).
 
 **Persistence:** nothing is permanent. Loop data lives in memory and resets on reload. The pricing slice is mirrored to local browser storage only so admin changes reach a second open tab; **Reset demo** clears it.
 

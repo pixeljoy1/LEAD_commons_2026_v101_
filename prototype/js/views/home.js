@@ -70,7 +70,7 @@
       </div>
     </section>
     <div class="strip" role="group" aria-label="What LEAD has produced">
-      <div><b>3</b><span>live challenges</span></div><div><b>1</b><span>real problem solved</span></div><div><b>38</b><span>verified Passports</span></div><div><b>62</b><span>mentor hours</span></div>
+      <div><b>3</b><span>live projects</span></div><div><b>1</b><span>real problem solved</span></div><div><b>38</b><span>verified Passports</span></div><div><b>62</b><span>mentor hours</span></div>
     </div>`;
   }
 

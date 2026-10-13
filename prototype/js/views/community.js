@@ -66,7 +66,7 @@
         </section>
         <aside class="stack" style="gap:16px">
           <div class="card"><span class="eyebrow">Agreed by</span>${ui.kv([['An employer', c.cosignedIndustry || 'Not yet'], ['A college', c.cosignedAcademia || 'Not yet']])}</div>
-          <div class="card"><span class="eyebrow">Practised in</span>${chs.map((x) => `<a href="#challenge-${x.id}">${esc(x.title)}</a>`).join('<br>') || '<p class="muted">No live challenge yet.</p>'}</div>
+          <div class="card"><span class="eyebrow">Practised in</span>${chs.map((x) => `<a href="#project-${x.id}">${esc(x.title)}</a>`).join('<br>') || '<p class="muted">No live project yet.</p>'}</div>
           <div class="card"><span class="eyebrow">Learn this skill</span>${(LEAD.learn ? LEAD.learn.taughtBy(slug) : []).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('') || '<p class="muted" style="font-size:14px">No module yet. Ask for one in Learn.</p>'}<p style="font-size:13px" class="muted">Longer courses live at the UMO Design School. LEAD links to them.</p><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">UMO Design School</a></div>
         </aside>
       </div>
@@ -90,7 +90,7 @@
 
   /* ================= Joint Design Calendar ================= */
   const cal = { kind: '', edit: null };
-  const KINDS = ['Industry circle', 'Guest session', 'Assessment day', 'Challenge milestone', 'Circle', 'Sync'];
+  const KINDS = ['Industry circle', 'Guest session', 'Assessment day', 'Project milestone', 'Circle', 'Sync'];
   function visibleEvents() {
     const r = role(); const u = me();
     return L().events.filter((e) => {

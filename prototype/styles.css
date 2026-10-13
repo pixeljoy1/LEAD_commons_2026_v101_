@@ -150,7 +150,8 @@ ul.px-list.yes li::before { background: var(--pos); }
 .logo-tile { background: var(--logo-tile); border-radius: 10px; padding: 6px 10px; display: grid; place-items: center; }
 .logo-tile img { height: 38px; width: auto; }
 .brand-div { width: 1px; height: 30px; background: var(--line); flex: none; }
-.brand-name { font: 700 21px/1 var(--f-display); color: var(--ink); letter-spacing: -.015em; white-space: nowrap; }
+.brand-lead { font: 700 26px/1 var(--f-display); color: var(--ink); letter-spacing: -.02em; white-space: nowrap; }
+.brand-by { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .nav { display: flex; gap: 2px; margin-left: 8px; overflow-x: auto; scrollbar-width: none; }
 .nav::-webkit-scrollbar { display: none; }
 .nav a {
@@ -190,12 +191,12 @@ ul.px-list.yes li::before { background: var(--pos); }
   .nav { order: 3; width: 100%; margin-left: -6px; }
   .logo-tile img { height: 30px; }
   .brand { gap: 10px; }
-  .brand-name { font-size: 17px; }
+  .brand-lead { font-size: 22px; }
   .brand-div { height: 24px; }
 }
 @media (min-width: 900px) and (max-width: 1180px) {
   .nav a { padding-inline: 8px; font-size: 14px; }
-  .brand-name { font-size: 18px; }
+  .brand-lead { font-size: 22px; }
   .logo-tile img { height: 32px; }
 }
 @media (max-width: 640px) {
@@ -207,9 +208,9 @@ ul.px-list.yes li::before { background: var(--pos); }
   .logo-tile { padding: 4px 6px; }
   .logo-tile img { height: 28px; }
   .brand { gap: 6px; }
-  .brand-name { font-size: 16px; }
+  .brand-lead { font-size: 20px; }
 }
-@media (max-width: 400px) { .brand-div { display: none; } }
+
 
 /* ---------- tags, chips, badges ---------- */
 .tag {
@@ -786,3 +787,12 @@ fieldset.q legend { padding: 0 6px; }
 /* header room for "My path" while signed in */
 .nav a.nav-path { color: var(--ink); font-weight: 700; }
 @media (min-width: 1181px) { .nav a { padding-inline: 10px; } .site-head .wrap { max-width: 1320px; } }
+
+/* Live Projects: how it works */
+.how-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; counter-reset: none; }
+.how-steps li a { display: grid; gap: 6px; height: 100%; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--panel); color: inherit; text-decoration: none; align-content: start; }
+.how-steps li a:hover, .how-steps li.cur a { border-color: var(--ink); }
+.how-steps .pxnum { font-size: 28px; }
+.how-steps b { font: 700 15px/1.2 var(--f-display); color: var(--ink); }
+.how-steps small { color: var(--muted); font-size: 13px; }
+.first-action { gap: 8px; border-color: var(--umo-blue); }

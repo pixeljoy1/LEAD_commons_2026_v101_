@@ -1,4 +1,4 @@
-/* LEAD · working loop, part A: Demand Map (W1), challenges and briefs (R6), team workspace, sprints (W2), submission (R7). */
+/* LEAD · working loop, part A: Demand Map (W1), live projects and briefs (R6), team workspace, sprints (W2), submission (R7). */
 (function (root) {
   const LEAD = root.LEAD;
   const { ui, store, content, rules } = LEAD;
@@ -61,7 +61,7 @@
           <aside class="stack" style="gap:16px">
             ${intake}
             ${r === 'industry' ? `<div class="card"><span class="eyebrow">My intakes</span>${mine.map((d) => `<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span>${esc(ui.capName(d.capSlug))}<br><span class="muted" style="font-size:12.5px">${esc(d.problem)}</span></span>${ui.status(d.status)}</div>`).join('') || '<p class="muted">None yet.</p>'}</div>` : ''}
-            ${r !== 'industry' && r !== 'admin' ? `<div class="card"><span class="eyebrow">Your view</span><p>${r === 'student' ? 'Pick a capability, then find a live challenge that needs it.' : 'Themes are public once the UMO team publishes them.'}</p><a class="btn" href="#challenges">Open challenges</a></div>` : ''}
+            ${r !== 'industry' && r !== 'admin' ? `<div class="card"><span class="eyebrow">Your view</span><p>${r === 'student' ? 'Pick a capability, then find a live project that needs it.' : 'Themes are public once the UMO team publishes them.'}</p><a class="btn" href="#projects">Open live projects</a></div>` : ''}
           </aside>
         </div>
         ${r === 'admin' ? opsQueue() : ''}
@@ -136,13 +136,13 @@
     'dm-brief'(el) {
       const d = sigById(el.dataset.id);
       const owner = store.user(d.by);
-      const c = { id: uid('c'), title: d.problem.length > 70 ? d.problem.slice(0, 67) + '…' : d.problem, sponsorOrgId: d.orgId, owner: owner ? owner.name : '', caps: [d.capSlug], status: 'Draft', context: '', problem: d.problem, solved: '', constraints: '', data: d.sensitive ? 'Sensitive. Must be sanitised before shaping.' : 'No sensitive data declared.', ambiguity: '', seats: d.seats, nda: { noPersonal: false, noConfidential: false, sanitised: false, ipTerms: false }, ipTerms: '', term: 'Winter 2026' };
+      const c = { id: uid('c'), code: nextPj(), title: d.problem.length > 70 ? d.problem.slice(0, 67) + '…' : d.problem, sponsorOrgId: d.orgId, owner: owner ? owner.name : '', caps: [d.capSlug], status: 'Draft', context: '', problem: d.problem, solved: '', constraints: '', data: d.sensitive ? 'Sensitive. Must be sanitised before shaping.' : 'No sensitive data declared.', ambiguity: '', seats: d.seats, nda: { noPersonal: false, noConfidential: false, sanitised: false, ipTerms: false }, ipTerms: '', term: 'Winter 2026' };
       store.commit('Brief drafted from intake', 'challenge', c.id, () => { L().challenges.unshift(c); return c; });
-      LEAD.go('challenge-' + c.id);
+      LEAD.go('project-' + c.id);
     },
   });
 
-  /* ================= Challenges ================= */
+  /* ================= Live Projects ================= */
   function visibleChallenges() {
     const r = role(); const u = me(); const all = L().challenges;
     const campusOf = (c) => L().matches.filter((m) => m.challengeId === c.id).map((m) => m.institutionId);
@@ -157,35 +157,68 @@
   }
 
   const PIPE = rules.MACHINES.challenge;
+  /* Plain names for the six project states. The state keys stay as the rules know them. */
+  const PLAIN = { Draft: 'Being shaped', Shaped: 'Ready', Matched: 'Matched to a campus', Live: 'Running', 'In assessment': 'Being scored', Closed: 'Finished' };
+  const plain = (s) => PLAIN[s] || s;
+  const pjCode = (c) => c.code || 'PJ-?';
+  function nextPj() { return 'PJ-' + (L().challenges.reduce((n, c) => Math.max(n, Number(String(c.code || '').split('-')[1]) || 0), 0) + 1); }
   function pipeline(status) {
     const i = PIPE.indexOf(status);
-    return `<div class="stepper" aria-label="Status ${esc(status)}">${PIPE.map((s, k) => `<span class="${k <= i ? 'on' : ''}">${esc(s)}</span>`).join('')}</div>`;
+    return `<div class="stepper" aria-label="Status ${esc(plain(status))}">${PIPE.map((s, k) => `<span class="${k <= i ? 'on' : ''}">${esc(plain(s))}</span>`).join('')}</div>`;
+  }
+
+  /* "How a Live Project works": six steps, each one a page. */
+  const HOW = [
+    ['A company brings a problem', 'Companies say what they need.', '#demand'],
+    ['UMO shapes it', 'The brief is made safe to share and matched to a campus.', '#projects'],
+    ['A team forms', 'Students join a team and open the brief.', '#team'],
+    ['A mentor coaches', 'Three short sessions with a practitioner.', '#sprints'],
+    ['The team hands in', 'Deliverable, decision log and a note on AI use.', '#submit'],
+    ['Professionals score it', 'Scored blind. A verified Passport is earned.', '#assess'],
+  ];
+  function howItWorks(cur) {
+    return `<section class="section" aria-label="How a Live Project works">${ui.sectionHead('', 'How a Live Project works', '', 'A Live Project is a real problem from a real company, worked on by a student team with a mentor, then scored by professionals.')}
+      <ol class="how-steps">${HOW.map((h, i) => `<li class="${cur === i ? 'cur' : ''}"><a href="${h[2]}"><span class="pxnum">${i + 1}</span><b>${esc(h[0])}</b><small>${esc(h[1])}</small></a></li>`).join('')}</ol></section>`;
+  }
+  const FIRST = {
+    student: ['Find a project', 'Open one that is running on your campus, then join its team.', '#projects'],
+    faculty: ['Fit one into your module', 'Open a project, map it to your module and credit window.', '#projects'],
+    head: ['See your campus projects', 'Every project running on your campus, with its outcome when it finishes.', '#projects'],
+    industry: ['Bring a problem', 'Tell UMO what you need. It becomes a brief for a student team.', '#demand'],
+    mentor: ['Coach a team', 'See the teams you mentor and book the next session.', '#sprints'],
+    open: ['Try an open project', 'Open-cohort projects are free and need no campus.', '#jobs'],
+    admin: ['Shape and match', 'Make briefs safe to share and match them to campuses.', '#projects'],
+  };
+  function firstAction(r) {
+    const f = FIRST[r]; if (!f) return '';
+    return `<div class="card first-action"><span class="eyebrow">What you can do first</span><h3>${esc(f[0])}</h3><p>${esc(f[1])}</p><a class="btn primary" href="${f[2]}">${esc(f[0])}</a></div>`;
   }
 
   LEAD.views.challenges = {
-    title: () => 'Challenges',
+    title: () => 'Live Projects',
     render() {
       const list = visibleChallenges();
       if (list === null) {
-        return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '03 · APPLY', title: 'Challenges.', lede: 'Campus challenges are for enrolled teams. The open community sees open-cohort challenges only.' })}
-          <div class="card"><h3>Open cohort · Framing challenge</h3><p>Applications open to the open community.</p><a class="btn primary" href="#opportunities">Apply</a></div></div>`;
+        return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '03 · APPLY', title: 'Live Projects.', lede: 'Campus live projects are for enrolled teams. The open community sees open-cohort live projects only.' })}
+          ${howItWorks(-1)}<div class="card"><h3>Open cohort · Framing project</h3><p>Applications open to the open community.</p><a class="btn primary" href="#jobs">Apply</a></div></div>`;
       }
       const r = role();
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '03 · APPLY · F-AP-01, F-AP-07, F-AP-09', title: 'Challenges.', lede: 'Real, scoped, NDA-safe problems taken into a term. Each one is shaped by the UMO team and matched to a campus.', meta: `${ui.simTag()}${r === 'industry' ? '<a class="btn primary" href="#demand">State a new need</a><a class="btn" href="#join-sponsor">Sponsor a challenge</a>' : ''}` })}
-        <div class="grid g2">${list.map((c) => `<a class="card" href="#challenge-${c.id}">
-          <div class="row between"><span class="label">${esc(ui.orgName(c.sponsorOrgId))}</span>${ui.status(c.status)}</div>
+        ${ui.hero({ compact: true, eyebrow: 'Live Projects · real work with a team and a mentor', title: 'Live Projects.', lede: 'A real problem from a real company, worked on by a student team with a mentor, then scored by professionals. Each one is shaped by the UMO team and matched to a campus.', meta: `${ui.simTag()}${r === 'industry' ? '<a class="btn primary" href="#demand">State a new need</a><a class="btn" href="#join-sponsor">Sponsor a live project</a>' : ''}` })}
+        ${howItWorks(-1)}${firstAction(r)}
+        <div class="grid g2" id="project-list">${list.map((c) => `<a class="card" href="#project-${c.id}">
+          <div class="row between"><span class="row" style="gap:8px"><span class="lmcode">${esc(pjCode(c))}</span><span class="label">${esc(ui.orgName(c.sponsorOrgId))}</span></span>${ui.status(c.status, plain(c.status))}</div>
           <h3>${esc(c.title)}</h3>
           <p style="font-size:14px">${esc(c.problem)}</p>
           <div class="pill-list">${c.caps.map((s) => `<span class="chip">${esc(ui.capName(s))}</span>`).join('')}</div>
           <div style="overflow-x:auto">${pipeline(c.status)}</div>
-        </a>`).join('') || '<div class="empty">No challenges for this role yet.</div>'}</div>
+        </a>`).join('') || '<div class="empty">No live projects for this role yet.</div>'}</div>
       </div>`;
     },
   };
 
   LEAD.views.challenge = {
-    title: () => 'Challenge brief',
+    title: () => 'Live Project brief',
     render(id) {
       const c = L().challenges.find((x) => x.id === id);
       if (!c) return LEAD.views.notfound.render();
@@ -201,12 +234,12 @@
         : `<div class="stack" style="gap:4px"><span class="label">${label}</span><p class="${c[k] ? 'ink' : 'muted'}">${esc(c[k] || 'Not written yet.')}</p></div>`;
       const myFacultyMatch = r === 'faculty' ? matches.find((m) => m.facultyId === u.id && !m.mapped) : null;
       return `<div class="page wrap">
-        <nav class="crumbs"><a href="#challenges">Challenges</a><span>/</span><span>${esc(c.id.toUpperCase())}</span></nav>
-        <div class="row between"><div class="stack" style="gap:6px"><span class="eyebrow">${esc(ui.orgName(c.sponsorOrgId))} · owner ${esc(c.owner || '—')} · ${esc(c.term)}</span><h1 style="font-size:clamp(30px,4.6vw,48px)">${esc(c.title)}</h1></div>${ui.status(c.status)}</div>
+        <nav class="crumbs"><a href="#projects">Live Projects</a><span>/</span><span>${esc(pjCode(c))}</span></nav>
+        <div class="row between"><div class="stack" style="gap:6px"><span class="eyebrow">${esc(pjCode(c))} · ${esc(ui.orgName(c.sponsorOrgId))} · owner ${esc(c.owner || '—')} · ${esc(c.term)}</span><h1 style="font-size:clamp(30px,4.6vw,48px)">${esc(c.title)}</h1></div>${ui.status(c.status)}</div>
         <div style="overflow-x:auto">${pipeline(c.status)}</div>
         <div class="split">
           <section class="card" style="gap:18px">
-            <div class="row between"><span class="eyebrow">One-page brief · spec §11.4, §15.2</span>${canEdit ? ui.tag('Editable', 'info') : ''}</div>
+            <div class="row between"><span class="eyebrow">One-page brief</span>${canEdit ? ui.tag('Editable', 'info') : ''}</div>
             ${field('context', 'Context', true)}
             ${field('problem', 'The problem as the company sees it', true)}
             ${field('solved', 'What “solved” means (success criteria)', true)}
@@ -230,10 +263,10 @@
               <button class="btn primary" type="submit">Match</button>
             </form>` : ''}
             ${myFacultyMatch ? `<form class="card" data-form="map" data-id="${myFacultyMatch.id}">
-              <span class="eyebrow">F-AP-03 · Challenge-in-a-course kit</span><h3>Map it to a module</h3>
+              <span class="eyebrow">F-AP-03 · Live Project-in-a-course kit</span><h3>Map it to a module</h3>
               <label class="field">Module<input name="module" id="map-mod" value="Studio 3" required></label>
               <label class="field">Credit window<select name="credit" id="map-credit"><option>Industry-taught credit window · 2 credits</option><option>Studio elective · 4 credits</option></select></label>
-              <button class="btn primary" type="submit">Confirm mapping</button><span class="muted" style="font-size:13px">Confirming makes the challenge Live for your campus.</span>
+              <button class="btn primary" type="submit">Confirm mapping</button><span class="muted" style="font-size:13px">Confirming makes the live project Live for your campus.</span>
             </form>` : ''}
             <div class="card"><span class="eyebrow">Matched campuses</span>${matches.map((m) => `<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span><b class="ink">${esc(ui.orgName(m.institutionId))}</b> · ${esc(m.cohort)}<br><span class="muted" style="font-size:12.5px">${esc(ui.nameOf(m.facultyId))} · ${esc(m.module || 'module not mapped')}</span></span>${m.mapped ? ui.status('Live', 'Mapped') : ui.status('Matched', 'Awaiting faculty')}</div>`).join('') || '<p class="muted">Not matched yet.</p>'}</div>
             ${teams.length && (r !== 'industry') ? `<div class="card"><span class="eyebrow">Teams</span>${teams.map((t) => `<a class="row between" style="padding:8px 0;border-top:1px solid var(--line);text-decoration:none" href="#team-${t.id}"><span class="ink">${esc(t.name)}</span><span class="muted">${t.memberIds.length} members</span></a>`).join('')}</div>` : ''}
@@ -274,30 +307,30 @@
   LEAD.forms.match = (fd, form) => {
     const c = chById(form.dataset.id);
     const m = { id: uid('mt'), challengeId: c.id, institutionId: fd.get('campus'), cohort: 'Cohort ' + ui.orgName(fd.get('campus')).slice(-1), term: c.term, facultyId: fd.get('faculty'), module: '', mapped: false };
-    store.commit('Challenge matched to campus', 'challenge_match', m.id, () => { L().matches.push(m); return m; });
+    store.commit('Live Project matched to campus', 'challenge_match', m.id, () => { L().matches.push(m); return m; });
     if (c.status === 'Shaped') move('challenge', c, 'Matched');
     ui.toast(`Matched to ${ui.orgName(m.institutionId)}. Faculty maps it next.`);
   };
   LEAD.forms.map = (fd, form) => {
     const m = L().matches.find((x) => x.id === form.dataset.id);
-    store.commit('Challenge mapped to module', 'challenge_match', m, () => { m.module = fd.get('module'); m.credit = fd.get('credit'); m.mapped = true; return m; });
+    store.commit('Live Project mapped to module', 'challenge_match', m, () => { m.module = fd.get('module'); m.credit = fd.get('credit'); m.mapped = true; return m; });
     const c = chById(m.challengeId);
-    if (c.status === 'Matched') move('challenge', c, 'Live', 'Challenge live');
+    if (c.status === 'Matched') move('challenge', c, 'Live', 'Live Project is live');
     if (!L().teams.some((t) => t.matchId === m.id)) {
       const studs = L().users.filter((x) => x.role === 'student' && x.orgId === m.institutionId).slice(0, 3).map((x) => x.id);
       store.commit('Team formed', 'team', m.id, () => { const t = { id: uid('t'), matchId: m.id, name: 'Team Plover', memberIds: studs, milestones: [{ t: 'Frame the problem', done: false }, { t: 'Interview', done: false }, { t: 'Prototype', done: false }, { t: 'Test', done: false }, { t: 'Defend at review', done: false }], decisions: [], thread: [] }; L().teams.push(t); return t; });
     }
-    ui.toast('Mapped. The challenge is Live for your campus.');
+    ui.toast('Mapped. The live project is Live for your campus.');
   };
 
   /* ================= Team workspace ================= */
   LEAD.views.team = {
-    title: () => 'Team workspace',
+    title: () => 'My team',
     render(id) {
       const r = role();
-      if (!['student', 'mentor', 'faculty', 'admin'].includes(r)) return ui.guard(['student', 'mentor', 'faculty'], 'The team workspace');
+      if (!['student', 'mentor', 'faculty', 'admin'].includes(r)) return ui.guard(['student', 'mentor', 'faculty'], 'My team');
       const t = id ? L().teams.find((x) => x.id === id) : activeTeam();
-      if (!t) return `<div class="page wrap"><div class="empty"><h3>No team yet.</h3><p>Join a live challenge on your campus first.</p><a class="btn" href="#challenges">Open challenges</a></div></div>`;
+      if (!t) return `<div class="page wrap"><div class="empty"><h3>No team yet.</h3><p>Join a live project on your campus first.</p><a class="btn" href="#projects">Open live projects</a></div></div>`;
       if (!myTeams().some((x) => x.id === t.id)) return ui.guard(['student', 'mentor', 'faculty'], 'This team’s workspace');
       const c = challengeOf(t); const m = matchOf(t);
       const sprint = L().sprints.find((s) => s.teamId === t.id);
@@ -306,8 +339,8 @@
       const doneN = t.milestones.filter((x) => x.done).length;
       const sub = L().submissions.find((s) => s.teamId === t.id);
       return `<div class="page wrap">
-        <nav class="crumbs"><a href="#challenges">Challenges</a><span>/</span><a href="#challenge-${c.id}">${esc(c.title)}</a><span>/</span><span>${esc(t.name)}</span></nav>
-        ${ui.hero({ compact: true, eyebrow: `F-AP-01 · ${esc(ui.orgName(m.institutionId))} · ${esc(m.module || '')}`, title: t.name + '.', lede: esc(c.ambiguity || c.problem), meta: `${ui.status(c.status)}${ui.tag(`Milestone ${Math.min(doneN + 1, t.milestones.length)} of ${t.milestones.length}`, 'ind')}${ui.tag(`${t.memberIds.length} of 4 joined`, '')}${r === 'faculty' ? ui.tag('Read only · own cohort', 'info') : ''}` })}
+        <nav class="crumbs"><a href="#projects">Live Projects</a><span>/</span><a href="#project-${c.id}">${esc(c.title)}</a><span>/</span><span>${esc(t.name)}</span></nav>
+        ${ui.hero({ compact: true, eyebrow: `${esc(pjCode(c))} · My team · ${esc(ui.orgName(m.institutionId))} · ${esc(m.module || '')}`, title: t.name + '.', lede: esc(c.ambiguity || c.problem), meta: `${ui.status(c.status)}${ui.tag(`Milestone ${Math.min(doneN + 1, t.milestones.length)} of ${t.milestones.length}`, 'ind')}${ui.tag(`${t.memberIds.length} of 4 joined`, '')}${r === 'faculty' ? ui.tag('Read only · own cohort', 'info') : ''}` })}
         <div class="split">
           <section class="stack" style="gap:20px">
             <div class="card">
@@ -330,8 +363,8 @@
           <aside class="stack" style="gap:16px">
             <div class="card"><span class="eyebrow">Milestones</span>${t.milestones.map((x, i) => `<label class="check"><input type="checkbox" id="ms-${t.id}-${i}" data-on="milestone" data-id="${t.id}" data-i="${i}" ${x.done ? 'checked' : ''} ${canWrite ? '' : 'disabled'}> ${esc(x.t)}</label>`).join('')}${ui.meter(Math.round((doneN / Math.max(1, t.milestones.length)) * 100))}</div>
             <div class="card"><span class="eyebrow">Team</span><ul class="px-list">${t.memberIds.map((x) => `<li>${esc(ui.nameOf(x))}</li>`).join('')}</ul>${sprint ? `<p style="font-size:14px">Mentor: <b class="ink">${esc(ui.nameOf(sprint.mentorId))}</b> · sprint ${ui.status(sprint.status)}</p>` : ''}</div>
-            <div class="card"><span class="eyebrow">F-LE-01 · Path for this challenge</span><ul class="px-list"><li>Problem framing · done</li><li>Interviewing stakeholders · in progress</li><li>Defending a decision · next</li></ul><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">Course content at UMO Design School</a></div>
-            <div class="btn-row"><a class="btn" href="#sprints">Mentor sprint</a>${r === 'student' ? `<a class="btn primary" href="#submit">${sub ? 'View submission' : 'Submit'}</a>` : ''}</div>
+            <div class="card"><span class="eyebrow">F-LE-01 · Path for this live project</span><ul class="px-list"><li>Problem framing · done</li><li>Interviewing stakeholders · in progress</li><li>Defending a decision · next</li></ul><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">Course content at UMO Design School</a></div>
+            <div class="btn-row"><a class="btn" href="#sprints">Mentor session</a>${r === 'student' ? `<a class="btn primary" href="#submit">${sub ? 'View submission' : 'Submit'}</a>` : ''}</div>
           </aside>
         </div>
       </div>`;
@@ -356,19 +389,19 @@
     store.commit(`Milestone ${el.checked ? 'done' : 'reopened'}`, 'milestone', t.id, () => { t.milestones[i].done = el.checked; return t.milestones[i]; });
   };
 
-  /* ================= Mentor sprints ================= */
+  /* ================= Mentor sessions ================= */
   LEAD.views.sprints = {
-    title: () => 'Mentor sprints',
+    title: () => 'Mentor sessions',
     render() {
       const r = role(); const u = me();
-      if (!['student', 'mentor', 'admin', 'faculty'].includes(r)) return ui.guard(['student', 'mentor', 'admin'], 'Mentor sprints');
+      if (!['student', 'mentor', 'admin', 'faculty'].includes(r)) return ui.guard(['student', 'mentor', 'admin'], 'Mentor sessions');
       const hoursOf = (mid) => L().sprints.filter((s) => s.mentorId === mid).flatMap((s) => s.sessions.filter((x) => x.done)).reduce((a, x) => a + x.minutes, 0) / 60;
       let main = '';
       if (r === 'student' || r === 'faculty') {
         const t = activeTeam();
         const sp = t && L().sprints.find((s) => s.teamId === t.id);
         main = !t ? '<div class="empty">No team yet.</div>' : !sp
-          ? `<div class="card"><h3>No mentor sprint yet</h3><p>Three 45-minute sessions with an industry mentor.</p>${r === 'student' ? `<button class="btn primary" data-act="sp-request" data-team="${t.id}">Request a mentor sprint</button>` : ''}</div>`
+          ? `<div class="card"><h3>No mentor session yet</h3><p>Three 45-minute sessions with an industry mentor.</p>${r === 'student' ? `<button class="btn primary" data-act="sp-request" data-team="${t.id}">Request a mentor session</button>` : ''}</div>`
           : sprintCard(sp, r === 'student');
       } else if (r === 'mentor') {
         main = L().sprints.filter((s) => s.mentorId === u.id).map((s) => sprintCard(s, false, true)).join('') || '<div class="empty">No teams assigned yet.</div>';
@@ -383,7 +416,7 @@
       const ledger = r === 'mentor' ? `<div class="card"><span class="eyebrow">F-ME-04 · Hours ledger</span><div class="kpi" style="padding:0;background:none"><span class="v">${hoursOf(u.id).toFixed(1)} h</span><span class="d">This term · ${L().sprints.filter((s) => s.mentorId === u.id).length} teams</span></div>
         <span class="label">Distinctions · F-CO-03 (P2)</span><div class="pill-list"><span class="chip">Mentor · ${Math.floor(hoursOf(u.id))} h</span><span class="chip">Assessor · 1 day</span></div></div>` : '';
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '04 · MENTOR · F-ME-01, F-ME-04, F-ME-05', title: 'Mentor.', lede: 'Three 45-minute sessions with a practitioner. Every hour is counted, because “nobody volunteers” was the room’s warning.', meta: ui.simTag() })}
+        ${ui.hero({ compact: true, eyebrow: 'Live Projects · step 4 of 6', title: 'Mentor sessions.', lede: 'Three 45-minute sessions with a practitioner. Every hour is counted.', meta: ui.simTag() })}
         <div class="split"><section class="stack">${main}</section><aside class="stack">${ledger}<div class="card"><span class="eyebrow">Conflict rule · R5</span><p>A mentor never scores the team they mentored. The scoring screen checks this.</p></div></aside></div>
         ${pool}
       </div>`;
@@ -411,7 +444,7 @@
   Object.assign(LEAD.act, {
     'sp-request'(el) {
       const sp = { id: uid('sp'), teamId: el.dataset.team, mentorId: null, status: 'Requested', sessions: [0, 1, 2].map(() => ({ at: null, minutes: 45, done: false })) };
-      store.commit('Mentor sprint requested', 'mentor_sprint', sp.id, () => { L().sprints.push(sp); return sp; });
+      store.commit('Mentor session requested', 'mentor_sprint', sp.id, () => { L().sprints.push(sp); return sp; });
       ui.toast('Requested. The UMO team assigns a mentor.');
     },
     'sp-assign'(el) {
@@ -442,7 +475,7 @@
   /* ================= Submission pack ================= */
   const drafts = {};
   LEAD.views.submit = {
-    title: () => 'Submission',
+    title: () => 'Hand in',
     render() {
       if (role() !== 'student') return ui.guard(['student'], 'The submission pack');
       const t = activeTeam();
@@ -451,12 +484,12 @@
       const sub = L().submissions.find((s) => s.teamId === t.id);
       const d = drafts[t.id] || (drafts[t.id] = { deliverable: 'https://example.org/kestrel-onboarding', reflection: 'We chose first-time account holders. With one sprint less we would cut the desktop flow.', ai: '' });
       if (sub) {
-        return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: `05 · SOLVE · ${esc(t.name)}`, title: 'Submitted.', lede: 'Your pack is with the assessors. They score blind: no names, no institution, until every score is locked.', meta: ui.status(sub.status) })}
+        return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: `Live Projects · step 5 of 6 · ${esc(t.name)}`, title: 'Handed in.', lede: 'Your pack is with the assessors. They score blind: no names, no institution, until every score is locked.', meta: ui.status(sub.status) })}
           <div class="card">${ui.kv([['Deliverable', sub.deliverable], ['Decision log', `${t.decisions.length} entries attached`], ['AI-use declaration', sub.ai], ['Submitted', ui.fmtDate(sub.at)]])}</div></div>`;
       }
       const check = rules.canSubmit(d);
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: `05 · SOLVE · F-SO-01, F-GV-04 · ${esc(c.title)}`, title: 'Submit.', lede: 'Deliverable, decision log, reflection and an AI-use declaration. A pack cannot be submitted without the declaration (R7).' })}
+        ${ui.hero({ compact: true, eyebrow: `Live Projects · step 5 of 6 · ${esc(c.title)}`, title: 'Hand in.', lede: 'Deliverable, decision log, reflection and a note on how you used AI. You cannot hand in without the AI note.' })}
         <form class="card" data-form="submit" data-id="${t.id}" style="max-width:820px">
           <label class="field">Deliverable link<input id="sb-del" name="deliverable" data-on="subdraft" data-id="${t.id}" data-k="deliverable" value="${esc(d.deliverable)}" required></label>
           <div class="notice"><span class="px"></span>Decision log attached automatically · <b class="ink">${t.decisions.length} entries</b></div>

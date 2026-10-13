@@ -23,12 +23,12 @@
 
   const WHO = { student: 'Student', faculty: 'Faculty', head: 'College', industry: 'Industry', mentor: 'Mentor', open: 'Open learner', admin: 'UMO admin' };
   const SHELF = {
-    student: 'Start with LM-SP-1. Then pick a format that suits you: on your own, with a teacher, with peers, or inside a real challenge.',
+    student: 'Start with LM-SP-1. Then pick a format that suits you: on your own, with a teacher, with peers, or inside a real live project.',
     faculty: 'Bring live briefs into your course, learn how others teach with them, and teach what you know.',
     head: 'Plan learning for your college and your faculty, and help others learn from what you do.',
     industry: 'Upskill your team, learn to assess well, and teach the next generation of designers.',
     mentor: 'Sharpen how you coach and score, and give hours back as a teacher.',
-    open: 'Learn the basics free, then try a circle or an open challenge.',
+    open: 'Learn the basics free, then try a circle or an open live project.',
     admin: 'Review what people offer and ask for, match teachers to requests, and keep the catalogue healthy.',
   };
 
@@ -103,7 +103,7 @@
     let list = Lr().modules.filter((m) => (!f.mode || m.mode === f.mode) && (!f.skill || m.skills.includes(f.skill)) && (!q || (m.code + ' ' + m.title + ' ' + m.line + ' ' + m.skills.map(ui.capName).join(' ')).toLowerCase().includes(q)) && (f.all || forYou(m)));
     list = list.slice().sort((a, b) => (b.pinned - a.pinned) || (forYou(b) - forYou(a)) || a.mode.localeCompare(b.mode) || a.n - b.n);
     return `<section class="section" id="catalogue" aria-label="Catalogue">${ui.sectionHead('', 'All learning', '', 'Every module has a code. Read it as: Learning Module · format · number.')}
-      <div class="notice" id="code-key"><span class="px"></span><span><b class="ink lmcode">LM-SP-1</b> means Learning Module · <b class="ink">S</b>elf-<b class="ink">P</b>aced · number 1. The format letters: <span class="lmcode">SP</span> self-paced, <span class="lmcode">IL</span> instructor-led, <span class="lmcode">PL</span> peer circle, <span class="lmcode">CB</span> inside a challenge. A <span class="lmcode">LP</span> code is a Learning Path: a bundle of modules with one price.</span></div>
+      <div class="notice" id="code-key"><span class="px"></span><span><b class="ink lmcode">LM-SP-1</b> means Learning Module · <b class="ink">S</b>elf-<b class="ink">P</b>aced · number 1. The format letters: <span class="lmcode">SP</span> self-paced, <span class="lmcode">IL</span> instructor-led, <span class="lmcode">PL</span> peer circle, <span class="lmcode">CB</span> inside a live project. A <span class="lmcode">LP</span> code is a Learning Path: a bundle of modules with one price.</span></div>
       ${filters()}
       <div class="grid g3" id="lm-list">${list.map(card).join('') || '<div class="empty">Nothing matches. Try another word, or show modules for every role.</div>'}</div>
       <div class="notice"><span class="px cyan"></span><span>Longer courses and certificates live at the <a href="https://umodesign.school" target="_blank" rel="noopener">UMO Design School</a>. LEAD links to them and does not duplicate them.</span></div>
@@ -219,7 +219,7 @@
         <div class="btn-row"><button class="btn primary" data-act="lm-enrol" data-code="${m.code}" ${enrolled ? 'disabled' : ''}>${enrolled ? 'You are on the list' : 'Tell me when it is ready'}</button></div>`;
     }
     if (m.mode === 'CB') {
-      return `<div class="btn-row"><a class="btn primary" href="#challenge-${m.challengeId}">Open the challenge</a></div><p class="muted tiny">You learn by doing the work, with a team and a mentor. Your progress is your submission.</p>`;
+      return `<div class="btn-row"><a class="btn primary" href="#project-${m.challengeId}">Open the live project</a></div><p class="muted tiny">You learn by doing the work, with a team and a mentor. Your progress is your submission.</p>`;
     }
     const full = m.seats != null && m.booked >= m.seats;
     const label = m.mode === 'PL' ? 'Join the circle' : 'Enrol';
@@ -285,9 +285,9 @@
     return `<div class="page wrap">${head}<section class="card lesson-page">
       <span class="eyebrow">${esc(m.code)} · complete</span>
       <h1 style="font-size:clamp(28px,4vw,42px)">You finished Day 1 readiness.</h1>
-      <p class="ink">You passed the check with ${play.result ? play.result.score : m.pass} of ${m.check.length}. It is saved in your learning record. When you do real work on a challenge, a Passport entry shows it at a verified level.</p>
+      <p class="ink">You passed the check with ${play.result ? play.result.score : m.pass} of ${m.check.length}. It is saved in your learning record. When you do real work on a live project, a Passport entry shows it at a verified level.</p>
       <span class="eyebrow">Next</span><div class="grid g3">${nexts.map(card).join('')}</div>
-      <div class="btn-row"><a class="btn primary" href="#learn" data-act="lm-leave">Back to Learn</a><a class="btn" href="#challenges">See live challenges</a></div></section></div>`;
+      <div class="btn-row"><a class="btn primary" href="#learn" data-act="lm-leave">Back to Learn</a><a class="btn" href="#projects">See live projects</a></div></section></div>`;
   }
 
   /* ---------- the view ---------- */
@@ -303,7 +303,7 @@
       play.code = null; play.phase = 'list';
       const r = role();
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: `Learn · ${esc(WHO[r] || '')}`, title: 'Learn.', lede: 'Learn on your own, with a teacher, with peers, or inside a real challenge. Teach what you know. Ask for what you want to learn.', meta: iCan() })}
+        ${ui.hero({ compact: true, eyebrow: `Learn · ${esc(WHO[r] || '')}`, title: 'Learn.', lede: 'Learn on your own, with a teacher, with peers, or inside a real live project. Teach what you know. Ask for what you want to learn.', meta: iCan() })}
         <div class="split rev">
           <aside class="stack" style="gap:16px">
             <div class="card" id="learn-shelf"><span class="eyebrow">Your shelf</span><p class="ink">${esc(SHELF[r] || '')}</p><div class="stack" style="gap:8px">${Lr().modules.filter((m) => forYou(m) && !m.pinned).slice(0, 4).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('')}</div></div>

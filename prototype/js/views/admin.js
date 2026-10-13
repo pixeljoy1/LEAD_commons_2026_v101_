@@ -24,7 +24,7 @@
   };
   const planStatus = (p) => (!p.active ? ui.status('PAUSED', 'Off') : rules.sellable(p).ok ? ui.status('ACTIVE', 'On sale') : ui.status('DRAFT', rules.sellable(p).reason));
   const joinRoute = (p) => ({ CAMPUS_LICENCE: 'join-college', INDUSTRY_MEMBERSHIP: 'join-industry', PATH_ENROLMENT: 'join-path-' + p.key, CHALLENGE_SPONSORSHIP: 'join-sponsor', OPEN_TIER: 'join-open' }[p.kind]);
-  const per = (p) => ({ TIERED_BY_SIZE: 'by institution size, a year', PER_SEAT: p.kind === 'PATH_ENROLMENT' ? 'per learner, per term' : 'per seat, a year', PER_CHALLENGE: 'per challenge', FREE: 'free', FLAT: 'flat', PER_COHORT: 'per cohort' }[p.pricingModel]);
+  const per = (p) => ({ TIERED_BY_SIZE: 'by institution size, a year', PER_SEAT: p.kind === 'PATH_ENROLMENT' ? 'per learner, per term' : 'per seat, a year', PER_CHALLENGE: 'per live project', FREE: 'free', FLAT: 'flat', PER_COHORT: 'per cohort' }[p.pricingModel]);
 
   function planCard(p) {
     const latest = (p.versions || []).slice().sort((a, b) => b.version - a.version)[0];
@@ -93,7 +93,7 @@
     const L = store.loop;
     const items = [
       ['#demand', 'Intake queue', `${L.demandSignals.filter((d) => d.status === 'Submitted').length} to review`],
-      ['#challenges', 'Challenges', `${L.challenges.filter((c) => ['Draft', 'Shaped'].includes(c.status)).length} to shape or match`],
+      ['#challenges', 'Live Projects', `${L.challenges.filter((c) => ['Draft', 'Shaped'].includes(c.status)).length} to shape or match`],
       ['#sprints', 'Mentor pool', `${L.users.filter((u) => u.role === 'mentor' && !u.verified).length} to verify`],
       ['#passports', 'Passports', `${L.passports.filter((p) => p.status === 'Proposed').length} to approve`],
       ['#learn', 'Learning catalogue', `${LEAD.learn ? LEAD.learn.pending() : 0} to review`],
