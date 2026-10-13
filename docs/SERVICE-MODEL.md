@@ -1,6 +1,6 @@
 # LEAD service model
 
-**Owner:** UMO Design Foundation · **Version:** 0.3 · **Prepared:** 13 October 2026
+**Owner:** UMO Design Foundation · **Version:** 0.4 · **Prepared:** 13 October 2026
 **Companion to:** `docs/SPEC.md` and `docs/SPEC-ADDENDUM-01.md` (the addendum wins on conflict).
 **Interactive version:** `prototype/index.html` (open it from a local server; see "Run it" below). The **Model** screen is this document as a working map.
 
@@ -85,13 +85,37 @@ Gates: G1 Supply (3 companies, day 60) · G2 Demand (3 campuses, day 60) · G3 T
 
 | Screen | Route | What it shows |
 |---|---|---|
-| Service model | `#model` | Ecosystem map, value flows, lifecycle switch, value matrix, retention, offers, IxDF lineage, full blueprint |
+| Homepage | `#home` (`#model` redirects here) | The whole service model in plain language, student-first. See “Homepage sections” below |
 | Verdict | `#verdict` | Gates with a live reading, the room's evidence, out-of-scope list, open decisions |
 | Access chooser and role homes | `#choose`, `#w-student` … `#w-admin` | All eight roles: journey, simulated screens, hand-offs, Sees / Can do / Cannot |
 | Working loop | `#demand`, `#challenges`, `#team`, `#sprints`, `#submit`, `#assess`, `#passports`, `#passport-<code>`, `#opportunities`, `#impact` | W1–W7 end to end with rules R1–R8 |
 | Community | `#lexicon`, `#calendar`, `#provisions` | Lexicon A–Z, Joint Design Calendar, Provisions board |
 | Join | `#join`, `#join-college`, `#join-industry`, `#join-path`, `#join-sponsor`, `#join-open` | Five mock sign-up flows with live quotes, codes, availability and email preview |
 | Admin | `#admin` | One page: pricing models (set a price, new version each time), coupons (second approval by a different admin), recent sign-ups. Choosing the Admin persona goes straight here. Simplified from addendum A11 on UMO's instruction: no separate dashboard, enumerations, banner or audit screens. The change log is the steward and admin `#audit` view |
+
+## Homepage sections (v0.4)
+
+The homepage is the model itself, written for anyone who lands on LEAD. About 90% of visitors are students, so the default path is a student's. Every section kept its content; the names changed.
+
+| Order | Section on the page | Was |
+|---|---|---|
+| 1 | Do real design work before you graduate (hero, simulated numbers strip) | Exchange. (hero) |
+| 2 | **Your path**: persona tabs and a vertical story from Week 1 to Month 3, current stage names kept | The eight-stage loop and the role homes |
+| 3 | **Find your door**: six cards (Student, Faculty, College, Industry, Mentor, Just curious) with a photo, a live mock price and Join | The access chooser |
+| 4 | **Who is in LEAD**: the interactive map, with a switch for how it runs (by hand today, in this prototype, first live pilots, full platform) | Ecosystem and Lifecycle switch |
+| 5 | **What everyone gives and gets** | Value exchange |
+| 6 | **Why people stay** | Retention |
+| 7 | **Seven ways people work together** | Workflows W1–W7 |
+| 8 | **Ways to join and what they cost** (live from the admin plan registry, mock prices) | Offers |
+| 9 | **Where LEAD is today** and **Five checks before each next step** | Lifecycle and Gates |
+| 10 | **Built on what already works** (IxDF is named only in the footer's About the model) | IxDF lineage |
+| 11 | **Everything, in detail** (collapsed: all 24 exchanges by step) | Blueprint |
+| 12 | **Questions people ask** | New |
+| 13 | **Ready to start?** | New |
+
+**Join sheet.** Every Join button opens one dialog that offers every route for the chosen role: free account, link my campus, or a Path for students; join through a campus or ask your college for faculty; a campus licence or a talk with UMO for colleges; membership, sponsorship or offering your own hours for industry; an application form for mentors. A mentor application appears in the steward's mentor pool, unverified, until the steward approves it.
+
+**Photos.** People photos are illustrative Unsplash stock, shown in grayscale with an indigo and cyan tint and a checker corner, each captioned “Illustrative · not the person”. Photographers are credited in the footer. Each slot is a named file in `prototype/assets/photos/`, so any photo can be replaced with a real UMO or UXINDIA one.
 
 **Header:** one lockup (UMO Design logo and "LEAD Commons"), the nav, then one **Demo** button, the **persona menu** and **Join**. The persona menu holds the eight personas, the theme switch and Reset demo. **Demo runs by persona:** it walks the current persona through their own journey, one step per stage, and the last step hands off to the next persona (Industry, Steward, Student, Mentor, Faculty, Institution head, Open, Admin).
 

@@ -36,7 +36,7 @@
   const store = {
     loop: LEAD.seed.build(),
     pricing: readPricing(),
-    session: { role: 'steward', userId: 'st1', adminActor: 'Admin A', demo: false, demoStep: 0 },
+    session: { role: 'student', userId: 's1', adminActor: 'Admin A', demo: false, demoStep: 0 },
 
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 

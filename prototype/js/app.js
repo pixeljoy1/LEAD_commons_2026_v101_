@@ -1,11 +1,10 @@
-/* LEAD · app shell and router. Routes are plain hash tokens (#model, #w-student, #join-college). */
+/* LEAD · app shell and router. Routes are plain hash tokens (#home, #w-student, #join-college). */
 (function (root) {
   const LEAD = root.LEAD;
   const { ui, store, content } = LEAD;
   const { esc } = ui;
 
   const NAV = [
-    ['model', 'Model'],
     ['lexicon', 'Learn'],
     ['challenges', 'Challenges'],
     ['calendar', 'Community'],
@@ -13,13 +12,13 @@
     ['impact', 'Impact'],
   ];
   const NAV_MATCH = {
-    model: ['model', 'verdict', 'choose'], lexicon: ['lexicon', 'demand'], challenges: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
+    lexicon: ['lexicon', 'demand'], challenges: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
     calendar: ['calendar', 'provisions'], opportunities: ['opportunities', 'passports', 'passport'], impact: ['impact', 'audit'],
   };
 
   /* token → [view, param] */
   function parse(token) {
-    const t = token || 'model';
+    const t = !token || token === 'model' ? 'home' : token; // the homepage is the model
     if (/^admin-/.test(t)) return ['admin', null]; // old admin routes now live on one page
     const prefixes = ['w-', 'lexicon-', 'challenge-', 'team-', 'passport-', 'join-path-', 'join-sponsor-'];
     for (const p of prefixes) if (t.startsWith(p)) return [p.slice(0, -1), t.slice(p.length)];
@@ -60,16 +59,16 @@
     const r = content.roleById[s.role];
     const theme = document.documentElement.getAttribute('data-theme');
     const items = content.roles.map((x) => `<button class="persona-item" role="menuitemradio" aria-checked="${x.id === s.role}" data-act="as" data-role="${x.id}" data-to="${x.id === 'admin' ? 'admin' : 'w-' + x.id}">
-        ${ui.glyph(x.id)}<span><b>${esc(x.name)}</b><small>${esc(x.lens)} lens</small></span>${x.id === s.role ? '<span class="px cyan" aria-hidden="true"></span>' : ''}</button>`).join('');
+        ${ui.glyph(x.id)}<span><b>${esc(x.name)}</b><small>${esc(x.lens)}</small></span>${x.id === s.role ? '<span class="px cyan" aria-hidden="true"></span>' : ''}</button>`).join('');
     return `${bannerHTML()}
     <header class="site-head">
       <div class="wrap head-row">
-        <a class="brand" href="#model" aria-label="LEAD Commons, by UMO Design Foundation. Home">
+        <a class="brand" href="#home" aria-label="LEAD Commons, by UMO Design Foundation. Home">
           <span class="logo-tile"><img src="../public/brand/UMO_logo.png" alt="UMO Design" width="309" height="129"></span>
           <span class="brand-div" aria-hidden="true"></span>
           <b class="brand-name">LEAD Commons</b>
         </a>
-        <nav class="nav" aria-label="Main">${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}<a class="nav-join" href="#join">Join</a></nav>
+        <nav class="nav" aria-label="Main">${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}<a class="nav-join" href="#join" data-act="sheet" data-role="student">Join</a></nav>
         <div class="head-tools">
           <button class="btn small demo-btn" data-act="demo-toggle" aria-pressed="${s.demo}" title="Walk the current persona through the loop">${s.demo ? 'Exit demo' : 'Demo'}</button>
           <div class="persona-wrap">
@@ -84,7 +83,7 @@
               <button class="persona-item" role="menuitem" data-act="reset"><span class="glyph-gap"></span><span><b>Reset demo</b><small>Clear demo data and start again</small></span></button>
             </div>
           </div>
-          <a class="btn join head-join" href="#join">Join</a>
+          <a class="btn join head-join" href="#join" data-act="sheet" data-role="student">Join</a>
         </div>
       </div>
     </header>`;
@@ -107,8 +106,12 @@
           <li><a href="https://uxin.co" target="_blank" rel="noopener">Find a job on UXIN</a></li>
           <li><a href="#calendar">Joint Design Calendar</a></li><li><a href="#verdict">Is it worth building?</a></li></ul></div>
       </div>
+      <details class="foot-about"><summary>About the model and photo credits</summary>
+        <p>LEAD borrows its structure from open learning communities such as the Interaction Design Foundation (IxDF), and adds real industry problems, mentoring and validation. No IxDF content, branding or text is used.</p>
+        <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${LEAD.photos.list.map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
+      </details>
       <div class="foot-base">
-        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.3 · Synthetic data only. No real people or student data.</span></span>
+        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.4 · Synthetic data only. No real people or student data.</span></span>
         <span class="uxi"><span>With</span><span class="logo-tile"><img src="../public/brand/UXINDIA_logo.png" alt="UXINDIA, Design Leadership Week 2026" width="523" height="102"></span></span>
       </div>
     </div></footer>`;
@@ -140,7 +143,9 @@
   let lastView = null;
 
   function render(opts) {
-    if (/^admin-/.test(decodeURIComponent(location.hash.slice(1)))) history.replaceState(null, '', '#admin');
+    const rawHash = decodeURIComponent(location.hash.slice(1));
+    if (/^admin-/.test(rawHash)) history.replaceState(null, '', '#admin');
+    if (rawHash === 'model') history.replaceState(null, '', '#home');
     const [view, param] = current();
     const v = LEAD.views[view] || LEAD.views.notfound;
     const focusId = document.activeElement && document.activeElement.id;
@@ -158,7 +163,8 @@
       const el = document.getElementById(focusId);
       if (el) { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) { try { el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* not text */ } } }
     }
-    document.title = `${v.title ? v.title(param) + ' · ' : ''}LEAD Commons`;
+    const pageTitle = v.title ? v.title(param) : '';
+    document.title = pageTitle ? `${pageTitle} · LEAD Commons` : 'LEAD Commons';
     lastView = view;
   }
   LEAD.render = render;
@@ -177,7 +183,7 @@
       const [view] = current();
       const v = LEAD.views[view];
       if (v && v.onPricing) v.onPricing(evt); else render({ keepScroll: true });
-      if (/^(join|admin)/.test(view) || view === 'model') ui.toast('Price updated.');
+      if (/^(join|admin)/.test(view) || view === 'home') ui.toast('Price updated.');
       return;
     }
     if (evt.kind === 'pricing') { render({ keepScroll: true }); return; }
@@ -271,8 +277,8 @@
   });
   LEAD.on.role = (el) => { store.setRole(el.value); };
 
-  LEAD.views.notfound = { render: () => `<div class="page wrap"><div class="empty"><h2>Nothing here.</h2><a class="btn" href="#model">Go to the service model</a></div></div>` };
+  LEAD.views.notfound = { render: () => `<div class="page wrap"><div class="empty"><h2>Nothing here.</h2><a class="btn" href="#home">Go to the homepage</a></div></div>` };
 
-  if (!location.hash) history.replaceState(null, '', '#model');
+  if (!location.hash) history.replaceState(null, '', '#home');
   render();
 })(typeof globalThis !== 'undefined' ? globalThis : this);

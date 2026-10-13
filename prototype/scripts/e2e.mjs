@@ -39,13 +39,13 @@ async function as(p, role) {
   await p.waitForTimeout(120);
 }
 
-await page.goto(BASE + '#model');
+await page.goto(BASE + '#home');
 await page.evaluate(() => { try { localStorage.clear(); } catch (e) { /* ignore */ } });
-await page.goto(BASE + '#model');
+await page.goto(BASE + '#model'); // old link: must land on the homepage
 await page.waitForSelector('.eco-canvas svg');
 
 /* ---------- crawl: every route × every role ---------- */
-const ROUTES = ['model', 'verdict', 'choose', 'lexicon', 'lexicon-problem-framing', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'calendar', 'provisions', 'audit',
+const ROUTES = ['home', 'model', 'verdict', 'choose', 'lexicon', 'lexicon-problem-framing', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'calendar', 'provisions', 'audit',
   'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans'];
 const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'steward', 'open', 'admin'];
 for (const r of ROLES) {
@@ -65,7 +65,7 @@ await as(page, 'student'); await go(page, 'admin');
 ok('S9 student cannot open the pricing admin', await page.locator('text=is not open to Student').count() > 0);
 
 /* ---------- header: one lockup, persona menu, one Demo button ---------- */
-await go(page, 'model');
+await go(page, 'home');
 await page.click('.persona-btn');
 const menuItems = await page.locator('.persona-item[data-role]').count();
 await page.keyboard.press('Escape');
@@ -83,6 +83,79 @@ const handedTo = await page.evaluate(() => LEAD.store.session.role);
 ok('Header: Demo runs by persona and hands off to the next', demoText.includes('Industry leader') && handLabel.includes('Hand off to') && handedTo === 'steward', `${handLabel.trim()} → ${handedTo}`);
 await page.click('.demo-btn');
 ok('Header: Exit demo removes the strip', await page.locator('.demo').count() === 0);
+
+
+/* ---------- homepage: plain language, student-first, people photos, join sheet ---------- */
+await go(page, 'home');
+ok('Home: the old #model link redirects to #home', page.url().endsWith('#home'));
+const homeText = await page.evaluate(() => document.querySelector('main').textContent);
+const banned = ['Lifecycle', 'Retention', 'Blueprint', 'Lineage', 'Value exchange', 'IxDF', 'v0.2', 'Chair', 'Wider Audience', 'Venn', 'Loop v0'];
+const hits = banned.filter((w) => homeText.includes(w)).concat(/\bgates?\b/i.test(homeText) ? ['gate'] : []);
+ok('Home: no internal jargon in the page body', hits.length === 0, hits.join(', '));
+const heads = await page.locator('main h1, main h2').allTextContents();
+ok('Home: plain section headings in order', ['Do real design work before you graduate.', 'Your path', 'Find your door', 'Who is in LEAD', 'What everyone gives and gets', 'Why people stay', 'Seven ways people work together', 'Ways to join and what they cost', 'Where LEAD is today', 'Built on what already works', 'Everything, in detail', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
+ok('Home: student path shows all eight stages with current names', (await page.locator('#path .beat .eyebrow').allTextContents()).map((t) => t.split('·')[1].trim()).join(',') === 'IDENTIFY,LEARN,APPLY,MENTOR,SOLVE,VALIDATE,CONNECT,GET OPPORTUNITY');
+await page.click('[data-act="path-tab"][data-role="faculty"]');
+ok('Home: persona tab swaps the story', (await page.locator('#path .beat h3').first().textContent()).startsWith('See what your syllabus leaves out'));
+await page.click('[data-act="path-tab"][data-role="student"]');
+
+await page.evaluate(() => document.querySelectorAll('img').forEach((i) => { i.loading = 'eager'; }));
+await page.waitForTimeout(600);
+const imgs = await page.evaluate(() => { const l = [...document.querySelectorAll('main img')]; return { n: l.length, ok: l.filter((i) => i.complete && i.naturalWidth > 0).length, caps: document.querySelectorAll('main .ph .ph-cap').length, figs: document.querySelectorAll('main .ph').length }; });
+ok('Home: every photo loads and carries its caption', imgs.n >= 11 && imgs.ok === imgs.n && imgs.caps === imgs.figs, JSON.stringify(imgs));
+const credits = await page.evaluate(() => document.querySelectorAll('.foot-about a').length);
+ok('Home: footer credits every photographer', credits === 11, `${credits} credits`);
+ok('Home: simulated numbers are labelled', await page.locator('.strip .tag.sim').count() === 1);
+ok('Home: six doors, each with Join', await page.locator('.door').count() === 6 && await page.locator('.door [data-act="sheet"]').count() === 6);
+
+/* join sheet */
+await page.click('.home-hero [data-act="sheet"]');
+ok('Sheet: opens on the student routes', await page.locator('.sheet').isVisible() && (await page.locator('.sheet .opt').count()) === 3 && (await page.locator('[data-act="sheet-role"][aria-pressed="true"]').textContent()) === 'Student');
+await page.keyboard.press('Escape');
+ok('Sheet: Escape closes it and returns focus', await page.locator('.sheet').count() === 0 && await page.evaluate(() => document.activeElement.getAttribute('data-act') === 'sheet'));
+await page.click('.home-hero [data-act="sheet"]');
+await page.locator('.sheet .opt:has-text("free account")').click();
+ok('Sheet: student free account goes to the open sign-up', page.url().endsWith('#join-open'));
+await go(page, 'home');
+await page.click('.home-hero [data-act="sheet"]');
+await page.locator('.sheet .opt:has-text("Enrol on a Path")').click();
+ok('Sheet: student Path goes to path enrolment', page.url().includes('#join-path'));
+await go(page, 'home');
+await page.click('.home-hero [data-act="sheet"]');
+await page.locator('.sheet .opt:has-text("Link my campus")').click();
+await page.locator('.sheet [data-campus="campus-b"]').click();
+ok('Sheet: linking a campus signs in as a student there', (await page.evaluate(() => LEAD.store.me().name)) === 'Tara Bose' && page.url().endsWith('#challenges'));
+const doorRoles = ['student', 'faculty', 'head', 'industry', 'mentor', 'open'];
+let doorOk = true;
+for (const r of doorRoles) {
+  await go(page, 'home');
+  await page.locator(`.door [data-act="sheet"][data-role="${r}"]`).click();
+  const pressed = await page.locator('[data-act="sheet-role"][aria-pressed="true"]').getAttribute('data-role');
+  const body = (await page.locator('#sheet-body .opt').count()) + (await page.locator('#sheet-body form').count());
+  if (pressed !== r || body < 1) doorOk = false;
+  await page.keyboard.press('Escape');
+}
+ok('Sheet: each door opens the sheet on its own role', doorOk);
+await go(page, 'home');
+await page.locator('.door [data-act="sheet"][data-role="industry"]').click();
+await page.locator('.sheet .opt:has-text("Sponsor a challenge")').click();
+ok('Sheet: industry sponsor routes to the sponsor flow', page.url().includes('#join-sponsor'));
+await go(page, 'home');
+await page.locator('.door [data-act="sheet"][data-role="head"]').click();
+await page.locator('.sheet .opt:has-text("Talk to UMO")').click();
+ok('Sheet: college sees the UMO address as text', await page.locator('.sheet >> text=team@umo.design').count() > 0);
+await page.keyboard.press('Escape');
+
+/* mentor application reaches the steward's pool */
+await go(page, 'home');
+await page.locator('.door [data-act="sheet"][data-role="mentor"]').click();
+await page.check('#sh-codex');
+await page.click('.sheet form[data-form="mentor-apply"] button[type="submit"]');
+await page.click('.sheet [data-act="sheet-steward"]');
+ok('Sheet: a mentor application lands in the steward pool, unverified', page.url().endsWith('#sprints') && await page.locator('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]').count() === 1);
+await page.click('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]');
+ok('Sheet: the steward approves the applicant', await page.locator('tr:has-text("Dana Fernandes") >> text=Verified').count() > 0);
+await as(page, 'student');
 
 /* ---------- S1: intake → merge → publish ---------- */
 await as(page, 'industry'); await go(page, 'demand');
@@ -261,7 +334,7 @@ ok('S15 after the admin pauses the coupon, the open quote shows the new total an
 
 /* ---------- screenshots and layout ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
-const SHOTS = ['model', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'lexicon'];
+const SHOTS = ['home', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'lexicon'];
 const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'steward', admin: 'admin', impact: 'steward', 'join-college': 'head' };
 for (const scheme of ['dark', 'light']) {
   const c = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: scheme });
@@ -287,7 +360,7 @@ for (const r of ['steward', 'student', 'admin']) {
   }
 }
 ok('Mobile 390px: no horizontal page scroll', wide.length === 0, wide.slice(0, 8).join(' '));
-for (const s of ['model', 'join-college', 'w-student', 'admin']) { if (roleFor[s]) await as(mp, roleFor[s]); await go(mp, s); await mp.waitForTimeout(250); await mp.screenshot({ path: `${shots}/mobile-${s}.png`, fullPage: false }); }
+for (const s of ['home', 'join-college', 'w-student', 'admin']) { if (roleFor[s]) await as(mp, roleFor[s]); await go(mp, s); await mp.waitForTimeout(250); await mp.screenshot({ path: `${shots}/mobile-${s}.png`, fullPage: false }); }
 
 ok('No script errors in any scenario', errors.length === 0, errors.slice(0, 5).join(' | '));
 await browser.close();

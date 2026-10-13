@@ -6,6 +6,7 @@
 
   /* ---------- verdict ---------- */
   const gateCounts = Object.fromEntries(content.gates.map((g) => [g.id, g.count]));
+  LEAD.gateCounts = gateCounts;
 
   function verdictReading(met) {
     if (met <= 2) return { k: 'Stay manual', d: 'Run Loop v0 by hand. Do not build Phase 2.', cls: 'sim' };
@@ -23,7 +24,7 @@
           eyebrow: 'Decision first · spec §2',
           title: 'Test.',
           lede: 'Worth testing, not yet worth building. The loop is the product; the platform is where it lives.',
-          meta: `${ui.tag(`${met} of 5 gates met`, r.cls)}${ui.tag(`Reading: ${r.k}`, 'ind')}<a class="btn" href="#model">See the service model</a>`,
+          meta: `${ui.tag(`${met} of 5 gates met`, r.cls)}${ui.tag(`Reading: ${r.k}`, 'ind')}<a class="btn" href="#home">Back to the homepage</a>`,
         })}
         <section class="section">
           ${ui.sectionHead('Gates', 'Five tests before any Phase 2 build', '', 'Proposals. Madhukar Joshi and Kaladhar Bapu set the final numbers. Counts here are illustrative; adjust them to rehearse the reading.')}

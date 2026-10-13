@@ -19,6 +19,10 @@ const logo = (f) => `data:image/png;base64,${readFileSync(join(proto, '..', 'pub
 const scripts = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map((m) => m[1]);
 let js = scripts.map((src) => `/* ${src} */\n${readFileSync(join(proto, src), 'utf8')}`).join('\n');
 js = js.replaceAll('../public/brand/UMO_logo.png', logo('UMO_logo.png')).replaceAll('../public/brand/UXINDIA_logo.png', logo('UXINDIA_logo.png'));
+/* Photos: every 'assets/photos/<name>.jpg' string becomes a data URI, so the published page needs no other files. */
+const photoRe = /assets\/photos\/([\w-]+)\.jpg/g;
+let nPhotos = 0;
+js = js.replace(photoRe, (_, name) => { nPhotos += 1; return `data:image/jpeg;base64,${readFileSync(join(proto, 'assets', 'photos', name + '.jpg')).toString('base64')}`; });
 if (js.includes('</script')) throw new Error('A script contains a closing script tag.');
 
 const head = html.match(/<head>([\s\S]*?)<\/head>/)[1]
@@ -32,4 +36,4 @@ const body = html.match(/<body>([\s\S]*?)<\/body>/)[1]
 const page = `${head.trim()}\n${body}\n<script>\n${js}\n</script>\n`;
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, page);
-console.log(`Wrote ${out} (${(page.length / 1024).toFixed(0)} KB, ${scripts.length} scripts inlined)`);
+console.log(`Wrote ${out} (${(page.length / 1024).toFixed(0)} KB, ${scripts.length} scripts inlined, ${nPhotos} photos inlined)`);

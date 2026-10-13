@@ -152,7 +152,7 @@
       ],
     },
     {
-      id: 'steward', name: 'UMO steward', short: 'Steward', lens: 'UXINDIA Chair', person: 'Nisha Thomas · UMO',
+      id: 'steward', name: 'UMO steward', short: 'Steward', lens: 'UMO team', person: 'Nisha Thomas · UMO',
       goal: 'Host the whole loop between meetings, and prove it works.', access: 'Steward, platform',
       sees: ['The whole loop in aggregate', 'The operations queue', 'Quality flags'],
       can: ['Shape intake and match', 'Approve mentors and assessors', 'Publish the Codex', 'Report at 30 and 90 days'],
@@ -166,7 +166,7 @@
       ],
     },
     {
-      id: 'open', name: 'Open community', short: 'Open', lens: 'Wider Audience', person: 'Dev Malhotra · open member',
+      id: 'open', name: 'Open community', short: 'Open', lens: 'Open to all', person: 'Dev Malhotra · open member',
       goal: 'Learn, find my people, and get a way in.', access: 'Open, free tier',
       sees: ['Lexicon', 'Public showcases', 'Circle events', 'Open-cohort challenges'],
       can: ['Join a Circle', 'Follow capabilities', 'Apply to an open cohort'],
@@ -179,7 +179,7 @@
       ],
     },
     {
-      id: 'admin', name: 'UMO admin (mock)', short: 'Admin', lens: 'UXINDIA Chair', person: 'Admin A or Admin B',
+      id: 'admin', name: 'UMO admin (mock)', short: 'Admin', lens: 'UMO team', person: 'Admin A or Admin B',
       goal: 'Set prices and offers once, and see them reach every sign-up safely.', access: 'Admin, pricing (mock)',
       sees: ['Plans, price history and tiers', 'Coupons and redemptions', 'Every mock sign-up', 'The audit log'],
       can: ['Set a price for any plan (a new version is made)', 'Create coupons by name and percent', 'Approve another admin’s coupon', 'Watch a change reach a second open tab'],
@@ -211,7 +211,7 @@
     { id: 'G2', name: 'Demand', test: 'At least 3 campuses commit a faculty lead and a term slot; 2 would sign a letter of intent in the fee band', by: 'Day 60 · Wed 25 Nov 2026', target: 3, count: 2, unit: 'campuses' },
     { id: 'G3', name: 'Trust', test: 'At least 1 employer states in writing that it would count validated evidence when shortlisting', by: 'Day 90 · Fri 18 Dec 2026', target: 1, count: 0, unit: 'employer' },
     { id: 'G4', name: 'Mentor supply', test: 'At least 10 practitioners give 4 or more hours each, or a mentor-credit model is agreed', by: 'Day 90 · Fri 18 Dec 2026', target: 10, count: 4, unit: 'practitioners' },
-    { id: 'G5', name: 'Custody', test: 'UMO confirmed as steward, the host for the empty UXINDIA Chair lens', by: '30-day sync · Mon 26 Oct 2026', target: 1, count: 0, unit: 'confirmation' },
+    { id: 'G5', name: 'Custody', test: 'UMO confirmed as the steward who hosts the loop between meetings', by: '30-day sync · Mon 26 Oct 2026', target: 1, count: 0, unit: 'confirmation' },
   ];
 
   /* ---------- lifecycle (§2.2) ---------- */
@@ -239,35 +239,35 @@
     { id: 'student', label: 'Student', group: 'College', x: 170, y: 250, role: 'student' },
     { id: 'faculty', label: 'Faculty', group: 'College', x: 110, y: 390, role: 'faculty' },
     { id: 'head', label: 'Institution head', group: 'College', x: 200, y: 530, role: 'head' },
-    { id: 'challenge', label: 'Industry Challenge', group: 'Joint Project', x: 500, y: 215 },
-    { id: 'steward', label: 'UMO steward', group: 'UXINDIA Chair', x: 500, y: 385, role: 'steward', hub: true },
+    { id: 'challenge', label: 'Industry Challenge', group: 'Shared project', x: 500, y: 215 },
+    { id: 'steward', label: 'UMO steward', group: 'UMO team', x: 500, y: 385, role: 'steward', hub: true },
     { id: 'industry', label: 'Industry leader', group: 'Employer', x: 830, y: 255, role: 'industry' },
     { id: 'mentor', label: 'Mentor & assessor', group: 'Employer', x: 880, y: 420, role: 'mentor' },
-    { id: 'open', label: 'Open community', group: 'Wider Audience', x: 560, y: 570, role: 'open' },
-    { id: 'school', label: 'UMO Design School', group: 'Connected', x: 160, y: 70, ext: true, href: 'https://umodesign.school' },
-    { id: 'catalysts', label: 'Mentors & Catalysts', group: 'Connected', x: 400, y: 70, ext: true, href: 'https://umo.design' },
-    { id: 'uxin', label: 'UXIN jobs', group: 'Connected', x: 620, y: 70, ext: true, href: 'https://uxin.co' },
-    { id: 'uxindia', label: 'UXINDIA', group: 'Connected', x: 850, y: 70, ext: true, href: 'https://umo.design' },
+    { id: 'open', label: 'Open community', group: 'Open to all', x: 560, y: 570, role: 'open' },
+    { id: 'school', label: 'UMO Design School', group: 'Partner', x: 160, y: 70, ext: true, href: 'https://umodesign.school' },
+    { id: 'catalysts', label: 'Mentors & Catalysts', group: 'Partner', x: 400, y: 70, ext: true, href: 'https://umo.design' },
+    { id: 'uxin', label: 'UXIN jobs', group: 'Partner', x: 620, y: 70, ext: true, href: 'https://uxin.co' },
+    { id: 'uxindia', label: 'UXINDIA', group: 'Partner', x: 850, y: 70, ext: true, href: 'https://umo.design' },
   ];
 
   /* state per phase: manual · sim · real · none · reserved */
   const Fl = (id, from, to, kind, label, detail, stage, v0, p1, v1, p3) => ({ id, from, to, kind, label, detail, stage, phase: { v0, p1, v1, p3 } });
   const flows = [
     Fl('f1', 'industry', 'steward', 'problem', 'Capability need', 'A five-minute intake: the capability, need-by date, assessor seats and whether data is sensitive.', 'IDENTIFY', 'manual', 'sim', 'real', 'real'),
-    Fl('f2', 'steward', 'challenge', 'problem', 'Shaped, NDA-safe brief', 'The steward merges intakes into themes and shapes a brief. R6: no personal or confidential data, sanitised examples, IP terms chosen.', 'APPLY', 'manual', 'sim', 'real', 'real'),
+    Fl('f2', 'steward', 'challenge', 'problem', 'Shaped, NDA-safe brief', 'The steward merges intakes into themes and shapes a brief: no personal or confidential data, sanitised examples, IP terms chosen.', 'APPLY', 'manual', 'sim', 'real', 'real'),
     Fl('f3', 'challenge', 'student', 'problem', 'Live challenge in a term', 'Matched to a campus term. Teams form, keep a decision log and work against a deliberately ambiguous brief.', 'APPLY', 'manual', 'sim', 'real', 'real'),
     Fl('f4', 'faculty', 'challenge', 'capability', 'Mapped into a module', 'Faculty slot the challenge into an existing module with a credit window. No course rewrite.', 'APPLY', 'manual', 'sim', 'real', 'real'),
     Fl('f5', 'mentor', 'student', 'time', 'Mentor sprints', 'Three 45-minute sessions. Notes stay in a private thread for the team and mentor.', 'MENTOR', 'manual', 'sim', 'real', 'real'),
-    Fl('f6', 'student', 'mentor', 'evidence', 'Submission pack', 'Deliverable, decision log, reflection and an AI-use declaration (R7). Scored blind-first (R1).', 'SOLVE', 'manual', 'sim', 'real', 'real'),
-    Fl('f7', 'mentor', 'steward', 'evidence', 'Locked blind scores', 'Assessors score against the shared rubric. A mentor never scores their own team (R5).', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
-    Fl('f8', 'steward', 'student', 'evidence', 'Verified Passport entry', 'A second approval (R2) turns a proposed entry into a verifiable link anyone can check.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
-    Fl('f9', 'student', 'industry', 'consent', 'Passport, shared by choice', 'Employers see only what a student shares, and sharing can be revoked at any time (R3).', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
+    Fl('f6', 'student', 'mentor', 'evidence', 'Submission pack', 'Deliverable, decision log, reflection and an AI-use declaration. Scored blind-first.', 'SOLVE', 'manual', 'sim', 'real', 'real'),
+    Fl('f7', 'mentor', 'steward', 'evidence', 'Locked blind scores', 'Assessors score against the shared rubric. A mentor never scores their own team.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
+    Fl('f8', 'steward', 'student', 'evidence', 'Verified Passport entry', 'A second approval turns a proposed entry into a verifiable link anyone can check.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
+    Fl('f9', 'student', 'industry', 'consent', 'Passport, shared by choice', 'Employers see only what a student shares, and sharing can be revoked at any time.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
     Fl('f10', 'industry', 'student', 'talent', 'Role or internship', 'Opportunities tied to verified evidence. Every internship carries a learning contract with a mentor and a stipend field.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
     Fl('f11', 'steward', 'industry', 'evidence', 'Problems solved', 'The Impact Ledger counts a challenge as solved when the sponsor’s named owner confirms it.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
-    Fl('f12', 'steward', 'head', 'evidence', 'Outcomes view', 'Validated Passports, challenges completed and faculty hours per cohort. Groups under 5 stay hidden (R4).', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
+    Fl('f12', 'steward', 'head', 'evidence', 'Outcomes view', 'Validated Passports, challenges completed and faculty hours per cohort. Groups under 5 stay hidden.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
     Fl('f13', 'head', 'steward', 'money', 'Campus licence', 'Proposed ₹5–15 lakh a year by institution size. Untested. Mock checkout only in Phase 1.', 'APPLY', 'none', 'sim', 'manual', 'real'),
     Fl('f14', 'industry', 'steward', 'money', 'Membership & sponsorship', 'Seats for teams and per-challenge sponsorship. Demo prices; no industry-side price exists yet.', 'APPLY', 'none', 'sim', 'manual', 'real'),
-    Fl('f15', 'industry', 'mentor', 'time', 'Assessor seats', 'Companies send practitioners to assessment days. Free seats; they feed the supply gate (G4).', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
+    Fl('f15', 'industry', 'mentor', 'time', 'Assessor seats', 'Companies send practitioners to assessment days. Free seats; they feed the supply gate.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
     Fl('f16', 'steward', 'mentor', 'recognition', 'Hours and distinctions', 'Every mentor hour is counted. Distinctions answer “nobody volunteers”. Honoraria or credit is an open decision.', 'MENTOR', 'manual', 'sim', 'real', 'real'),
     Fl('f17', 'mentor', 'faculty', 'capability', 'Practitioner sessions', 'Residencies and co-mentoring keep faculty in live industry contact.', 'LEARN', 'manual', 'sim', 'real', 'real'),
     Fl('f18', 'steward', 'open', 'capability', 'Lexicon, Circles, open cohort', 'Plain definitions, local and online Circles, and a way into an open-cohort challenge.', 'CONNECT', 'none', 'sim', 'none', 'real'),
@@ -282,40 +282,40 @@
   const stays = {
     student: { gives: 'Work, a decision log, consent to share', gets: 'Real problems, mentors, a Passport employers trust, a way to a role', why: 'Evidence beats a transcript when 40% are not placed.', risk: 'If challenges are thin, the Passport means little.', quote: '“Never done full projects, requires mentoring.”' },
     faculty: { gives: 'A module slot, co-mentoring, rubric input', gets: 'Live industry input without a course rewrite, workload credit', why: 'The kit fits the existing curriculum and credit window.', risk: 'Without workload credit, faculty time is invisible.', quote: '“We all do FDPs… and the gap still remains.”' },
-    head: { gives: 'The licence fee, a faculty lead, a term slot', gets: 'Outcomes for accreditation and placement, aggregate evidence', why: 'Outcomes are measurable and defensible against the fee band.', risk: 'The ₹5–15 lakh band is untested (G2).', quote: '“Why is 40% not placed?”' },
-    industry: { gives: 'Real problems, assessors, sponsorship', gets: 'A capability built, verified candidates, problems solved', why: 'Pooled sponsorship and early talent access answer “why train a competitor’s hire?”', risk: 'Willingness to pay is unproven (G1, G3).', quote: '“Low company budget for training.”' },
-    mentor: { gives: 'Hours, feedback, blind scores', gets: 'Recognition, distinctions, a credit model', why: 'Time-boxed sprints fit a calendar; every hour is counted.', risk: 'Good practitioners cost money (G4).', quote: '“Nobody volunteers; good practitioners cost money.”' },
-    steward: { gives: 'Shaping, matching, integrity, reports', gets: 'A mandate, fees that fund the loop, proof it works', why: 'The UXINDIA Chair lens held no cards. Someone has to host the loop.', risk: 'Without custody (G5), nothing runs between meetings.', quote: 'UXINDIA Chair and Wider Audience held no cards.' },
-    open: { gives: 'Attention, participation, consent', gets: 'Plain definitions, Circles, an on-ramp into a cohort', why: 'Free to start; Awareness is the row that did not travel.', risk: 'Without an owner, the open tier stays empty.', quote: 'Awareness did not travel to the Venn.' },
-    challenge: { gives: 'A real, scoped problem', gets: 'Solutions, a problems-solved record', why: 'It is the joint project both lenses own.', risk: 'NDAs block real cases unless shaped (R6).', quote: '“Industry doesn’t give students proper projects.”' },
-    school: { gives: 'Courses, certification, scholarships', gets: 'Learners routed from LEAD Paths', why: 'Connect, do not duplicate.', risk: 'Open decision: who sells LEAD Paths (A17 #1).', quote: 'UMO Design School · “EXCEL”' },
+    head: { gives: 'The licence fee, a faculty lead, a term slot', gets: 'Outcomes for accreditation and placement, aggregate evidence', why: 'Outcomes are measurable and defensible against the fee band.', risk: 'The ₹5–15 lakh band is untested.', quote: '“Why is 40% not placed?”' },
+    industry: { gives: 'Real problems, assessors, sponsorship', gets: 'A capability built, verified candidates, problems solved', why: 'Pooled sponsorship and early talent access answer “why train a competitor’s hire?”', risk: 'Willingness to pay is unproven.', quote: '“Low company budget for training.”' },
+    mentor: { gives: 'Hours, feedback, blind scores', gets: 'Recognition, distinctions, a credit model', why: 'Time-boxed sprints fit a calendar; every hour is counted.', risk: 'Good practitioners cost money.', quote: '“Nobody volunteers; good practitioners cost money.”' },
+    steward: { gives: 'Shaping, matching, integrity, reports', gets: 'A mandate, fees that fund the loop, proof it works', why: 'Nobody had claimed the hosting role. Someone has to host the loop.', risk: 'Until UMO confirms it will host, nothing runs between meetings.', quote: 'In the room’s exercise, the hosting role was left empty.' },
+    open: { gives: 'Attention, participation, consent', gets: 'Plain definitions, Circles, an on-ramp into a cohort', why: 'Free to start. Career awareness was left out of the room’s plan, and belongs here.', risk: 'Without an owner, the open tier stays empty.', quote: 'Career awareness was named in the room, then not carried forward.' },
+    challenge: { gives: 'A real, scoped problem', gets: 'Solutions, a problems-solved record', why: 'It is the joint project both lenses own.', risk: 'NDAs block real cases unless shaped.', quote: '“Industry doesn’t give students proper projects.”' },
+    school: { gives: 'Courses, certification, scholarships', gets: 'Learners routed from LEAD Paths', why: 'Connect, do not duplicate.', risk: 'Open question: who sells LEAD Paths.', quote: 'UMO Design School · “EXCEL”' },
     catalysts: { gives: 'Experienced mentors', gets: 'A structured way to give time', why: 'The pool already exists.', risk: 'Consent per person.', quote: 'UMO Mentors & Catalysts' },
     uxin: { gives: 'General design jobs', gets: 'Traffic from the open tier', why: 'LEAD keeps only evidence-backed roles.', risk: 'Overlap if the boards blur.', quote: 'uxin.co' },
-    uxindia: { gives: 'A stage and an audience', gets: 'Showcase content from the loop', why: 'Design Pitch fits CONNECT.', risk: 'Reserved until a bundle decision (§19 #9).', quote: 'UXINDIA · 23–27 Sept, Bengaluru' },
+    uxindia: { gives: 'A stage and an audience', gets: 'Showcase content from the loop', why: 'Design Pitch fits CONNECT.', risk: 'Reserved until UMO decides.', quote: 'UXINDIA · 23–27 Sept, Bengaluru' },
   };
 
   /* ---------- workflows (§7) ---------- */
   const workflows = [
-    { id: 'W1', name: 'Demand to Challenge', seq: ['industry', 'steward', 'faculty'], result: 'Intake submitted → published challenge matched to a campus term' },
-    { id: 'W2', name: 'Learn, Apply, Mentor', seq: ['student', 'mentor', 'faculty'], result: 'Team formed → three mentor sprints complete' },
-    { id: 'W3', name: 'Solve to Passport', seq: ['student', 'mentor', 'steward'], result: 'Submission → blind scoring → second approval → Verified Passport entry' },
-    { id: 'W4', name: 'Passport to Opportunity', seq: ['student', 'industry', 'head'], result: 'Student shares → employer shortlists → outcome recorded' },
-    { id: 'W5', name: 'Faculty uplift', seq: ['faculty', 'mentor', 'head'], result: 'Faculty co-mentor → hours and credit recognised' },
-    { id: 'W6', name: 'Measure and re-aim', seq: ['steward', 'head', 'industry'], result: 'Impact Ledger published → feeds the Demand Map' },
-    { id: 'W7', name: 'Open on-ramp', seq: ['open', 'steward', 'student'], result: 'Open learner completes a path → invited into an open cohort' },
+    { id: 'W1', name: 'A company brings a problem', seq: ['industry', 'steward', 'faculty'], result: 'A company’s request becomes a live challenge in a campus term' },
+    { id: 'W2', name: 'A team learns, works and gets coached', seq: ['student', 'mentor', 'faculty'], result: 'A team forms and finishes three coaching sessions' },
+    { id: 'W3', name: 'Work becomes a verified Passport', seq: ['student', 'mentor', 'steward'], result: 'Submitted work is scored blind, approved twice, and turned into a Passport entry' },
+    { id: 'W4', name: 'A Passport leads to a job', seq: ['student', 'industry', 'head'], result: 'A student shares evidence, an employer shortlists, the outcome is recorded' },
+    { id: 'W5', name: 'Faculty grow with industry', seq: ['faculty', 'mentor', 'head'], result: 'Faculty co-mentor on a live challenge and their hours and credit are recognised' },
+    { id: 'W6', name: 'Results shape what comes next', seq: ['steward', 'head', 'industry'], result: 'Published results show what employers still need' },
+    { id: 'W7', name: 'Open learners step into a cohort', seq: ['open', 'steward', 'student'], result: 'A free learner finishes a path and is invited into an open challenge' },
   ];
 
   /* ---------- IxDF mapping (§4.1) ---------- */
   const ixdf = [
-    ['Open library of articles and videos', 'LEAD Lexicon', 'Replicate', 'Answers “what is core?”, with a demand signal per definition'],
+    ['Open library of articles and videos', 'LEAD Lexicon', 'Replicate', 'Answers “what is core?”, with how many employers asked for each skill'],
     ['Self-paced courses with certificates', 'LEAD Paths', 'Adapt', 'Weighted to practice with feedback'],
-    ['Verifiable certificates and Distinctions', 'Skills Passport', 'Adapt', 'Evidence is validated work, not course completion'],
-    ['Master Classes with industry leaders', 'Practitioner Sessions', 'Replicate', 'Feeds faculty development'],
-    ['Community and Local Groups', 'Chapters + Circles on one calendar', 'Adapt', 'The calendar is the room’s own idea'],
-    ['Company Memberships', 'Industry Membership', 'Replicate', 'Pooled funding and early talent access'],
+    ['Verifiable certificates and distinctions', 'Skills Passport', 'Adapt', 'Evidence is validated work, not course completion'],
+    ['Master classes with industry leaders', 'Practitioner Sessions', 'Replicate', 'Feeds faculty development'],
+    ['Community and local groups', 'Chapters and Circles on one calendar', 'Adapt', 'The calendar is the room’s own idea'],
+    ['Memberships for companies', 'Industry Membership', 'Replicate', 'Pooled funding and early access to talent'],
     ['Toolkits for educators', 'Faculty Toolkit', 'Adapt', 'Answers curriculum rigidity'],
-    ['The Educational Codex', 'LEAD Codex', 'Adapt', 'Trust and Compliance, Job Ethics, Economic Constraint'],
-    ['No equivalent', 'Challenges · Sprints · Assessment Days · Opportunity Board · Impact Ledger', 'New', 'Where the room’s evidence points'],
+    ['A published standard for certificates', 'LEAD Codex', 'Adapt', 'Trust and compliance, job ethics, economic constraint'],
+    ['Nothing like this', 'Challenges, mentor sprints, assessment days, the opportunity board and the Impact Ledger', 'New', 'Where the room’s evidence points'],
   ];
 
   /* ---------- demo mode, run by persona ---------- */
@@ -335,5 +335,98 @@
     { route: 'join-college', stage: 'Sign-up', say: 'Open the college sign-up in a second tab, enter a code and watch the price drop.' },
   ];
 
-  Object.assign(LEAD, { content: { stages, features, featureById, roles, roleById, evidence, gates, phases, valueKinds, actors, flows, stays, workflows, ixdf, demoByRole, demoOrder } });
+
+  /* ---------- plain-language layer for the public homepage ---------- */
+  const plainPhase = {
+    v0: { label: 'By hand today', when: 'Now', blurb: 'People and spreadsheets run the loop: one shared calendar, an intake form, a brief template, a Passport sheet and a mentor group. No software.' },
+    p1: { label: 'In this prototype', when: 'Ready for the 26 Oct sync', blurb: 'A clickable version with made-up people. Every role can walk its path. Prices are mock, and nothing is saved or charged.' },
+    v1: { label: 'First live pilots', when: 'After most checks pass', blurb: 'Real accounts and one real loop for a few campuses and companies. Fees are invoiced by hand.' },
+    p3: { label: 'Full platform', when: 'After the pilots prove the loop', blurb: 'Memberships, the open tier, Circles, a skills index, and scale.' },
+  };
+  const plainGate = { G1: 'Companies bring problems', G2: 'Campuses commit', G3: 'Employers value the evidence', G4: 'Enough mentors', G5: 'UMO hosts the loop' };
+
+  const S = (stage, when, head, body, route, cta, extra) => Object.assign({ stage, when, head, body, route, cta }, extra || {});
+  const story = {
+    student: [
+      S('IDENTIFY', 'Week 1', 'See what employers want.', 'Companies tell LEAD which skills they need this term. You see them in plain words and pick the ones you want to build.', 'demand', 'See what is asked', { photo: 'story-identify' }),
+      S('LEARN', 'Weeks 1–3', 'Learn only what the project needs.', 'Short modules tied to a live project. The basics stay; tools you will not use are left out. Full courses live at UMO Design School.', 'lexicon', 'Open the Lexicon'),
+      S('APPLY', 'Weeks 3–8', 'Work on a real company problem.', 'Join a team of four. The brief is real and a little vague on purpose, so you decide what to solve. You keep a log of what you chose and why.', 'team', 'Open my team', { photo: 'story-apply' }),
+      S('MENTOR', 'Weeks 4–8', 'Get coached by someone who does this for a living.', 'Three 45-minute sessions with a practitioner. Feedback stays private to your team and your mentor.', 'sprints', 'Book a session', { photo: 'story-mentor' }),
+      S('SOLVE', 'Week 8', 'Hand in your work.', 'Send your deliverable, your decision log, a short reflection and a note on how you used AI.', 'submit', 'Open the submission'),
+      S('VALIDATE', 'Week 9', 'Get scored by professionals.', 'Assessors score your work against a rubric you saw in advance. They do not see your name or college until they have locked their scores.', 'passports', 'See my Passport', { photo: 'story-validate' }),
+      S('CONNECT', 'Ongoing', 'Meet the people.', 'Industry circles, guest sessions and assessment days sit on one shared calendar. Come to any that are public.', 'calendar', 'See the calendar', { feats: ['F-CO-01', 'F-CO-04'], handoff: ['steward'], sample: { title: 'Calendar · next 30 days', rows: [['Industry circle', 'Wed'], ['Assessment day', '14 Nov'], ['Guest session', '21 Nov']] } }),
+      S('GET OPPORTUNITY', 'Month 3 on', 'Apply with proof.', 'Share your Passport with the employers you choose. Roles and internships list the evidence they want, and every internship has a mentor and a learning plan.', 'opportunities', 'See opportunities'),
+    ],
+    faculty: [
+      S('IDENTIFY', 'Before term', 'See what your syllabus leaves out.', 'Compare a module with what employers asked for this term. You see the gaps and the challenges that would fill them.', 'challenges', 'Open the challenges'),
+      S('LEARN', 'Term start', 'Bring a practitioner into your room.', 'A design director co-teaches in week one. Your hours count as faculty development.', 'calendar', 'See sessions'),
+      S('APPLY', 'Weeks 2–8', 'Slot a live challenge into your module.', 'Map the brief to a module and a credit window. You do not rewrite your course.', 'challenges', 'Map a challenge'),
+      S('MENTOR', 'Weeks 4–8', 'Sit in on mentor sessions.', 'Co-mentor with the practitioner, see what your students are told, and share notes with the team.', 'team', 'Open a team'),
+      S('VALIDATE', 'Week 9', 'Help write the rubric.', 'Faculty and assessors set the scoring rubric together, so marks mean the same to both sides.', 'assess', 'See the rubric'),
+      S('CONNECT', 'Ongoing', 'Meet industry on one calendar.', 'Add campus events, join industry circles and see assessment days in one place.', 'calendar', 'Open the calendar'),
+    ],
+    head: [
+      S('IDENTIFY', 'Planning', 'See where demand and curriculum differ.', 'A gap report across your programmes shows which skills employers want that your courses do not cover yet.', 'demand', 'See the demand map'),
+      S('APPLY', 'Term setup', 'Join LEAD for your institution.', 'Pick a licence by number of students, set the term slot and name a faculty lead. Prices are under Ways to join.', 'join-college', 'Start a campus licence'),
+      S('VALIDATE', 'End of term', 'See outcomes you can defend.', 'How many Passports were validated, how many challenges finished, how many faculty hours. No student names; groups under five stay hidden.', 'impact', 'See outcomes'),
+      S('GET OPPORTUNITY', 'Placement season', 'Show readiness to employers.', 'Share verified readiness with your placement cell: shortlists, interviews and offers.', 'impact', 'See readiness'),
+    ],
+    industry: [
+      S('IDENTIFY', 'Day 1', 'Tell us what capability you need.', 'A five-minute intake: the capability, the date you need it by, and how many assessors you can offer.', 'demand', 'State a need'),
+      S('APPLY', 'Weeks 1–3', 'Bring one real problem.', 'The steward shapes your brief so it is safe to share: no confidential data, sanitised examples, clear IP terms. Share the cost with other companies if you like.', 'challenges', 'Open the sponsor desk'),
+      S('VALIDATE', 'Week 9', 'Score the work, blind.', 'Send an assessor to an assessment day. Names stay hidden until scores are locked.', 'assess', 'Open scoring'),
+      S('CONNECT', 'Ongoing', 'Meet campuses.', 'Industry circles put your team in the room with faculty from several colleges.', 'calendar', 'See circles'),
+      S('GET OPPORTUNITY', 'Month 3 on', 'Hire from evidence.', 'See shortlists with verified work attached, and a count of problems solved.', 'opportunities', 'See the shortlist'),
+    ],
+    mentor: [
+      S('LEARN', 'Any time', 'Give a talk.', 'Offer a 45-minute session to several campuses at once.', 'calendar', 'Offer a session'),
+      S('MENTOR', 'Weeks 4–8', 'Coach a team.', 'Three short sessions per team. Every hour is logged and counted.', 'sprints', 'Open my teams'),
+      S('VALIDATE', 'Week 9', 'Score blind.', 'Score against the shared rubric. You never score a team you mentored.', 'assess', 'Start scoring'),
+      S('CONNECT', 'Ongoing', 'Be recognised.', 'Hours and assessment days earn distinctions you can share.', 'impact', 'See my hours'),
+    ],
+    open: [
+      S('IDENTIFY', 'Day 1', 'Learn what the words mean.', 'The Lexicon explains design skills in plain language and shows how many employers ask for each.', 'lexicon', 'Open the Lexicon'),
+      S('LEARN', 'Weeks 1–4', 'Start a free path.', 'Short modules at your own pace. When you are ready, enrol on a path tied to a live challenge.', 'join-path', 'See paths'),
+      S('CONNECT', 'Monthly', 'Find a circle near you.', 'Meet people in Bengaluru or online.', 'calendar', 'Find a circle'),
+      S('GET OPPORTUNITY', 'Month 2 on', 'Take the open challenge.', 'Apply to an open-cohort challenge and see what a real brief feels like.', 'opportunities', 'See the open board'),
+    ],
+  };
+  const storyTabs = [
+    { role: 'student', label: 'Student', lede: 'From your first week to your first role. Every step opens a real screen.' },
+    { role: 'faculty', label: 'Faculty', lede: 'Teach with live industry input, without rewriting your course.' },
+    { role: 'head', label: 'College', lede: 'Show outcomes you can defend, without adding cost you cannot.' },
+    { role: 'industry', label: 'Industry', lede: 'Get a capability built, and find the people who can show it.' },
+    { role: 'mentor', label: 'Mentor', lede: 'Give back in a way that fits your calendar, and is recognised.' },
+    { role: 'open', label: 'Open learner', lede: 'Learn, find your people and get a way in. Free.' },
+  ];
+
+  const doors = [
+    { role: 'student', name: 'Student', photo: 'door-student', line: 'Work on real briefs and leave with proof.', can: ['Take on a live company challenge', 'Get coached by a practitioner', 'Earn a Passport employers can check'], plan: 'PATH_FRAMING', price: (f) => `Free to start · paths from ${f}` },
+    { role: 'faculty', name: 'Faculty', photo: 'door-faculty', line: 'Teach with live briefs, without rewriting your course.', can: ['Slot a challenge into a module', 'Co-teach with a practitioner', 'Score with a shared rubric'], plan: null, price: () => 'Through your campus' },
+    { role: 'head', name: 'College', photo: 'door-college', line: 'Show placement outcomes you can defend.', can: ['Enrol cohorts by term', 'See validated Passports in aggregate', 'Report outcomes to your board'], plan: 'CAMPUS_STANDARD', price: (f) => `From ${f} a year` },
+    { role: 'industry', name: 'Industry', photo: 'door-industry', line: 'Get a capability built and find the people who show it.', can: ['Bring a real, scoped problem', 'Send assessors to score work', 'See shortlists with evidence attached'], plan: 'INDUSTRY_TEAM', price: (f) => `From ${f} a seat a year` },
+    { role: 'mentor', name: 'Mentor', photo: 'door-mentor', line: 'Give back in a way that fits your calendar.', can: ['Coach a team in three short sessions', 'Score blind against a shared rubric', 'Earn recognition for every hour'], plan: null, price: () => 'Free · recognised' },
+    { role: 'open', name: 'Just curious', photo: 'door-open', line: 'Find out what design work is really like.', can: ['Read the Lexicon', 'Join a circle near you', 'Try an open challenge'], plan: null, price: () => 'Free' },
+  ];
+  const heroPromises = [
+    { label: 'Teach with live briefs', role: 'faculty' },
+    { label: 'Show outcomes you can defend', role: 'head' },
+    { label: 'Find talent with proof', role: 'industry' },
+    { label: 'Give back and be recognised', role: 'mentor' },
+    { label: 'Just curious? Start free', role: 'open' },
+  ];
+
+  const faq = [
+    ['Is it free for students?', 'You can start free. An open account gives you the Lexicon, circles and open challenges. Enrolling on a Path has a price. Every price on this page is mock and not an offer.'],
+    ['Does my college have to be on LEAD?', 'No. Join free first. Linking your campus unlocks the challenges that run inside your college’s term.'],
+    ['What is a Passport?', 'A record of work you did on a real challenge, scored by professionals, with a link anyone can check. You decide who sees it, and you can stop sharing at any time.'],
+    ['Who owns the work I do on a company’s problem?', 'The terms are being set with counsel. You will see them before you start a challenge.'],
+    ['Will assessors know who I am?', 'Not while they score. Assessors see names and colleges only after they lock their scores.'],
+    ['What do the Lexicon, Paths and the Codex mean?', 'The Lexicon is a plain-language list of design skills. Paths are short modules tied to a live challenge. The Codex is the rulebook for consent, IP, ethics and conflicts.'],
+    ['What does it cost a college or a company?', 'A campus licence is priced by number of students, a company membership by seats, and a sponsored challenge by challenge. All prices here are mock.'],
+    ['Who runs LEAD?', 'UMO Design Foundation, a non-profit. A UMO steward hosts the loop: they shape briefs, match campuses and give the second approval on Passports.'],
+    ['Is this a real platform?', 'This is a working prototype with made-up people and data. Nothing is saved or charged.'],
+  ];
+
+  Object.assign(LEAD, { content: { stages, features, featureById, roles, roleById, evidence, gates, phases, valueKinds, actors, flows, stays, workflows, ixdf, demoByRole, demoOrder, plainPhase, plainGate, story, storyTabs, doors, heroPromises, faq } });
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -14,6 +14,8 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - Prices, plans and coupons are data in the database, never hard-coded. Sign-up records store enumerated keys (addendum A4).
 - Mock pricing only. Every priced screen says "Mock pricing. Not an offer." Nothing is charged.
 - Look and feel priority: LEAD identity, then umo.design and umodesign.school, then ixdf.org patterns. Copy IxDF patterns only, never its logo, text, images or colours. Link to UMO Design School, UMO Mentors & Catalysts and UXIN; do not duplicate them.
+- Public pages (the homepage and the join sheet) use plain words a first-year student understands. No rule codes (R1…), no spec terms (lifecycle, gates, retention, lineage, blueprint, value exchange), no internal lens names. Keep each product name (Passport, Lexicon, Paths, Codex) and explain it where it first appears.
+- People photos are illustrative stock. Keep the checker treatment, the caption “Illustrative · not the person”, and the photographer credit in the footer. Never name or imply a real person.
 - Every state change writes an audit entry.
 - Small steps: finish one milestone, run tests, show the result, then stop and ask.
 
