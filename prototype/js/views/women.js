@@ -25,7 +25,7 @@
     return `<div class="card women-tally" id="women-tally">
       <span class="eyebrow">Seats funded so far</span>
       <div class="row" style="align-items:baseline;gap:10px"><span class="pxnum" style="font-size:clamp(36px,6vw,56px)" id="women-seats">${nf(t.seats)}</span><span class="muted">of ${nf(t.target)}</span></div>
-      <p class="women-words ink" id="women-words"><b>${esc(ui.numberWords(t.seats))}</b> women have a funded seat in design.</p>
+      <p class="women-words ink" id="women-words"><b>${esc(ui.numberWords(t.seats).replace(/^./, (c) => c.toUpperCase()))}</b> women have a funded seat in design.</p>
       <p class="women-cheer">${esc(CHEER)}</p>
       ${ui.meter(Math.max(1, Math.round(t.pct)), { px: true })}
       <div class="src-bar" id="women-sources" role="img" aria-label="Where the seats come from">${SOURCES.map((s) => `<i class="src src-${s.id}" style="flex:${Math.max(by[s.id], 1)}" title="${esc(s.label)}: ${nf(by[s.id])}"></i>`).join('')}</div>

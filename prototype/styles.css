@@ -812,5 +812,5 @@ fieldset.q legend { padding: 0 6px; }
 .pkg .table-wrap { margin: 4px 0; }
 
 .women-words { font-size: 16px; line-height: 1.35; margin: 2px 0 0; text-transform: none; }
-.women-words b { font-family: var(--f-display); text-transform: capitalize; }
+.women-words b { font-family: var(--f-display); }
 .women-cheer { color: var(--body); font-size: 14.5px; line-height: 1.45; margin: 0; }
