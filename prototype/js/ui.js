@@ -24,6 +24,18 @@
     return fmtDate(ms);
   }
 
+  /* 25654 → "twenty-five thousand six hundred and fifty-four" */
+  const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  function numberWords(n) {
+    n = Math.floor(Number(n) || 0);
+    if (n < 20) return ONES[n];
+    if (n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '');
+    if (n < 1000) return ONES[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' and ' + numberWords(n % 100) : '');
+    if (n < 1000000) return numberWords(Math.floor(n / 1000)) + ' thousand' + (n % 1000 ? (n % 1000 < 100 ? ' and ' : ' ') + numberWords(n % 1000) : '');
+    return numberWords(Math.floor(n / 1000000)) + ' million' + (n % 1000000 ? ' ' + numberWords(n % 1000000) : '');
+  }
+
   const S = () => LEAD.store;
   const nameOf = (id) => { const u = S().user(id); return u ? u.name : id; };
   const orgName = (id) => { const o = S().org(id); return o ? o.name : id; };
@@ -140,7 +152,7 @@
     setTimeout(() => t.remove(), 3600);
   }
 
-  LEAD.ui = { esc, attr, fmtDate, fmtDay, fmtTime, ago, nameOf, orgName, capName, roleName, status, tag, simTag, mockTag, mode, hero, sectionHead, simFrame, kv, kpis, loopStrip, glyph, lvlDots, meter, availability, guard, toast, inr: P.formatINR };
+  LEAD.ui = { numberWords, esc, attr, fmtDate, fmtDay, fmtTime, ago, nameOf, orgName, capName, roleName, status, tag, simTag, mockTag, mode, hero, sectionHead, simFrame, kv, kpis, loopStrip, glyph, lvlDots, meter, availability, guard, toast, inr: P.formatINR };
   LEAD.views = LEAD.views || {};
   LEAD.act = LEAD.act || {};
   LEAD.forms = LEAD.forms || {};

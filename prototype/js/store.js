@@ -17,7 +17,11 @@
       const raw = root.localStorage && root.localStorage.getItem(KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        if (p && Array.isArray(p.plans) && Array.isArray(p.coupons)) return p;
+        if (p && Array.isArray(p.plans) && Array.isArray(p.coupons)) {
+          p.settings = Object.assign({}, LEAD.pricingSeed.build().settings, p.settings); // older storage must never zero the count
+          if (!p.settings.womenBase) p.settings.womenBase = LEAD.pricingSeed.build().settings.womenBase;
+          return p;
+        }
       }
     } catch (e) { /* storage blocked: stay in memory */ }
     return LEAD.pricingSeed.build();

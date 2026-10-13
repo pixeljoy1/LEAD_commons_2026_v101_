@@ -146,8 +146,8 @@ ul.px-list.yes li::before { background: var(--pos); }
   border-bottom: 1px solid var(--line);
 }
 .head-row { display: flex; align-items: center; gap: 14px; min-height: 68px; }
-.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; flex: none; }
-.logo-tile { background: var(--logo-tile); border-radius: 10px; padding: 6px 10px; display: grid; place-items: center; }
+.brand { display: flex; align-items: center; gap: 8px; text-decoration: none; flex: none; }
+.logo-tile { background: var(--logo-tile); border-radius: 10px; padding: 6px 8px; display: grid; place-items: center; }
 .logo-tile img { height: 38px; width: auto; }
 .brand-div { width: 1px; height: 30px; background: var(--line); flex: none; }
 .brand-lead { font: 700 26px/1 var(--f-display); color: var(--ink); letter-spacing: -.02em; white-space: nowrap; }
@@ -248,7 +248,8 @@ button.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); bor
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px;
   font: 600 14.5px/1 var(--f-display); letter-spacing: .01em; border-radius: 10px; border: 1px solid var(--line);
-  background: var(--panel); color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap;
+  background: var(--panel); color: var(--ink); cursor: pointer; text-decoration: none; white-space: normal; text-align: center;
+  max-width: 240px; align-self: flex-start; justify-self: start;
 }
 .btn:hover { border-color: var(--muted); color: var(--ink); }
 .btn.primary { background: var(--indigo); border-color: var(--indigo); color: var(--on-accent); }
@@ -809,3 +810,7 @@ fieldset.q legend { padding: 0 6px; }
 .job-panel { gap: 12px; min-width: 0; }
 .job-panel .item { min-width: 0; overflow-wrap: anywhere; }
 .pkg .table-wrap { margin: 4px 0; }
+
+.women-words { font-size: 16px; line-height: 1.35; margin: 2px 0 0; text-transform: none; }
+.women-words b { font-family: var(--f-display); text-transform: capitalize; }
+.women-cheer { color: var(--body); font-size: 14.5px; line-height: 1.45; margin: 0; }

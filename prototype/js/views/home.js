@@ -15,7 +15,7 @@
     const p = LEAD.photos.bySlot[slot];
     if (!p) return '';
     const opts = o || {};
-    return `<figure class="ph ${opts.cls || ''}"><img src="${p.src}" alt="${esc(p.alt)}" decoding="async" ${opts.eager ? '' : 'loading="lazy"'}><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative · not the person</figcaption></figure>`;
+    return `<figure class="ph ${opts.cls || ''}"><img src="${p.src}" alt="${esc(p.alt)}" decoding="async" ${opts.eager ? '' : 'loading="lazy"'}><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative purposes only</figcaption></figure>`;
   }
 
   function heading(title, sub, right) {
@@ -50,7 +50,7 @@
     const t = store.womenTally();
     return `<div class="leaf-main"><span class="eyebrow">An initiative of UMO Design Foundation</span><h2 class="leaf-h">${esc(l.head)}</h2>
         <p class="lede">${esc(l.line)}</p>
-        <div class="stack" style="gap:6px"><span class="tnum ink"><b>${t.seats.toLocaleString('en-IN')}</b> of ${t.target.toLocaleString('en-IN')} seats funded</span>${ui.meter(Math.max(1, Math.round(t.pct)), { px: true })}<span class="muted tiny">Demo count.</span></div>
+        <div class="stack" style="gap:6px"><span class="tnum ink"><b>${t.seats.toLocaleString('en-IN')}</b> of ${t.target.toLocaleString('en-IN')} seats funded</span><span class="women-words ink"><b>${esc(ui.numberWords(t.seats))}</b> women have a funded seat in design.</span><span class="women-cheer">Each seat is one more woman with a new way forward. Add a seat, give an hour or sponsor a cohort, and the next one starts with you.</span>${ui.meter(Math.max(1, Math.round(t.pct)), { px: true })}<span class="muted tiny">Demo count.</span></div>
         <div class="btn-row"><button class="btn primary big" data-go="women">${esc(l.second[0])}</button><button class="btn big" data-act="path-role" data-role="${l.primary[1]}">${esc(l.primary[0])}</button></div></div>
       <div class="leaf-aside">${photo(l.photo, { cls: 'hero-ph' })}</div>`;
   }

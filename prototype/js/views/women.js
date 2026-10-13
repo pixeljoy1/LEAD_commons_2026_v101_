@@ -7,6 +7,7 @@
 
   const tally = () => store.womenTally();
   const nf = (n) => n.toLocaleString('en-IN');
+  const CHEER = 'Each seat is one more woman with a new way forward. Add a seat, give an hour or sponsor a cohort, and the next one starts with you.';
 
   /* The five places seats come from. Order is the order on the bar. */
   const SOURCES = [
@@ -24,6 +25,8 @@
     return `<div class="card women-tally" id="women-tally">
       <span class="eyebrow">Seats funded so far</span>
       <div class="row" style="align-items:baseline;gap:10px"><span class="pxnum" style="font-size:clamp(36px,6vw,56px)" id="women-seats">${nf(t.seats)}</span><span class="muted">of ${nf(t.target)}</span></div>
+      <p class="women-words ink" id="women-words"><b>${esc(ui.numberWords(t.seats))}</b> women have a funded seat in design.</p>
+      <p class="women-cheer">${esc(CHEER)}</p>
       ${ui.meter(Math.max(1, Math.round(t.pct)), { px: true })}
       <div class="src-bar" id="women-sources" role="img" aria-label="Where the seats come from">${SOURCES.map((s) => `<i class="src src-${s.id}" style="flex:${Math.max(by[s.id], 1)}" title="${esc(s.label)}: ${nf(by[s.id])}"></i>`).join('')}</div>
       <ul class="src-legend">${SOURCES.map((s) => `<li><span class="src-dot src-${s.id}"></span><span>${esc(s.label)}</span><b class="tnum" data-src="${s.id}">${nf(by[s.id])}</b></li>`).join('')}</ul>
@@ -59,7 +62,7 @@
         btns: ['<a class="btn ghost" href="#join">See the plans</a>'] },
     ];
     cards.sort((a, b) => (b.role === me && me ? 1 : 0) - (a.role === me && me ? 1 : 0));
-    const ph = (slot) => { const p = LEAD.photos.bySlot[slot]; return p ? `<figure class="ph door-ph"><img src="${p.src}" alt="${esc(p.alt)}" decoding="async" loading="lazy"><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative · not the person</figcaption></figure>` : ''; };
+    const ph = (slot) => { const p = LEAD.photos.bySlot[slot]; return p ? `<figure class="ph door-ph"><img src="${p.src}" alt="${esc(p.alt)}" decoding="async" loading="lazy"><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative purposes only</figcaption></figure>` : ''; };
     return cards.map((c) => `<article class="card tight women-role ${c.role && c.role === me ? 'is-you' : ''}" data-role="${c.role || 'all'}">${c.slot ? ph(c.slot) : ''}
       <div class="row between"><span class="eyebrow">${esc(c.name)}</span>${c.role && c.role === me ? '<span class="tag info">You</span>' : ''}</div>
       <div class="stack" style="gap:2px"><b class="pxnum" style="font-size:30px">${esc(c.total)}</b><span class="muted tiny">${esc(c.what)}</span></div>
@@ -85,7 +88,7 @@
             <h1 id="women-title">1 Million Women in Design.</h1>
             <p class="lede">Design is stronger when more women shape it. Every seat funded puts one more woman into learning design. LEAD adds to the count from five places, and every role has a way to add to it.</p>
             <div class="btn-row">${signed ? '<button class="btn primary big" data-act="scroll" data-id="women-roles">What I can do</button>' : '<button class="btn primary big" data-act="sheet" data-role="student">Join LEAD</button><button class="btn big" data-act="scroll" data-id="women-roles">How each role adds seats</button>'}</div></div>
-          <div class="hero-aside">${photo ? `<figure class="ph hero-ph"><img src="${photo.src}" alt="${esc(photo.alt)}" decoding="async"><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative · not the person</figcaption></figure>` : ''}</div>
+          <div class="hero-aside">${photo ? `<figure class="ph hero-ph"><img src="${photo.src}" alt="${esc(photo.alt)}" decoding="async"><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative purposes only</figcaption></figure>` : ''}</div>
         </section>
         <section class="section" aria-label="Tally">${tallyCard()}</section>
         <section class="section" aria-label="What counts as a seat">

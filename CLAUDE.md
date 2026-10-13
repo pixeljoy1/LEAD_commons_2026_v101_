@@ -8,7 +8,7 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - Do not build Phase 2 or Phase 3 features (section 2, and any feature marked P1 or P2 in section 6) unless the user says the gates have passed.
 - UMO is the dominant brand on every screen. UXINDIA appears small, in the footer. Never use the words "SFIA" or "LUMA" in product copy.
 - Plain words. Short sentences. No filler, no emojis, no marketing language. Strategy stays sharp; jargon goes.
-- Anything illustrative must say so on screen in plain words (for example “Demo count” or “Illustrative · not the person”). Do not use a “Simulated” label. The footer and persona menu keep one neutral line: “Demo only · nothing saved or charged”.
+- Anything illustrative must say so on screen in plain words (for example “Demo count” or “Illustrative purposes only”). Do not use a “Simulated” label. The footer and persona menu keep one neutral line: “Demo only · nothing saved or charged”.
 - 1 Million Women in Design: the automatic share (default 5%) is a setting in the pricing data, never hard-coded. It comes out of the price and is never added to it. Top-up seats are optional and shown before confirm. Rules R18 and R19 live in `rules.js` and `pricing.js` with tests.
 - The homepage opens with a timed carousel. “Your path” stays folded until a role is picked.
 - Learning codes: `LM-<mode>-<n>` for a module (SP self-paced, IL instructor-led, PL peer circle, CB inside a live project), `LP-n` for a Learning Path, `TP-n` open topic, `RQ-n` request, `OF-n` offer. Show the code on every card, step and button. Rules R20 to R22 live in `rules.js` with tests.
@@ -18,14 +18,14 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - There is no UMO steward role. UMO admin runs the loop and the pricing. Never show “mock” on admin or persona labels; priced customer screens keep “Mock pricing. Not an offer.”
 - Homepage map section is titled “What is in it for you”. Its four steps are: Today, by hand · In this demo · Next: first pilots · Later: the full platform. The map drawing itself does not change.
 - The demo starts signed out (Join, “Sign in as…”). Picking a persona signs in: Log out replaces Join and “My path” (Admin for UMO admin) joins the top menu until Log out. Join is UMO blue (`--umo-blue`, dark text).
-- 1 Million Women counts seats funded only, from five sources: share of paid plans, top-up seats, college pledges, sponsored cohorts, and hours given (default 10 hours = 1 seat, counted when an admin marks the offer Done). Rule R23. Seeded at 12,341.
+- 1 Million Women counts seats funded only, from five sources: share of paid plans, top-up seats, college pledges, sponsored cohorts, and hours given (default 10 hours = 1 seat, counted when an admin marks the offer Done). Rule R23. Seeded at 25,654.
 - Mobile first. Dark theme is the reference design; light theme must also pass.
 - Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum, R18–R25 added in rounds 4 to 8).
 - Prices, plans and coupons are data in the database, never hard-coded. Sign-up records store enumerated keys (addendum A4).
 - Mock pricing only. Every priced screen says "Mock pricing. Not an offer." Nothing is charged.
 - Look and feel priority: LEAD identity, then umo.design and umodesign.school, then ixdf.org patterns. Copy IxDF patterns only, never its logo, text, images or colours. Link to UMO Design School, UMO Mentors & Catalysts and UXIN; do not duplicate them.
 - Public pages (the homepage and the join sheet) use plain words a first-year student understands. No rule codes (R1…), no spec terms (lifecycle, gates, retention, lineage, blueprint, value exchange), no internal lens names. Keep each product name (Passport, Skills Guide, Paths, Codex) and explain it where it first appears. The old name “Lexicon” is retired.
-- People photos are illustrative stock. Keep the checker treatment, the caption “Illustrative · not the person”, and the photographer credit in the footer. Never name or imply a real person.
+- People photos are illustrative stock. Keep the checker treatment, the caption “Illustrative purposes only”, and the photographer credit in the footer. Never name or imply a real person.
 - Every state change writes an audit entry.
 - Small steps: finish one milestone, run tests, show the result, then stop and ask.
 

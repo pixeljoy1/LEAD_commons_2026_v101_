@@ -115,7 +115,7 @@ The homepage is the model itself, written for anyone who lands on LEAD. About 90
 
 **Join sheet.** Every Join button opens one dialog that offers every route for the chosen role: free account, link my campus, or a Path for students; join through a campus or ask your college for faculty; a campus licence or a talk with UMO for colleges; membership, sponsorship or offering your own hours for industry; an application form for mentors. A mentor application appears in the steward's mentor pool, unverified, until the steward approves it.
 
-**Photos.** People photos are illustrative Unsplash stock, shown in grayscale with an indigo and cyan tint and a checker corner, each captioned “Illustrative · not the person”. Photographers are credited in the footer. Each slot is a named file in `prototype/assets/photos/`, so any photo can be replaced with a real UMO or UXINDIA one.
+**Photos.** People photos are illustrative Unsplash stock, shown in grayscale with an indigo and cyan tint and a checker corner, each captioned “Illustrative purposes only”. Photographers are credited in the footer. Each slot is a named file in `prototype/assets/photos/`, so any photo can be replaced with a real UMO or UXINDIA one.
 
 **Header:** one lockup ("LEAD", "by", then the UMO Design logo), the nav, then one **Demo** button, the **persona menu** and **Join**. The persona menu holds the eight personas, the theme switch and Reset demo. **Demo runs by persona:** it walks the current persona through their own journey, one step per stage, and the last step hands off to the next persona (Industry, Steward, Student, Mentor, Faculty, Institution head, Open, Admin).
 
@@ -179,15 +179,15 @@ The homepage map section (was "Who is in LEAD") now answers two questions: what 
 
 **Sign in and out.** The demo opens signed out: the public view, Join in UMO blue, and a "Sign in as…" menu. Picking a persona signs in. Log out replaces Join, and **My path** (Admin for UMO admin) appears in the top menu until Log out. Logging out returns to the homepage.
 
-**1 Million Women: seats funded only, seeded at 12,341.**
+**1 Million Women: seats funded only, seeded at 25,654.**
 
 | Source | Seeded | Grows when |
 |---|---|---|
-| Share of paid plans | 5,240 | Any paid sign-up (share ÷ seat price) |
-| Top-up seats | 2,310 | A learner or company adds seats at sign-up |
-| College pledges | 3,150 | A college pledges seats in its sign-up |
-| Sponsored cohorts | 1,200 | A company sponsors a women's cohort (10 seats) |
-| Hours given | 441 | A UMO admin marks a women's teaching offer Done (R23: 10 hours = 1 seat) |
+| Share of paid plans | 10,800 | Any paid sign-up (share ÷ seat price) |
+| Top-up seats | 4,700 | A learner or company adds seats at sign-up |
+| College pledges | 6,200 | A college pledges seats in its sign-up |
+| Sponsored cohorts | 2,400 | A company sponsors a women's cohort (10 seats) |
+| Hours given | 1,554 | A UMO admin marks a women's teaching offer Done (R23: 10 hours = 1 seat) |
 
 The 1 Million Women page shows the count, the split by source, and one card per role with its running total and its real action. The photo is a vocational training class of women.
 

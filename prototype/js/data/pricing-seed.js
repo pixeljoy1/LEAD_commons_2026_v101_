@@ -74,7 +74,7 @@
   }
 
   function settings() {
-    return { approvalThresholdPct: 50, taxRateBps: 0, quoteTtlMinutes: 15, womenSharePct: 5, womenSeatPrice: 1000 * L, womenBase: { share: 5240, topup: 2310, college: 3150, sponsor: 1200, hours: 441 }, womenHoursPerSeat: 10, womenTarget: 1000000 };
+    return { approvalThresholdPct: 50, taxRateBps: 0, quoteTtlMinutes: 15, womenSharePct: 5, womenSeatPrice: 1000 * L, womenBase: { share: 10800, topup: 4700, college: 6200, sponsor: 2400, hours: 1554 }, womenHoursPerSeat: 10, womenTarget: 1000000 };
   }
 
   function banner() {

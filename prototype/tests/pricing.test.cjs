@@ -215,7 +215,7 @@ test('R19 a top-up adds seats at the seat price and is counted in the tally', ()
   const su = P.buildSignup(q, {});
   const before = P.womenTally([], d.settings);
   const after = P.womenTally([su], d.settings);
-  assert.equal(before.seats, 12341);
+  assert.equal(before.seats, 25654);
   assert.equal(after.seats, before.seats + 3 + Math.floor(q.womenShare / d.settings.womenSeatPrice));
   assert.equal(after.bySource.topup, before.bySource.topup + 3);
   assert.equal(after.target, 1000000);
@@ -226,8 +226,8 @@ test('R19 college pledges and sponsored cohorts land in their own source', () =>
   const college = P.buildSignup(P.quote({ planKey: 'CAMPUS_STANDARD', orgSize: 800, womenSeats: 20, orgId: 'c', now: NOW }, d), {});
   const sponsor = P.buildSignup(P.quote({ planKey: 'SPONSOR_SINGLE', quantity: 1, womenSeats: 10, orgId: 's', now: NOW }, d), {});
   const t = P.womenTally([college, sponsor], d.settings);
-  assert.equal(t.bySource.college, 3150 + 20);
-  assert.equal(t.bySource.sponsor, 1200 + 10);
+  assert.equal(t.bySource.college, 6200 + 20);
+  assert.equal(t.bySource.sponsor, 2400 + 10);
   assert.equal(t.seats, Object.values(t.bySource).reduce((a, b) => a + b, 0));
 });
 
@@ -238,7 +238,7 @@ test('R23 hours become seats at the set rate, per offer, rounded down', () => {
   assert.equal(P.seatsFromHours(9, 10), 0);
   assert.equal(P.seatsFromHours(10, 0), 0);
   const t = P.womenTally([], d.settings, [{ hours: 25 }, { hours: 9 }, { hours: 40 }]);
-  assert.equal(t.bySource.hours, 441 + 2 + 0 + 4);
+  assert.equal(t.bySource.hours, 1554 + 2 + 0 + 4);
   assert.equal(R.validateHoursPerSeat(10).ok, true);
   assert.equal(R.validateHoursPerSeat(0).ok, false);
   assert.equal(R.validateHoursPerSeat(101).ok, false);
