@@ -1,4 +1,4 @@
-/* Rules R1–R8 (spec §17.1) and R11–R13 (addendum A15.1). Run: npm test */
+/* Rules R1–R8 (spec §17.1), R11–R13 (addendum A15.1) and R24–R25. Run: npm test */
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const R = require('../js/rules.js');
@@ -111,4 +111,32 @@ test('coupon lifecycle moves', () => {
   assert.equal(R.setCouponStatus(c, 'PAUSED').ok, true);
   assert.equal(R.setCouponStatus({ status: 'PAUSED' }, 'ACTIVE').ok, true);
   assert.equal(R.setCouponStatus({ status: 'ARCHIVED' }, 'ACTIVE').ok, false);
+});
+
+test('R24 a referral stays private until the student confirms it', () => {
+  const ref = { byId: 'm1', studentId: 's1', orgId: 'harbor', status: 'Waiting' };
+  const emp = { role: 'industry', id: 'i3', orgId: 'harbor' };
+  assert.equal(R.referralVisible(ref, emp), false);
+  assert.equal(R.referralVisible(ref, { role: 'mentor', id: 'm1' }), true);
+  assert.equal(R.referralVisible(ref, { role: 'student', id: 's1' }), true);
+  assert.equal(R.referralVisible(ref, { role: 'student', id: 's2' }), false);
+  assert.equal(R.confirmReferral(ref, 's2', true).ok, false);
+  const res = R.confirmReferral(ref, 's1', true);
+  assert.equal(res.ok, true);
+  const done = Object.assign({}, ref, { status: res.status });
+  assert.equal(R.referralVisible(done, emp), true);
+  assert.equal(R.referralVisible(done, { role: 'industry', id: 'i1', orgId: 'northwind' }), false);
+  assert.equal(R.confirmReferral(done, 's1', false).ok, false);
+});
+
+test('R25 a drive reply goes Pending to Accepted or Declined; only the college closes the drive', () => {
+  const reply = { orgId: 'northwind', status: 'Pending' };
+  assert.equal(R.driveReply(reply, 'Accepted', 'harbor').ok, false);
+  assert.equal(R.driveReply(reply, 'Maybe', 'northwind').ok, false);
+  assert.equal(R.driveReply(reply, 'Accepted', 'northwind').status, 'Accepted');
+  assert.equal(R.driveReply({ orgId: 'northwind', status: 'Accepted' }, 'Declined', 'northwind').ok, false);
+  const drive = { orgId: 'campus-a', status: 'Open' };
+  assert.equal(R.canCloseDrive(drive, 'northwind').ok, false);
+  assert.equal(R.canCloseDrive(drive, 'campus-a').ok, true);
+  assert.equal(R.canCloseDrive({ orgId: 'campus-a', status: 'Closed' }, 'campus-a').ok, false);
 });

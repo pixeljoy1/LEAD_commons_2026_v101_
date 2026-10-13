@@ -32,7 +32,15 @@ const watch = (page) => { page.on('pageerror', (e) => errors.push(`${page.url()}
 const page = await ctx.newPage();
 watch(page);
 
-async function go(p, token) { await p.evaluate((t) => { if (location.hash.slice(1) === t) LEAD.render(); else location.hash = t; }, token); await p.waitForTimeout(120); }
+async function goRaw(p, token) { await p.evaluate((t) => { if (location.hash.slice(1) === t) LEAD.render(); else location.hash = t; }, token); await p.waitForTimeout(120); }
+/* A join page opens on the package details. Most scenarios want the cart, so go() picks the package. */
+async function go(p, token) {
+  await goRaw(p, token);
+  if (/^join-/.test(token) && await p.locator('#join-package').count()) {
+    const key = (token.match(/^join-(?:path|sponsor)-(.+)$/) || [])[1];
+    await p.click(key ? `[data-act="pkg-choose"][data-key="${key}"]` : '[data-act="pkg-choose"] >> nth=0'); await p.waitForTimeout(120);
+  }
+}
 async function openSheet(p) { await p.evaluate(() => LEAD.store.signOut()); await p.waitForSelector('.head-join'); await p.click('.head-join'); }
 async function as(p, role) {
   await p.click('.persona-btn');
@@ -46,7 +54,7 @@ await page.goto(BASE + '#model'); // old link: must land on the homepage
 await page.waitForSelector('.eco-canvas svg');
 
 /* ---------- crawl: every route × every role ---------- */
-const ROUTES = ['home', 'model', 'verdict', 'choose', 'skills', 'skills-problem-framing', 'lexicon-problem-framing', 'learn', 'learn-LM-SP-1', 'learn-LM-IL-1', 'learn-LM-CB-1', 'learn-LM-PL-2', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'women', 'calendar', 'provisions', 'audit',
+const ROUTES = ['home', 'model', 'verdict', 'choose', 'skills', 'skills-problem-framing', 'lexicon-problem-framing', 'learn', 'learn-LM-SP-1', 'learn-LM-IL-1', 'learn-LM-CB-1', 'learn-LM-PL-2', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'jobs', 'impact', 'women', 'calendar', 'provisions', 'audit',
   'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans'];
 const simulated = []; const oldWords = [];
 const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'open', 'admin'];
@@ -104,7 +112,7 @@ ok('Path: folded until a role is picked', await page.locator('#path').count() ==
 await page.click('#car .leaf:not([hidden]) [data-act="path-role"][data-role="student"]');
 await page.waitForSelector('#path');
 ok('Path: picking “Start as a student” unfolds the student path below', await page.locator('#path').isVisible() && (await page.locator('#path .beat .eyebrow').count()) === 9);
-ok('Home: student path shows the stages with current names', (await page.locator('#path .beat .eyebrow').allTextContents()).map((t) => t.split('·')[1].trim()).join(',') === 'IDENTIFY,LEARN,APPLY,MENTOR,SOLVE,VALIDATE,CONNECT,CONNECT,GET OPPORTUNITY');
+ok('Home: student path shows the stages with current names', (await page.locator('#path .beat .eyebrow').allTextContents()).map((t) => t.split('·')[1].trim()).join(',') === 'IDENTIFY,LEARN,APPLY,MENTOR,SOLVE,VALIDATE,CONNECT,CONNECT,GET A DESIGN JOB');
 ok('Home: student path has the women step', await page.locator('#path .beat:has-text("Join a women") [data-act="as"]').count() === 1);
 await page.click('[data-act="path-tab"][data-role="faculty"]');
 ok('Home: persona tab swaps the story', (await page.locator('#path .beat h3').first().textContent()).startsWith('See what your syllabus leaves out'));
@@ -144,53 +152,142 @@ ok('Home: footer credits every photographer', credits === 16, `${credits} credit
 
 ok('Home: six doors, each with Join', await page.locator('.door').count() === 6 && await page.locator('.door [data-act="sheet"]').count() === 6);
 
-/* join sheet */
+/* join sheet: every option lands on a package page, then the cart, then confirm, and signs in as that persona */
 await openSheet(page);
-ok('Sheet: opens on the student routes', await page.locator('.sheet').isVisible() && (await page.locator('.sheet .opt').count()) === 3 && (await page.locator('[data-act="sheet-role"][aria-pressed="true"]').textContent()) === 'Student');
+ok('Sheet: opens on the student routes', await page.locator('.sheet').isVisible() && (await page.locator('.sheet .opt').count()) === 2 && (await page.locator('[data-act="sheet-role"][aria-pressed="true"]').textContent()) === 'Student');
 await page.keyboard.press('Escape');
 ok('Sheet: Escape closes it and returns focus', await page.locator('.sheet').count() === 0 && await page.evaluate(() => document.activeElement.getAttribute('data-act') === 'sheet'));
-await openSheet(page);
-await page.locator('.sheet .opt:has-text("free account")').click();
-ok('Sheet: student free account goes to the open sign-up', page.url().endsWith('#join-open'));
-await go(page, 'home');
-await openSheet(page);
-await page.locator('.sheet .opt:has-text("Enrol on a Path")').click();
-ok('Sheet: student Path goes to path enrolment', page.url().includes('#join-path'));
-await go(page, 'home');
-await openSheet(page);
-await page.locator('.sheet .opt:has-text("Link my campus")').click();
-await page.locator('.sheet [data-campus="campus-b"]').click();
-ok('Sheet: linking a campus signs in as a student there', (await page.evaluate(() => LEAD.store.me().name)) === 'Tara Bose' && page.url().endsWith('#challenges'));
 const doorRoles = ['student', 'faculty', 'head', 'industry', 'mentor', 'open'];
 let doorOk = true;
 for (const r of doorRoles) {
   await go(page, 'home');
   await page.locator(`.door [data-act="sheet"][data-role="${r}"]`).click();
   const pressed = await page.locator('[data-act="sheet-role"][aria-pressed="true"]').getAttribute('data-role');
-  const body = (await page.locator('#sheet-body .opt').count()) + (await page.locator('#sheet-body form').count());
+  const body = await page.locator('#sheet-body .opt').count();
   if (pressed !== r || body < 1) doorOk = false;
   await page.keyboard.press('Escape');
 }
 ok('Sheet: each door opens the sheet on its own role', doorOk);
-await go(page, 'home');
-await page.locator('.door [data-act="sheet"][data-role="industry"]').click();
-await page.locator('.sheet .opt:has-text("Sponsor a challenge")').click();
-ok('Sheet: industry sponsor routes to the sponsor flow', page.url().includes('#join-sponsor'));
 await go(page, 'home');
 await page.locator('.door [data-act="sheet"][data-role="head"]').click();
 await page.locator('.sheet .opt:has-text("Talk to UMO")').click();
 ok('Sheet: college sees the UMO address as text', await page.locator('.sheet >> text=team@umo.design').count() > 0);
 await page.keyboard.press('Escape');
 
-/* mentor application reaches the steward's pool */
-await go(page, 'home');
-await page.locator('.door [data-act="sheet"][data-role="mentor"]').click();
-await page.check('#sh-codex');
-await page.click('.sheet form[data-form="mentor-apply"] button[type="submit"]');
-await page.click('.sheet [data-act="sheet-admin"]');
-ok('Sheet: a mentor application lands in the UMO admin pool, unverified', page.url().endsWith('#sprints') && await page.locator('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]').count() === 1);
+/* every sheet option, every persona: package → cart → confirm → signed in → My path. Never visits Live Projects. */
+const JOIN_CASES = [
+  ['student', 0, 'join-open', 'student'], ['student', 1, 'join-path', 'student'], ['faculty', 0, 'join-faculty', 'faculty'], ['faculty', 1, 'join-college', 'head'],
+  ['head', 0, 'join-college', 'head'], ['industry', 0, 'join-industry', 'industry'], ['industry', 1, 'join-sponsor', 'industry'], ['mentor', 0, 'join-mentor', 'mentor'], ['open', 0, 'join-open', 'open'], ['open', 1, 'join-path', 'student'],
+];
+let joinOk = true; const joinInfo = [];
+for (const [role, idx, route, want] of JOIN_CASES) {
+  await goRaw(page, 'home');
+  await page.evaluate(() => { LEAD.store.signOut(); window.__hashes = []; window.addEventListener('hashchange', () => window.__hashes.push(location.hash)); });
+  await page.click('.head-join');
+  await page.click(`[data-act="sheet-role"][data-role="${role}"]`);
+  await page.click(`#sheet-body .opt >> nth=${idx}`); await page.waitForTimeout(250);
+  const landed = page.url().endsWith('#' + route) && await page.locator('#join-package').count() === 1 && await page.locator('[data-act="pkg-choose"]').count() >= 1;
+  const priced = await page.locator('#join-package >> text=Mock pricing. Not an offer.').count() >= 1;
+  await page.click('[data-act="pkg-choose"] >> nth=0'); await page.waitForTimeout(150);
+  const cart = await page.locator('[id^="sum-"]').count() === 1 && await page.locator('[data-act="confirm"]').count() === 1;
+  const cb = page.locator('input[type=checkbox][data-k=codex]'); if (await cb.count()) await cb.check();
+  const camp = page.locator('select[data-k=campus]'); if (await camp.count() && route === 'join-faculty') await camp.selectOption('campus-b');
+  await page.waitForTimeout(400);
+  await page.click('[data-act="confirm"]'); await page.waitForTimeout(250);
+  const out = await page.evaluate(() => ({ role: LEAD.store.session.role, signed: LEAD.store.session.signedIn, mypath: !!document.getElementById('go-mypath'), hashes: window.__hashes }));
+  const noProjects = !out.hashes.some((h) => /project|challenge/.test(h));
+  const good = landed && priced && cart && out.signed && out.role === want && out.mypath && noProjects && page.url().endsWith('#' + route);
+  if (!good) joinOk = false;
+  joinInfo.push(`${role}/${idx}:${good ? 'ok' : JSON.stringify({ landed, priced, cart, out })}`);
+}
+ok('Join: all ten sheet options reach package, cart and confirm, sign in as the persona, offer My path and never visit Live Projects', joinOk, joinInfo.filter((x) => !x.endsWith(':ok')).join(' '));
+await page.click('#go-mypath'); await page.waitForTimeout(150);
+ok('Join: Go to My path opens the persona home', page.url().includes('#w-student'));
+await goRaw(page, 'home'); await page.evaluate(() => LEAD.store.signOut());
+await page.click('.head-join'); await page.click('[data-act="sheet-role"][data-role="faculty"]'); await page.click('#sheet-body .opt >> nth=0');
+await page.click('[data-act="pkg-choose"] >> nth=0'); await page.locator('input[type=checkbox][data-k=codex]').check(); await page.selectOption('select[data-k=campus]', 'campus-b'); await page.waitForTimeout(300);
+await page.click('[data-act="confirm"]');
+ok('Join: faculty joining through Campus B signs in as a faculty member there', (await page.evaluate(() => LEAD.store.me().name)) === 'Prof. Rahul Sen');
+await goRaw(page, 'home'); await page.evaluate(() => LEAD.store.signOut());
+await page.click('.head-join'); await page.click('#sheet-body .opt >> nth=0');
+await page.click('[data-act="pkg-choose"] >> nth=0'); await page.selectOption('select[data-k=campus]', 'campus-b'); await page.locator('input[type=checkbox][data-k=codex]').check(); await page.waitForTimeout(300);
+await page.click('[data-act="confirm"]');
+ok('Join: a student who links Campus B signs in as a student there', (await page.evaluate(() => LEAD.store.me().name)) === 'Tara Bose');
+await goRaw(page, 'join-faculty'); await page.click('[data-act="pkg-choose"] >> nth=0'); await page.selectOption('select[data-k=campus]', 'none');
+ok('Join: a campus that is not listed shows the note to copy', await page.locator('#join-note').count() === 1 && await page.locator('[data-act="join-copy"]').count() === 1);
+await goRaw(page, 'join-college'); await goRaw(page, 'join-industry');
+ok('Join: arriving on a join page from anywhere else starts on the package details', await page.locator('#join-package').count() === 1);
+await goRaw(page, 'join-college'); await page.click('[data-act="pkg-choose"] >> nth=0'); await page.click('[data-act="pkg-back"]');
+ok('Join: the cart has a way back to the package', await page.locator('#join-package').count() === 1);
+ok('Join: the college package lists its size tiers with prices from the registry', (await page.evaluate(() => { LEAD.store.signOut(); return 1; })) === 1 && (await goRaw(page, 'join-college'), await page.locator('#join-package table tbody tr').count()) >= 3);
+
+/* mentor joined above: unverified in the UMO admin pool */
+await as(page, 'admin'); await go(page, 'sprints');
+ok('Join: a mentor who joined is in the UMO admin pool, unverified', await page.locator('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]').count() === 1);
 await page.click('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]');
-ok('Sheet: the admin approves the applicant', await page.locator('tr:has-text("Dana Fernandes") >> text=Verified').count() > 0);
+ok('Join: the admin approves the applicant', await page.locator('tr:has-text("Dana Fernandes") >> text=Verified').count() > 0);
+await as(page, 'student');
+
+/* ---------- brand, Live Projects, Design Jobs ---------- */
+await goRaw(page, 'home');
+ok('Brand: the header reads LEAD by the UMO Design logo', (await page.locator('.brand-lead').textContent()).trim() === 'LEAD' && (await page.locator('.brand-by').textContent()).trim().toLowerCase() === 'by' && await page.locator('header img, header svg, .brand-umo').count() > 0);
+await goRaw(page, 'projects');
+ok('Live Projects: the menu, the strip and the first action', await page.locator('nav a[href="#projects"]').count() === 1 && await page.locator('.how-steps li, .how-steps > *').count() >= 6 && await page.locator('.first-action').count() === 1);
+await goRaw(page, 'challenges');
+ok('Live Projects: the old challenges route still works', (await page.locator('h1').textContent()).includes('Live Project'));
+const BAN = [];
+for (const t of ['home', 'projects', 'jobs', 'learn', 'women', 'join', 'calendar', 'impact']) {
+  await goRaw(page, t);
+  const txt = await page.locator('main, header, footer').allInnerTexts();
+  if (/Commons|\bChallenges?\b/.test(txt.join(' '))) BAN.push(t);
+}
+ok('Copy: no page says Commons or Challenge', BAN.length === 0, BAN.join(','));
+
+await goRaw(page, 'opportunities');
+ok('Design Jobs: the old opportunities route lands on Design Jobs', (await page.locator('h1').textContent()).includes('Design Jobs') && await page.locator('nav a[href="#jobs"]').count() === 1);
+await page.evaluate(() => LEAD.store.signOut()); await goRaw(page, 'jobs');
+ok('Design Jobs: signed out shows four lanes in order, each with who opens then who responds', (await page.$$eval('.job-lane', (n) => n.map((x) => x.dataset.lane).join())) === 'role,drive,cohort,referral' && (await page.$$eval('.job-lane', (n) => n.every((x) => [...x.querySelectorAll('.job-panel')].map((y) => y.dataset.panel).join() === 'opens,responds'))));
+const FIRST = { industry: 'role,drive,referral,cohort', student: 'role,referral,drive,cohort', open: 'cohort,role,referral,drive', head: 'drive,role,cohort,referral', faculty: 'referral,role,drive,cohort', mentor: 'referral,role,drive,cohort', admin: 'cohort,role,drive,referral' };
+let ordOk = true;
+for (const [r, ord] of Object.entries(FIRST)) {
+  await as(page, r); await goRaw(page, 'jobs');
+  const got = await page.$$eval('.job-lane', (n) => n.map((x) => x.dataset.lane).join());
+  const yours = await page.locator('.job-lane.is-yours').first().getAttribute('data-lane');
+  if (got !== ord || yours !== ord.split(',')[0]) ordOk = false;
+}
+ok('Design Jobs: each persona sees its own lanes first, tagged Yours', ordOk);
+await as(page, 'industry'); await goRaw(page, 'jobs');
+await page.fill('#po-title', 'Visual designer'); await page.click('form[data-form="post-op"] button[type="submit"]');
+await as(page, 'student'); await goRaw(page, 'jobs');
+await page.locator('[data-lane="role"] .job-panel[data-panel="responds"] article:has-text("Visual designer") button[type="submit"]').click();
+await as(page, 'industry'); await goRaw(page, 'jobs');
+ok('Design Jobs: industry opens a role, a student applies, industry sees the applicant', await page.locator('[data-lane="role"] [data-panel="responds"] >> text=Aanya Rao').count() >= 1);
+await as(page, 'head'); await goRaw(page, 'jobs');
+await page.fill('#pd-title', 'Campus A spring drive'); await page.click('form[data-form="post-drive"] button[type="submit"]');
+await as(page, 'industry'); await goRaw(page, 'jobs');
+await page.locator('[data-lane="drive"] [data-panel="responds"] article:has-text("Campus A spring drive") [data-to="Accepted"]').click();
+const drv = await page.evaluate(() => LEAD.store.loop.drives.find((d) => d.title === 'Campus A spring drive').replies.find((x) => x.orgId === 'northwind').status);
+ok('Design Jobs: a college opens a drive and industry accepts it (R25)', drv === 'Accepted');
+await page.evaluate(() => LEAD.store.setRole('industry', 'i3')); await goRaw(page, 'jobs');
+await as(page, 'head'); await goRaw(page, 'jobs');
+ok('Design Jobs: only the college sees the close button', await page.locator('[data-act="drive-close"]').count() >= 1);
+await page.locator('[data-act="drive-close"]').first().click();
+ok('Design Jobs: the college closes a drive', await page.evaluate(() => LEAD.store.loop.drives.some((d) => d.status === 'Closed')));
+await as(page, 'mentor'); await goRaw(page, 'jobs');
+await page.selectOption('#rf-student', 's2'); await page.selectOption('#rf-role', 'op5'); await page.click('form[data-form="refer"] button[type="submit"]');
+await page.evaluate(() => LEAD.store.setRole('industry', 'i3')); await goRaw(page, 'jobs');
+const hidden = await page.locator('[data-lane="referral"] [data-ref]').filter({ hasText: 'Kabir Shah' }).count();
+await page.evaluate(() => LEAD.store.setRole('student', 's2')); await goRaw(page, 'jobs');
+await page.click('[data-act="ref-confirm"][data-accept="1"]');
+await page.evaluate(() => LEAD.store.setRole('industry', 'i3')); await goRaw(page, 'jobs');
+const shown = await page.locator('[data-lane="referral"] [data-ref]').filter({ hasText: 'Kabir Shah' }).count();
+ok('Design Jobs: a referral stays hidden from the employer until the student confirms (R24)', hidden === 0 && shown === 1);
+await as(page, 'admin'); await goRaw(page, 'jobs');
+await page.click('form[data-form="post-cohort"] button[type="submit"]');
+await as(page, 'open'); await goRaw(page, 'jobs');
+await page.locator('[data-lane="cohort"] [data-panel="responds"] [data-act="op-open-apply"]').first().click();
+ok('Design Jobs: the admin opens a cohort call and an open learner applies', await page.evaluate(() => LEAD.store.loop.opportunities.some((o) => o.lane === 'cohort' && o.id !== 'op4') && LEAD.store.loop.audit.some((a) => /Open-cohort call opened/.test(a.action))));
+await page.evaluate(() => LEAD.store.resetDemo());
 await as(page, 'student');
 
 /* ---------- S1: intake → merge → publish ---------- */
@@ -281,7 +378,7 @@ await go(page, 'passport-' + code);
 ok('S7 approval → share → public verification link works', pending > 0 && (await page.locator('text=LEAD Skills Passport · verified').count()) === 1, code);
 
 /* ---------- S8: shortlist, outcome, problem solved ---------- */
-await as(page, 'industry'); await go(page, 'opportunities');
+await as(page, 'industry'); await go(page, 'jobs');
 await page.locator('button[data-act="op-short"]').first().click();
 await page.locator('button[data-act="op-out"][data-r="Hired"]').first().click();
 await go(page, 'impact');

@@ -8,19 +8,20 @@
     ['learn', 'Learn'],
     ['projects', 'Live Projects'],
     ['calendar', 'Community'],
-    ['opportunities', 'Opportunities'],
+    ['jobs', 'Design Jobs'],
     ['impact', 'Impact'],
     ['women', '1M Women'],
   ];
   const NAV_MATCH = {
     learn: ['learn', 'skills', 'demand'], projects: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
-    calendar: ['calendar', 'provisions'], opportunities: ['opportunities', 'passports', 'passport'], impact: ['impact', 'audit'],
+    calendar: ['calendar', 'provisions'], jobs: ['jobs', 'passports', 'passport'], impact: ['impact', 'audit'],
   };
 
   /* token → [view, param] */
   function parse(token) {
     let t = !token || token === 'model' ? 'home' : token; // the homepage is the model
     if (t === 'lexicon' || t.startsWith('lexicon-')) t = 'skills' + t.slice(7); // the Lexicon is now the Skills Guide
+    if (t === 'opportunities') t = 'jobs'; // Design Jobs were Opportunities; both routes work
     if (t === 'projects') t = 'challenges'; // Live Projects are the old Challenges; both routes work
     if (t.startsWith('project-')) t = 'challenge-' + t.slice(8);
     if (/^admin-/.test(t)) return ['admin', null]; // old admin routes now live on one page

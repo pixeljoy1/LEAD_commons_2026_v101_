@@ -37,9 +37,9 @@ Eight kinds of value move through the service: **money, problems, capability, ev
 | 6 | Student → Assessor | Evidence | Submission pack with AI-use declaration (R7) | SOLVE | Manual | Sim | Real | Real |
 | 7 | Assessor → Steward | Evidence | Locked blind scores (R1, R5) | VALIDATE | Manual | Sim | Real | Real |
 | 8 | Steward → Student | Evidence | Verified Passport entry (R2) | VALIDATE | Manual | Sim | Real | Real |
-| 9 | Student → Industry | Consent | Passport, shared by choice (R3) | OPPORTUNITY | Manual | Sim | Real | Real |
-| 10 | Industry → Student | Talent | Role or internship with learning contract | OPPORTUNITY | Manual | Sim | Real | Real |
-| 11 | Steward → Industry | Evidence | Problems solved (Impact Ledger) | OPPORTUNITY | Manual | Sim | Real | Real |
+| 9 | Student → Industry | Consent | Passport, shared by choice (R3) | DESIGN JOB | Manual | Sim | Real | Real |
+| 10 | Industry → Student | Talent | Role or internship with learning contract | DESIGN JOB | Manual | Sim | Real | Real |
+| 11 | Steward → Industry | Evidence | Problems solved (Impact Ledger) | DESIGN JOB | Manual | Sim | Real | Real |
 | 12 | Steward → Inst. head | Evidence | Outcomes view, groups under 5 hidden (R4) | VALIDATE | Manual | Sim | Real | Real |
 | 13 | Inst. head → Steward | Money | Campus licence | APPLY | — | Sim | Manual | Real |
 | 14 | Industry → Steward | Money | Membership and sponsorship | APPLY | — | Sim | Manual | Real |
@@ -50,7 +50,7 @@ Eight kinds of value move through the service: **money, problems, capability, ev
 | 19 | Open → Steward | Consent | Joins with consent | CONNECT | — | Sim | — | Real |
 | 20 | UMO Design School → Student | Capability | Course content (link out) | LEARN | Manual | Sim | Real | Real |
 | 21 | Mentors & Catalysts → Mentor | Time | Seeds the mentor pool | MENTOR | Manual | Sim | Real | Real |
-| 22 | UXIN → Open | Talent | General jobs (link out) | OPPORTUNITY | Manual | Sim | Real | Real |
+| 22 | UXIN → Open | Talent | General jobs (link out) | DESIGN JOB | Manual | Sim | Real | Real |
 | 23 | UXINDIA → Industry | Recognition | Design Pitch stage | CONNECT | — | — | — | Res. |
 | 24 | Industry → Open | Money | Scholarship and gift match | LEARN | — | — | — | Res. |
 
@@ -88,7 +88,7 @@ Gates: G1 Supply (3 companies, day 60) · G2 Demand (3 campuses, day 60) · G3 T
 | Homepage | `#home` (`#model` redirects here) | The whole service model in plain language, student-first. See “Homepage sections” below |
 | Verdict | `#verdict` | Gates with a live reading, the room's evidence, out-of-scope list, open decisions |
 | Access chooser and role homes | `#choose`, `#w-student` … `#w-admin` | All eight roles: journey, simulated screens, hand-offs, Sees / Can do / Cannot |
-| Working loop | `#demand`, `#challenges`, `#team`, `#sprints`, `#submit`, `#assess`, `#passports`, `#passport-<code>`, `#opportunities`, `#impact` | W1–W7 end to end with rules R1–R8 |
+| Working loop | `#demand`, `#challenges`, `#team`, `#sprints`, `#submit`, `#assess`, `#passports`, `#passport-<code>`, `#jobs`, `#impact` | W1–W7 end to end with rules R1–R8 |
 | Community | `#lexicon`, `#calendar`, `#provisions` | Lexicon A–Z, Joint Design Calendar, Provisions board |
 | Join | `#join`, `#join-college`, `#join-industry`, `#join-path`, `#join-sponsor`, `#join-open` | Five mock sign-up flows with live quotes, codes, availability and email preview |
 | Admin | `#admin` | One page: pricing models (set a price, new version each time), coupons (second approval by a different admin), recent sign-ups. Choosing the Admin persona goes straight here. Simplified from addendum A11 on UMO's instruction: no separate dashboard, enumerations, banner or audit screens. The change log is the steward and admin `#audit` view |

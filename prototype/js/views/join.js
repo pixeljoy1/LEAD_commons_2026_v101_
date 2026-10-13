@@ -20,7 +20,8 @@
   /* Arriving at a join page from anywhere else starts at the package page. Re-renders of the same page keep the step. */
   const arrive = (flow) => {
     const st = S[flow];
-    if (LEAD.prevView === LEAD.curView || st.done) return;
+    if (LEAD.prevView === LEAD.curView) return;
+    st.done = null; st.quote = null; st.stale = null; st.code = '';
     st.step = 'package';
     if ('persona' in st && !(st.pinAt && Date.now() - st.pinAt < 2000)) st.persona = 'open';
   };

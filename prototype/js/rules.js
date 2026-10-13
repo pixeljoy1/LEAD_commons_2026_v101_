@@ -1,4 +1,4 @@
-/* LEAD · business rules R1–R23 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
+/* LEAD · business rules R1–R25 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
   const enums = isNode ? require('./enums.js') : root.LEAD.enums;
@@ -70,6 +70,33 @@
   /* ---------- R3 Student controls sharing ---------- */
   function employerCanSee(entry) {
     return !!entry && entry.status === 'Shared' && entry.shared === true;
+  }
+
+  /* ---------- R24 A referral stays private until the student confirms it ---------- */
+  /* viewer: { role, id, orgId }. The author and the named student can always see it. Employers and others only after the student confirms. */
+  function referralVisible(ref, viewer) {
+    if (!ref || !viewer) return false;
+    if (viewer.role === 'admin') return true;
+    if (viewer.id === ref.byId || viewer.id === ref.studentId) return true;
+    return ref.status === 'Confirmed' && viewer.role === 'industry' && viewer.orgId === ref.orgId;
+  }
+  function confirmReferral(ref, actorId, accept) {
+    if (ref.status !== 'Waiting') return no(`This referral is already ${ref.status.toLowerCase()}.`);
+    if (actorId !== ref.studentId) return no('Only the student named in a referral can confirm or decline it.');
+    return ok({ status: accept ? 'Confirmed' : 'Declined' });
+  }
+
+  /* ---------- R25 A hiring drive reply moves Pending to Accepted or Declined; only the college closes the drive ---------- */
+  function driveReply(reply, to, actorOrgId) {
+    if (actorOrgId !== reply.orgId) return no('Only the invited company can answer for itself.');
+    if (reply.status !== 'Pending') return no(`This reply is already ${reply.status.toLowerCase()}.`);
+    if (!['Accepted', 'Declined'].includes(to)) return no('A reply is Accepted or Declined.');
+    return ok({ status: to });
+  }
+  function canCloseDrive(drive, actorOrgId) {
+    if (drive.status === 'Closed') return no('This drive is already closed.');
+    if (actorOrgId !== drive.orgId) return no('Only the college that opened a drive can close it.');
+    return ok();
   }
 
   /* ---------- R4 Small groups stay hidden ---------- */
@@ -354,7 +381,7 @@
 
   return {
     MACHINES, canTransition, transition,
-    identitiesVisible, canVerify, employerCanSee, MIN_GROUP, aggregate,
+    identitiesVisible, canVerify, employerCanSee, referralVisible, confirmReferral, driveReply, canCloseDrive, MIN_GROUP, aggregate,
     canScore, canContact, NDA_CHECKS, ndaSafe, canSubmit, auditEntry,
     lastPrice, setPrice, validatePlan,
     needsSecondApproval, validateCouponFields, createCoupon, approveCoupon, setCouponStatus,

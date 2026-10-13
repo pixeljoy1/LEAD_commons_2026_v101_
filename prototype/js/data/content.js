@@ -11,7 +11,7 @@
     { id: 'SOLVE', n: '05', module: 'Hand-in', what: 'Team deliverable plus decision log', umo: 'EXECUTE' },
     { id: 'VALIDATE', n: '06', module: 'Assessment + Codex', what: 'Industry assessors score against a shared rubric', umo: 'EXCEL' },
     { id: 'CONNECT', n: '07', module: 'Chapters & Circles', what: 'Campus and industry meet on one calendar', umo: 'EXPERIENCE' },
-    { id: 'GET OPPORTUNITY', n: '08', module: 'Opportunity Board + Impact Ledger', what: 'Hire or deploy, and count problems solved', umo: 'EXCEL' },
+    { id: 'GET A DESIGN JOB', n: '08', module: 'Design Jobs + Impact Ledger', what: 'Hire or deploy, and count problems solved', umo: 'EXCEL' },
   ];
 
   /* ---------- features (§6, A14) ---------- */
@@ -56,13 +56,13 @@
     F('F-CO-02', 'Industry circle', 'Employers meet campus faculty on the shared calendar', 'Cross-pollination', 'Adapt', 'P1'),
     F('F-CO-03', 'Distinctions', 'Recognition for hours and sessions', 'Recognition without cost', 'Adapt', 'P2'),
     F('F-CO-04', 'Circles and Chapters', 'Local and online groups', 'Cross-pollination', 'Adapt', 'P2'),
-    F('F-OP-01', 'Opportunity board', 'Roles and internships tied to verified evidence', 'Why is 40% not placed?', 'New', 'P0'),
+    F('F-OP-01', 'Design Jobs', 'Roles and internships tied to verified evidence', 'Why is 40% not placed?', 'New', 'P0'),
     F('F-OP-02', 'Learning contract', 'Internships carry a mentor, a learning plan and a stipend field', 'Internships are seen as cheap labour', 'New', 'P0'),
     F('F-OP-03', 'Placement readiness view', 'Verified readiness against open roles', 'Why is 40% not placed?', 'New', 'P0 (mock)'),
     F('F-OP-04', 'Verified shortlist', 'Candidates with evidence attached, shared by the students', 'Employers need evidence they trust', 'New', 'P0'),
     F('F-OP-05', 'Problems solved', 'The ledger counts what a live project solved', '“How many industry problems were solved?”', 'New', 'P0'),
     F('F-OP-06', 'Impact Ledger', 'Problems solved, verified outcomes, Future Skills Index, 30 and 90-day reports', '“What do you measure??”', 'New', 'P0'),
-    F('F-OP-07', 'Open opportunity board', 'Entry points for people outside a campus cohort', 'Wider Audience lens was empty', 'New', 'P2'),
+    F('F-OP-07', 'Open-cohort calls', 'Entry points for people outside a campus cohort', 'Wider Audience lens was empty', 'New', 'P2'),
     F('F-GV-01', 'Consent manager', 'Records, shows and revokes consent', 'Student data and consent', 'New', 'P0'),
     F('F-GV-03', 'Audit log', 'Every state change recorded', 'Trust and Compliance', 'New', 'P0'),
     F('F-GV-04', 'AI-use declaration', 'Each submission states how AI was used', 'Critical AI literacy (a Bud)', 'New', 'P0'),
@@ -93,7 +93,7 @@
         J('MENTOR', 'Weeks 4–8', ['F-ME-01', 'F-ME-02'], 'Mentor session · session 2', [['Mentor', 'Kavya Iyer'], ['Agenda', 'Defend your scope'], ['Notes', 'Private to team']], 'Join session', ['mentor'], 'sprints'),
         J('SOLVE', 'Week 8', ['F-SO-01'], 'Submission', [['Deliverable', 'Prototype + deck'], ['Decision log', 'Attached'], ['AI-use declaration', 'Required']], 'Submit', ['mentor'], 'submit'),
         J('VALIDATE', 'Week 9', ['F-VA-01'], 'Assessment · result', [['Framing', 'Strong'], ['Decision defence', 'Developing'], ['Passport entry', 'Added, verifiable']], 'Share Passport link', ['mentor', 'admin'], 'passports'),
-        J('GET OPPORTUNITY', 'Month 3 on', ['F-OP-01', 'F-OP-02'], 'Opportunity board', [['Associate designer', 'Shares your Passport'], ['Internship · 3 months', 'Learning contract'], ['Applied', '2']], 'Apply', ['industry'], 'opportunities'),
+        J('GET A DESIGN JOB', 'Month 3 on', ['F-OP-01', 'F-OP-02'], 'Design Jobs', [['Associate designer', 'Shares your Passport'], ['Internship · 3 months', 'Learning contract'], ['Applied', '2']], 'Apply', ['industry'], 'jobs'),
       ],
     },
     {
@@ -121,7 +121,7 @@
         J('IDENTIFY', 'Planning', ['F-ID-04'], 'Gap report', [['Programmes scanned', '6'], ['Highest-demand gap', 'Business context'], ['Cohorts proposed', '2']], 'Plan cohorts', ['industry'], 'demand'),
         J('APPLY', 'Term setup', ['F-AP-05', 'F-AP-06'], 'Membership', [['Tier', 'By institution size'], ['Fee band (proposed)', '₹5–15 lakh a year'], ['Cohorts', '2']], 'Review agreement', ['admin'], 'join-college'),
         J('VALIDATE', 'End of term', ['F-VA-07'], 'Outcomes · cohort A', [['Passports validated', '38 of 60'], ['Live Projects completed', '12'], ['Faculty hours', '54']], 'Download report', ['admin'], 'impact'),
-        J('GET OPPORTUNITY', 'Placement season', ['F-OP-03'], 'Readiness · cohort A', [['Shortlisted by employers', '21'], ['Interviews', '14'], ['Offers', '5']], 'Share with placement cell', ['industry'], 'impact'),
+        J('GET A DESIGN JOB', 'Placement season', ['F-OP-03'], 'Readiness · cohort A', [['Shortlisted by employers', '21'], ['Interviews', '14'], ['Offers', '5']], 'Share with placement cell', ['industry'], 'impact'),
       ],
     },
     {
@@ -135,7 +135,7 @@
         J('APPLY', 'Weeks 1–3', ['F-AP-07', 'F-AP-08'], 'Sponsor desk · brief v1', [['NDA-safe', 'Yes'], ['Co-sponsors', '2 companies'], ['Campuses interested', '3']], 'Approve brief', ['admin', 'faculty'], 'projects'),
         J('VALIDATE', 'Week 9', ['F-VA-03'], 'Assessment day · seat', [['Submissions', '12'], ['Blind-first', 'On'], ['Your hours', '4']], 'Start scoring', ['mentor'], 'assess'),
         J('CONNECT', 'Ongoing', ['F-CO-02'], 'Industry circle · Wed', [['Attending', '8 companies'], ['Campuses', '4'], ['Topic', '“Readiness, defined”']], 'RSVP', ['admin'], 'calendar'),
-        J('GET OPPORTUNITY', 'Month 3 on', ['F-OP-04', 'F-OP-05'], 'Impact · your live projects', [['Problems solved', '1 of 1'], ['Candidates shortlisted', '6'], ['Hired or deployed', '2']], 'View evidence', ['head', 'admin'], 'opportunities'),
+        J('GET A DESIGN JOB', 'Month 3 on', ['F-OP-04', 'F-OP-05'], 'Impact · your live projects', [['Problems solved', '1 of 1'], ['Candidates shortlisted', '6'], ['Hired or deployed', '2']], 'View evidence', ['head', 'admin'], 'jobs'),
       ],
     },
     {
@@ -161,7 +161,7 @@
         J('IDENTIFY', 'Day 1', ['F-ID-07'], 'Skills Guide · “Framing the problem”', [['Definition', 'Plain language'], ['Levels', '4 descriptors'], ['Asked by', '7 companies']], 'Follow', [], 'skills'),
         J('LEARN', 'Weeks 1–4', ['F-LE-05'], 'Open path', [['Module', 'Stakeholder interviews'], ['Progress', '2 of 5'], ['Next', 'Quiz']], 'Continue', [], 'join-path'),
         J('CONNECT', 'Monthly', ['F-CO-04'], 'Circles near you', [['Bengaluru', 'Wed'], ['Online', 'Fri'], ['Members', '120']], 'Join', ['admin'], 'calendar'),
-        J('GET OPPORTUNITY', 'Month 2 on', ['F-OP-07'], 'Open board', [['Open cohort live project', 'Applications open'], ['Internship', '1'], ['Mentor match', '2']], 'Apply', ['admin'], 'opportunities'),
+        J('GET A DESIGN JOB', 'Month 2 on', ['F-OP-07'], 'Open-cohort calls', [['Open cohort live project', 'Applications open'], ['Internship', '1'], ['Mentor match', '2']], 'Apply', ['admin'], 'jobs'),
       ],
     },
     {
@@ -175,7 +175,7 @@
         J('APPLY', 'Weeks 1–3', ['F-AP-09'], 'Matching', [['Briefs open', '4'], ['Campuses ready', '5'], ['Matched', '2']], 'Match next', ['faculty', 'industry'], 'projects'),
         J('MENTOR', 'Continuous', ['F-ME-05'], 'Mentor pool', [['Active mentors', '14'], ['Hours this term', '62'], ['Gap vs demand', '−3']], 'Invite mentors', ['mentor'], 'sprints'),
         J('VALIDATE', 'Week 9', ['F-VA-06'], 'Integrity checks', [['Rubrics approved', '3 of 3'], ['Conflicts flagged', '0'], ['Entries pending second approval', '4']], 'Approve', ['mentor', 'head'], 'passports'),
-        J('GET OPPORTUNITY', 'Day 30 and 90', ['F-OP-06'], 'Impact · day 30', [['Live Projects live', '3'], ['Problems solved', '1'], ['Verified Passports', '38']], 'Publish report', ['head', 'industry'], 'impact'),
+        J('GET A DESIGN JOB', 'Day 30 and 90', ['F-OP-06'], 'Impact · day 30', [['Live Projects live', '3'], ['Problems solved', '1'], ['Verified Passports', '38']], 'Publish report', ['head', 'industry'], 'impact'),
       ],
     },
   ];
@@ -248,9 +248,9 @@
     Fl('f6', 'student', 'mentor', 'evidence', 'Submission pack', 'Deliverable, decision log, reflection and an AI-use declaration. Scored blind-first.', 'SOLVE', 'manual', 'sim', 'real', 'real'),
     Fl('f7', 'mentor', 'admin', 'evidence', 'Locked blind scores', 'Assessors score against the shared rubric. A mentor never scores their own team.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
     Fl('f8', 'admin', 'student', 'evidence', 'Verified Passport entry', 'A second approval turns a proposed entry into a verifiable link anyone can check.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
-    Fl('f9', 'student', 'industry', 'consent', 'Passport, shared by choice', 'Employers see only what a student shares, and sharing can be revoked at any time.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
-    Fl('f10', 'industry', 'student', 'talent', 'Role or internship', 'Opportunities tied to verified evidence. Every internship carries a learning contract with a mentor and a stipend field.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
-    Fl('f11', 'admin', 'industry', 'evidence', 'Problems solved', 'The Impact Ledger counts a live project as solved when the sponsor’s named owner confirms it.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
+    Fl('f9', 'student', 'industry', 'consent', 'Passport, shared by choice', 'Employers see only what a student shares, and sharing can be revoked at any time.', 'GET A DESIGN JOB', 'manual', 'sim', 'real', 'real'),
+    Fl('f10', 'industry', 'student', 'talent', 'Role or internship', 'Design Jobs tied to verified evidence. Every internship carries a learning contract with a mentor and a stipend field.', 'GET A DESIGN JOB', 'manual', 'sim', 'real', 'real'),
+    Fl('f11', 'admin', 'industry', 'evidence', 'Problems solved', 'The Impact Ledger counts a live project as solved when the sponsor’s named owner confirms it.', 'GET A DESIGN JOB', 'manual', 'sim', 'real', 'real'),
     Fl('f12', 'admin', 'head', 'evidence', 'Outcomes view', 'Validated Passports, live projects completed and faculty hours per cohort. Groups under 5 stay hidden.', 'VALIDATE', 'manual', 'sim', 'real', 'real'),
     Fl('f13', 'head', 'admin', 'money', 'Campus licence', 'Proposed ₹5–15 lakh a year by institution size. Untested. Mock checkout only in Phase 1.', 'APPLY', 'none', 'sim', 'manual', 'real'),
     Fl('f14', 'industry', 'admin', 'money', 'Membership & sponsorship', 'Seats for teams and per-project sponsorship. Demo prices; no industry-side price exists yet.', 'APPLY', 'none', 'sim', 'manual', 'real'),
@@ -261,7 +261,7 @@
     Fl('f19', 'open', 'admin', 'consent', 'Joins with consent', 'A free open-tier member, after the consent manager records what they agreed to.', 'CONNECT', 'none', 'sim', 'none', 'real'),
     Fl('f20', 'school', 'student', 'capability', 'Course content (link out)', 'LEAD links to the UMO Design School for courses and certification. It does not duplicate them.', 'LEARN', 'manual', 'sim', 'real', 'real'),
     Fl('f21', 'catalysts', 'mentor', 'time', 'Seeds the mentor pool', 'UMO Mentors & Catalysts seed the pool, each person by consent.', 'MENTOR', 'manual', 'sim', 'real', 'real'),
-    Fl('f22', 'uxin', 'open', 'talent', 'General jobs (link out)', 'UXIN carries general jobs. LEAD’s board keeps only evidence-backed roles.', 'GET OPPORTUNITY', 'manual', 'sim', 'real', 'real'),
+    Fl('f22', 'uxin', 'open', 'talent', 'General jobs (link out)', 'UXIN carries general jobs. LEAD lists only evidence-backed roles.', 'GET A DESIGN JOB', 'manual', 'sim', 'real', 'real'),
     Fl('f23', 'uxindia', 'industry', 'recognition', 'Design Pitch stage', 'A showcase at CONNECT. Reserved as a bundle overlay.', 'CONNECT', 'none', 'none', 'none', 'reserved'),
     Fl('f24', 'industry', 'open', 'money', 'Scholarship & gift match', 'A paid seat funds a free one, as the School’s “Give a gift of Design” does. Reserved; needs a finance and legal decision.', 'LEARN', 'none', 'none', 'none', 'reserved'),
   ];
@@ -302,7 +302,7 @@
     ['Memberships for companies', 'Industry Membership', 'Replicate', 'Pooled funding and early access to talent'],
     ['Toolkits for educators', 'Faculty Toolkit', 'Adapt', 'Answers curriculum rigidity'],
     ['A published standard for certificates', 'LEAD Codex', 'Adapt', 'Trust and compliance, job ethics, economic constraint'],
-    ['Nothing like this', 'Live Projects, mentor sessions, assessment days, the opportunity board and the Impact Ledger', 'New', 'Where the room’s evidence points'],
+    ['Nothing like this', 'Live Projects, mentor sessions, assessment days, Design Jobs and the Impact Ledger', 'New', 'Where the room’s evidence points'],
   ];
 
   /* ---------- demo mode, run by persona ---------- */
@@ -344,7 +344,7 @@
       S('VALIDATE', 'Week 9', 'Get scored by professionals.', 'Assessors score your work against a rubric you saw in advance. They do not see your name or college until they have locked their scores.', 'passports', 'See my Passport', { photo: 'story-validate' }),
       S('CONNECT', 'Ongoing', 'Meet the people.', 'Industry circles, guest sessions and assessment days sit on one shared calendar. Come to any that are public.', 'calendar', 'See the calendar', { feats: ['F-CO-01', 'F-CO-04'], handoff: ['admin'], sample: { title: 'Calendar · next 30 days', rows: [['Industry circle', 'Wed'], ['Assessment day', '14 Nov'], ['Guest session', '21 Nov']] } }),
       S('CONNECT', 'Ongoing', 'Join a women’s circle.', 'Women in design meet every month in Bengaluru and online. Part of every paid plan funds seats for women through 1 Million Women in Design, and you can add a seat of your own.', 'women', 'See 1 Million Women', { feats: ['F-CO-01'], handoff: ['admin'], photo: 'women-circle' }),
-      S('GET OPPORTUNITY', 'Month 3 on', 'Apply with proof.', 'Share your Passport with the employers you choose. Roles and internships list the evidence they want, and every internship has a mentor and a learning plan.', 'opportunities', 'See opportunities'),
+      S('GET A DESIGN JOB', 'Month 3 on', 'Apply with proof.', 'Share your Passport with the employers you choose. Roles and internships list the evidence they want, and every internship has a mentor and a learning plan.', 'jobs', 'See Design Jobs'),
     ],
     faculty: [
       S('IDENTIFY', 'Before term', 'See what your syllabus leaves out.', 'Compare a module with what employers asked for this term. You see the gaps and the live projects that would fill them.', 'projects', 'Open the live projects'),
@@ -362,7 +362,7 @@
       S('APPLY', 'Term setup', 'Join LEAD for your institution.', 'Pick a licence by number of students, set the term slot and name a faculty lead. Prices are under Ways to join.', 'join-college', 'Start a campus licence'),
       S('APPLY', 'At sign-up', 'Pledge seats for women students.', 'When you join, commit a number of seats for women students. Part of your fee also goes to 1 Million Women in Design.', 'join-college', 'Pledge at sign-up', { feats: [], handoff: ['admin'] }),
       S('VALIDATE', 'End of term', 'See outcomes you can defend.', 'How many Passports were validated, how many live projects finished, how many faculty hours. No student names; groups under five stay hidden.', 'impact', 'See outcomes'),
-      S('GET OPPORTUNITY', 'Placement season', 'Show readiness to employers.', 'Share verified readiness with your placement cell: shortlists, interviews and offers.', 'impact', 'See readiness'),
+      S('GET A DESIGN JOB', 'Placement season', 'Show readiness to employers.', 'Share verified readiness with your placement cell: shortlists, interviews and offers.', 'impact', 'See readiness'),
     ],
     industry: [
       S('IDENTIFY', 'Day 1', 'Tell us what capability you need.', 'A five-minute intake: the capability, the date you need it by, and how many assessors you can offer.', 'demand', 'State a need'),
@@ -371,7 +371,7 @@
       S('APPLY', 'Weeks 1–3', 'Sponsor a women’s cohort.', 'Fund seats for a cohort of women designers on your live project. Part of every fee also goes to 1 Million Women in Design.', 'join-sponsor', 'Sponsor a cohort', { feats: [], handoff: ['admin'] }),
       S('VALIDATE', 'Week 9', 'Score the work, blind.', 'Send an assessor to an assessment day. Names stay hidden until scores are locked.', 'assess', 'Open scoring'),
       S('CONNECT', 'Ongoing', 'Meet campuses.', 'Industry circles put your team in the room with faculty from several colleges.', 'calendar', 'See circles'),
-      S('GET OPPORTUNITY', 'Month 3 on', 'Hire from evidence.', 'See shortlists with verified work attached, and a count of problems solved.', 'opportunities', 'See the shortlist'),
+      S('GET A DESIGN JOB', 'Month 3 on', 'Hire from evidence.', 'See shortlists with verified work attached, and a count of problems solved.', 'jobs', 'See the shortlist'),
     ],
     mentor: [
       S('LEARN', 'Any time', 'Give a talk.', 'Offer a 45-minute session to several campuses at once.', 'calendar', 'Offer a session'),
@@ -385,7 +385,7 @@
       S('IDENTIFY', 'Day 1', 'Learn what the words mean.', 'The Skills Guide explains design skills in plain language and shows how many employers ask for each.', 'skills', 'Open the Skills Guide'),
       S('LEARN', 'Weeks 1–4', 'Start with a free module.', 'Begin with LM-SP-1, free and self-paced. When you are ready, try a peer circle or enrol on a Learning Path tied to a live project.', 'learn-LM-SP-1', 'Start LM-SP-1'),
       S('CONNECT', 'Monthly', 'Find a circle near you.', 'Meet people in Bengaluru or online.', 'calendar', 'Find a circle'),
-      S('GET OPPORTUNITY', 'Month 2 on', 'Take an open live project.', 'Apply to an open-cohort live project and see what a real brief feels like.', 'opportunities', 'See the open board'),
+      S('GET A DESIGN JOB', 'Month 2 on', 'Take an open live project.', 'Apply to an open-cohort live project and see what a real brief feels like.', 'jobs', 'See the open-cohort calls'),
     ],
   };
   const storyTabs = [

@@ -172,7 +172,18 @@
       { id: 'op1', orgId: 'northwind', title: 'Associate product designer', kind: 'role', caps: ['problem-framing', 'design-decision'], status: 'Shortlisting', open: false, note: 'Shares your Passport' },
       { id: 'op2', orgId: 'northwind', title: 'Design internship · 3 months', kind: 'internship', caps: ['problem-framing'], status: 'Open', learningContractId: 'lc1', open: false },
       { id: 'op3', orgId: 'harbor', title: 'Service design intern', kind: 'internship', caps: ['economic-constraint'], status: 'Open', learningContractId: 'lc1', open: false },
-      { id: 'op4', orgId: 'umo', title: 'Open cohort · Framing project', kind: 'open cohort', caps: ['problem-framing'], status: 'Open', open: true, note: 'Applications open to the open community' },
+      { id: 'op4', orgId: 'umo', title: 'Open cohort · Framing project', kind: 'open cohort', caps: ['problem-framing'], status: 'Open', open: true, lane: 'cohort', note: 'Applications open to the open community' },
+      { id: 'op5', orgId: 'harbor', title: 'Junior interaction designer', kind: 'role', caps: ['design-decision'], status: 'Open', open: false },
+      { id: 'op6', orgId: 'lumen', title: 'Research intern · 3 months', kind: 'internship', caps: ['problem-framing'], status: 'Open', learningContractId: 'lc1', open: false },
+      { id: 'op7', orgId: 'lumen', title: 'Content designer', kind: 'role', caps: ['economic-constraint'], status: 'Open', open: false },
+    ];
+    const drives = [
+      { id: 'dr1', orgId: 'campus-a', title: 'Campus A design hiring day', when: '2026-11-12', seats: 40, caps: ['problem-framing'], status: 'Open', replies: [{ id: 'dr1-northwind', orgId: 'northwind', status: 'Accepted', at: D('2026-10-08') }, { id: 'dr1-harbor', orgId: 'harbor', status: 'Pending', at: null }] },
+      { id: 'dr2', orgId: 'campus-c', title: 'Campus C placement week', when: '2026-11-24', seats: 60, caps: ['design-decision'], status: 'Open', replies: [{ id: 'dr2-northwind', orgId: 'northwind', status: 'Pending', at: null }, { id: 'dr2-lumen', orgId: 'lumen', status: 'Pending', at: null }] },
+    ];
+    const referrals = [
+      { id: 'rf1', byId: 'm1', studentId: 's5', opportunityId: 'op1', orgId: 'northwind', note: 'Strong framing work on the Northwind project. Worth a conversation.', status: 'Confirmed', at: D('2026-10-05') },
+      { id: 'rf2', byId: 'f1', studentId: 's1', opportunityId: 'op5', orgId: 'harbor', note: 'Careful with decisions and clear in review.', status: 'Waiting', at: D('2026-10-11') },
     ];
     const applications = [
       { id: 'ap1', opportunityId: 'op1', studentId: 's5', passportIds: ['pe5'], shortlisted: true, at: D('2026-10-03') },
@@ -219,7 +230,7 @@
 
     return {
       orgs, users, defaultUser, capabilities, levels, demandSignals, themes, challenges, matches, teams, sprints,
-      rubric, submissions, scores, assessmentDays, passports, learningContracts, opportunities, applications, outcomes,
+      rubric, submissions, scores, assessmentDays, passports, learningContracts, opportunities, applications, outcomes, drives, referrals,
       problemRecords, events, provisions, consents, audit: [], follows: [], circles: [],
       learning: LEAD.learningData.build(),
     };

@@ -796,3 +796,16 @@ fieldset.q legend { padding: 0 6px; }
 .how-steps b { font: 700 15px/1.2 var(--f-display); color: var(--ink); }
 .how-steps small { color: var(--muted); font-size: 13px; }
 .first-action { gap: 8px; border-color: var(--umo-blue); }
+
+/* Design Jobs: four lanes, each with "who opens" then "who responds" */
+.job-lane { display: grid; gap: 14px; margin: 0 0 28px; padding: 18px 0 0; border-top: 1px solid var(--line); }
+.job-lane.is-yours { border-top: 2px solid var(--umo-blue); }
+.lane-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.lane-head h2 { font-size: clamp(20px, 3vw, 26px); margin: 0; }
+.lane-num { font-size: 32px; line-height: 1; color: var(--umo-blue); min-width: 28px; }
+.lane-head .tag { margin-left: auto; }
+.lane-panels { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .lane-panels { grid-template-columns: 1fr 1fr; align-items: start; } }
+.job-panel { gap: 12px; min-width: 0; }
+.job-panel .item { min-width: 0; overflow-wrap: anywhere; }
+.pkg .table-wrap { margin: 4px 0; }

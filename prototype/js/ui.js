@@ -31,10 +31,10 @@
   const roleName = (id) => (LEAD.content.roleById[id] || { name: id }).name;
 
   const STATUS = {
-    good: ['Live', 'Verified', 'Shared', 'Complete', 'Published', 'ACTIVE', 'Moderated', 'Filled', 'CONFIRMED_MOCK', 'Scored', 'solved', 'Hired', 'Deployed', 'cosigned', 'Open'],
+    good: ['Live', 'Verified', 'Shared', 'Complete', 'Published', 'ACTIVE', 'Moderated', 'Filled', 'CONFIRMED_MOCK', 'Scored', 'solved', 'Hired', 'Deployed', 'cosigned', 'Open', 'Accepted'],
     warn: ['Draft', 'Submitted', 'Requested', 'Proposed', 'PENDING_APPROVAL', 'DRAFT', 'Needs an owner', 'partly', 'draft', 'Shortlisting'],
     info: ['In progress', 'In scoring', 'Matched', 'Shaped', 'Booked', 'Reviewed', 'Merged', 'In assessment', 'Reserved', 'QUOTED'],
-    bad: ['Revoked', 'PAUSED', 'EXPIRED', 'EXHAUSTED', 'CANCELLED', 'not', 'Closed', 'ARCHIVED'],
+    bad: ['Revoked', 'PAUSED', 'EXPIRED', 'EXHAUSTED', 'CANCELLED', 'not', 'Closed', 'Declined', 'ARCHIVED'],
   };
   function status(s, label) {
     let cls = '';

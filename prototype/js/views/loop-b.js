@@ -238,62 +238,164 @@
     },
   };
 
-  /* ================= Opportunities ================= */
-  LEAD.views.opportunities = {
-    title: () => 'Opportunities',
+  /* ================= Design Jobs ================= */
+  /* Four lanes. Each lane has the same two panels in the same order: who opens, then who responds. */
+  const LANES = [
+    { id: 'role', n: 1, title: 'Roles and internships', opens: 'Industry', responds: 'Students and open learners', yours: ['industry', 'student', 'open'] },
+    { id: 'drive', n: 2, title: 'Campus hiring drives', opens: 'Colleges', responds: 'Industry', yours: ['head', 'industry'] },
+    { id: 'cohort', n: 3, title: 'Open-cohort calls', opens: 'UMO admin', responds: 'Open learners', yours: ['admin', 'open'] },
+    { id: 'referral', n: 4, title: 'Referrals', opens: 'Mentors and faculty', responds: 'The student, then the employer', yours: ['mentor', 'faculty', 'student', 'industry'] },
+  ];
+  const LANE_ORDER = {
+    industry: ['role', 'drive', 'referral', 'cohort'], student: ['role', 'referral', 'drive', 'cohort'], open: ['cohort', 'role', 'referral', 'drive'],
+    head: ['drive', 'role', 'cohort', 'referral'], faculty: ['referral', 'role', 'drive', 'cohort'], mentor: ['referral', 'role', 'drive', 'cohort'], admin: ['cohort', 'role', 'drive', 'referral'],
+  };
+  const JOBS_LINE = {
+    industry: 'You open roles and internships, answer campus hiring drives, and see students referred to you.',
+    student: 'You apply to roles with your Passport and confirm referrals made for you.',
+    open: 'You apply to open-cohort calls first, then to open roles.',
+    head: 'You open hiring drives for your campus and close them when they are done.',
+    faculty: 'You refer a student to a role. The student confirms before any employer sees it.',
+    mentor: 'You refer a student to a role. The student confirms before any employer sees it.',
+    admin: 'You open open-cohort calls and see every lane.',
+  };
+  const REF_STATUS = { Waiting: 'Waiting for the student', Confirmed: 'Confirmed by the student', Declined: 'Declined by the student' };
+  const INDUSTRY_ORGS = ['northwind', 'harbor', 'lumen'];
+
+  LEAD.views.jobs = {
+    title: () => 'Design Jobs',
     render() {
-      const r = role(); const u = me();
-      if (r === 'admin') return ui.guard(['student', 'industry', 'open'], 'The opportunity board');
-      const ops = L().opportunities;
-      const lc = (o) => L().learningContracts.find((x) => x.id === o.learningContractId);
-      const card = (o, actions) => `<article class="card">
+      const signed = store.session.signedIn; const r = signed ? role() : null; const u = signed ? me() : null;
+      const D = L(); const ops = D.opportunities;
+      const laneOf = (o) => o.lane || (o.open ? 'cohort' : 'role');
+      const viewer = u ? { role: r, id: u.id, orgId: u.orgId } : null;
+      const is = (...rs) => !!r && rs.includes(r);
+      const signin = (roleKey, label, verb) => (signed ? '' : `<button class="btn small" data-act="as" data-role="${roleKey}" data-to="jobs">Sign in as ${esc(label)} to ${esc(verb)}</button>`);
+      const note = (t) => `<p class="muted" style="font-size:13.5px">${esc(t)}</p>`;
+      const lc = (o) => D.learningContracts.find((x) => x.id === o.learningContractId);
+      const row = (o, extra) => `<article class="item job" data-job="${o.id}">
         <div class="row between"><span class="label">${esc(ui.orgName(o.orgId))} · ${esc(o.kind)}</span>${ui.status(o.status)}</div>
-        <h3>${esc(o.title)}</h3>
-        <div class="pill-list">${o.caps.map((s) => `<span class="chip">${esc(ui.capName(s))}</span>`).join('')}</div>
-        ${o.kind === 'internship' && lc(o) ? `<div class="card tight flat"><span class="label">F-OP-02 · Learning contract</span>${ui.kv([['Mentor', lc(o).mentor], ['Duration', lc(o).duration], ['Stipend', lc(o).stipend]])}<p style="font-size:13px">${esc(lc(o).plan)}</p></div>` : ''}
-        ${actions || ''}</article>`;
-      let body = '';
-      if (r === 'student') {
-        const mineE = L().passports.filter((p) => p.studentId === u.id && ['Verified', 'Shared'].includes(p.status));
-        const apps = L().applications.filter((a) => a.studentId === u.id);
-        body = `<div class="grid g2">${ops.filter((o) => !o.open).map((o) => {
-          const ap = apps.find((a) => a.opportunityId === o.id);
-          return card(o, ap ? `<div class="notice">Applied ${ui.fmtDate(ap.at)} · ${ap.shortlisted ? '<b class="ink">Shortlisted</b>' : 'In review'}${(L().outcomes.find((x) => x.applicationId === ap.id) || {}).result ? ' · outcome recorded' : ''}</div>`
-            : `<form class="stack" data-form="apply" data-id="${o.id}"><span class="label">Attach Passport entries</span>${mineE.map((p) => `<label class="check"><input type="checkbox" name="pe" value="${p.id}" checked> ${esc(ui.capName(p.capSlug))} · ${LEVELS[p.level - 1]} ${p.shared ? ui.tag('Shared', 'live') : ui.tag('Not shared', 'sim')}</label>`).join('') || '<p class="muted" style="font-size:13px">No verified entries yet.</p>'}<span class="muted" style="font-size:12.5px">The employer sees an entry only if you share it.</span><button class="btn primary" type="submit">Apply</button></form>`);
-        }).join('')}</div>`;
-      } else if (r === 'industry') {
-        const mine = ops.filter((o) => o.orgId === u.orgId);
-        body = `<div class="split"><section class="stack" style="gap:16px">${mine.map((o) => {
-          const apps = L().applications.filter((a) => a.opportunityId === o.id);
-          return card(o, `<span class="label">Applicants · ${apps.length}</span>${apps.map((a) => {
-            const ents = a.passportIds.map(ppById).filter(Boolean);
-            const seen = ents.filter((p) => rules.employerCanSee(p));
-            const out = L().outcomes.find((x) => x.applicationId === a.id);
-            return `<div class="item"><div class="row between"><b class="ink">${esc(ui.nameOf(a.studentId))}</b>${a.shortlisted ? ui.status('Shortlisting', 'Shortlisted') : ''}</div>
-              ${seen.map((p) => `<span class="row" style="gap:8px">${ui.lvlDots(p.level)} ${esc(ui.capName(p.capSlug))} · <a href="#passport-${esc(p.code)}">verify</a></span>`).join('') || '<span class="muted" style="font-size:13px">No shared evidence. Entries stay hidden until the student shares (R3).</span>'}
-              ${ents.length > seen.length && seen.length ? `<span class="muted" style="font-size:12.5px">${ents.length - seen.length} more not shared.</span>` : ''}
-              <div class="row">${!a.shortlisted ? `<button class="btn small" data-act="op-short" data-id="${a.id}">Shortlist</button>` : ''}
-              ${a.shortlisted && !out ? `<button class="btn small primary" data-act="op-out" data-id="${a.id}" data-r="Hired">Hired</button><button class="btn small" data-act="op-out" data-id="${a.id}" data-r="Deployed">Deployed</button><button class="btn small ghost" data-act="op-out" data-id="${a.id}" data-r="None">No hire</button>` : ''}
-              ${out ? ui.status(out.result) : ''}</div></div>`;
-          }).join('') || '<p class="muted" style="font-size:13px">No applicants yet.</p>'}`);
-        }).join('')}</section>
-        <aside><form class="card" data-form="post-op"><span class="eyebrow">Post an opportunity</span>
+        <b class="ink">${esc(o.title)}</b>
+        <div class="pill-list">${o.caps.map((c) => `<span class="chip">${esc(ui.capName(c))}</span>`).join('')}</div>
+        ${o.kind === 'internship' && lc(o) ? `<span class="muted" style="font-size:13px">Learning contract · mentor ${esc(lc(o).mentor)} · ${esc(lc(o).duration)} · ${esc(lc(o).stipend)}</span>` : ''}
+        ${extra || ''}</article>`;
+      const panel = (kind, who, inner) => `<div class="card job-panel" data-panel="${kind}"><span class="eyebrow">${kind === 'opens' ? 'Who opens' : 'Who responds'} · ${esc(who)}</span>${inner}</div>`;
+      const pe = (id) => D.passports.filter((p) => p.studentId === id && ['Verified', 'Shared'].includes(p.status));
+      const capSelect = (id) => `<label class="field">Capability<select id="${id}" name="cap">${D.capabilities.map((c) => `<option value="${c.slug}">${esc(c.name)}</option>`).join('')}</select></label>`;
+
+      /* ---- lane 1: roles and internships ---- */
+      function laneRole(l) {
+        const roles = ops.filter((o) => laneOf(o) === 'role').sort((a, b) => (is('industry') && b.orgId === u.orgId) - (is('industry') && a.orgId === u.orgId));
+        const opens = roles.map((o) => row(o)).join('') || note('No roles yet.');
+        const post = is('industry') ? `<form class="stack" data-form="post-op"><span class="eyebrow">Open a role</span>
           <label class="field">Title<input id="po-title" name="title" value="Junior service designer" required></label>
-          <div class="form-grid"><label class="field">Kind<select id="po-kind" name="kind"><option value="internship">Internship</option><option value="role">Role</option></select></label>
-          <label class="field">Capability<select id="po-cap" name="cap">${L().capabilities.map((c) => `<option value="${c.slug}">${esc(c.name)}</option>`).join('')}</select></label></div>
+          <div class="form-grid"><label class="field">Kind<select id="po-kind" name="kind"><option value="internship">Internship</option><option value="role">Role</option></select></label>${capSelect('po-cap')}</div>
           <span class="label">Learning contract (required for internships)</span>
           <label class="field">Mentor<input id="po-mentor" name="mentor" value="Priya Shah"></label>
           <label class="field">Learning plan<textarea id="po-plan" name="plan">Weeks 1–4 shadow research; weeks 5–12 own one experiment.</textarea></label>
           <label class="field">Stipend note<input id="po-stipend" name="stipend" value="Field only; policy not set"></label>
-          <button class="btn primary" type="submit">Post</button></form></aside></div>`;
-      } else if (r === 'open') {
-        body = `<div class="grid g2">${ops.filter((o) => o.open).map((o) => card(o, L().applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The UMO team replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`)).join('')}
-          <article class="card"><span class="label">General design jobs</span><h3>Looking for any design role?</h3><p>UXIN carries general jobs. LEAD lists only evidence-backed roles.</p><a class="btn" href="https://uxin.co" target="_blank" rel="noopener">Find a job on UXIN</a></article></div>`;
-      } else {
-        const sim = r === 'head' ? `<section class="section">${ui.sectionHead('F-OP-03 · Placement readiness · cohort A', 'Readiness', ui.simTag())}${ui.kpis([{ label: 'Shortlisted by employers', v: 21 }, { label: 'Interviews', v: 14 }, { label: 'Offers', v: 5 }])}<button class="btn small" data-act="toast" data-msg="Shared with the placement cell (mock).">Share with placement cell</button></section>` : '';
-        body = `${sim}<div class="grid g2">${ops.map((o) => card(o, `<span class="muted" style="font-size:13px">${L().applications.filter((a) => a.opportunityId === o.id).length} applications</span>`)).join('')}</div>`;
+          <button class="btn primary" type="submit">Post the role</button></form>` : note(signed ? 'Industry opens these.' : 'Companies open these. ') + signin('industry', 'industry', 'open a role');
+        let resp;
+        if (is('industry')) {
+          const mine = roles.filter((o) => o.orgId === u.orgId);
+          resp = mine.map((o) => {
+            const apps = D.applications.filter((a) => a.opportunityId === o.id);
+            return `<article class="item"><b class="ink">${esc(o.title)}</b><span class="label">Applicants · ${apps.length}</span>${apps.map((a) => {
+              const ents = a.passportIds.map(ppById).filter(Boolean); const seen = ents.filter((p) => rules.employerCanSee(p)); const out = D.outcomes.find((x) => x.applicationId === a.id);
+              return `<div class="item flat"><div class="row between"><b class="ink">${esc(ui.nameOf(a.studentId))}</b>${a.shortlisted ? ui.status('Shortlisting', 'Shortlisted') : ''}</div>
+                ${seen.map((p) => `<span class="row" style="gap:8px">${ui.lvlDots(p.level)} ${esc(ui.capName(p.capSlug))} · <a href="#passport-${esc(p.code)}">verify</a></span>`).join('') || '<span class="muted" style="font-size:13px">No shared evidence. Entries stay hidden until the student shares (R3).</span>'}
+                <div class="row">${!a.shortlisted ? `<button class="btn small" data-act="op-short" data-id="${a.id}">Shortlist</button>` : ''}
+                ${a.shortlisted && !out ? `<button class="btn small primary" data-act="op-out" data-id="${a.id}" data-r="Hired">Hired</button><button class="btn small" data-act="op-out" data-id="${a.id}" data-r="Deployed">Deployed</button><button class="btn small ghost" data-act="op-out" data-id="${a.id}" data-r="None">No hire</button>` : ''}
+                ${out ? ui.status(out.result) : ''}</div></div>`;
+            }).join('') || note('No applicants yet.')}</article>`;
+          }).join('') || note('You have no open roles yet.');
+        } else if (is('student')) {
+          const apps = D.applications.filter((a) => a.studentId === u.id); const mineE = pe(u.id);
+          resp = roles.map((o) => {
+            const ap = apps.find((a) => a.opportunityId === o.id);
+            return `<article class="item"><b class="ink">${esc(o.title)}</b>${ap ? `<div class="notice">Applied ${ui.fmtDate(ap.at)} · ${ap.shortlisted ? '<b class="ink">Shortlisted</b>' : 'In review'}${(D.outcomes.find((x) => x.applicationId === ap.id) || {}).result ? ' · outcome recorded' : ''}</div>`
+              : `<form class="stack" data-form="apply" data-id="${o.id}"><span class="label">Attach Passport entries</span>${mineE.map((p) => `<label class="check"><input type="checkbox" name="pe" value="${p.id}" checked> ${esc(ui.capName(p.capSlug))} · ${LEVELS[p.level - 1]} ${p.shared ? ui.tag('Shared', 'live') : ui.tag('Not shared', 'sim')}</label>`).join('') || '<p class="muted" style="font-size:13px">No verified entries yet.</p>'}<span class="muted" style="font-size:12.5px">The employer sees an entry only if you share it.</span><button class="btn primary" type="submit">Apply</button></form>`}</article>`;
+          }).join('');
+        } else if (is('open')) {
+          resp = roles.map((o) => `<article class="item"><b class="ink">${esc(o.title)}</b>${D.applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The UMO team replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`}</article>`).join('');
+        } else {
+          resp = note(signed ? 'Students and open learners apply with a Passport.' : 'Students and open learners apply here, with a Passport.') + `<div class="btn-row">${signin('student', 'a student', 'apply')}${signin('open', 'an open learner', 'apply')}</div>`;
+        }
+        return [panel('opens', l.opens, opens + post), panel('responds', l.responds, resp)];
       }
-      return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '08 · GET OPPORTUNITY · F-OP-01, F-OP-02, F-OP-04', title: 'Opportunity.', lede: 'Roles and internships tied to verified evidence. Every internship carries a learning contract.', meta: ui.simTag() })}${body}</div>`;
+
+      /* ---- lane 2: campus hiring drives ---- */
+      function laneDrive(l) {
+        const drives = D.drives.slice().sort((a, b) => (is('head') && b.orgId === u.orgId) - (is('head') && a.orgId === u.orgId));
+        const sum = (d) => ['Accepted', 'Pending', 'Declined'].map((k) => [k, d.replies.filter((x) => x.status === k).length]).filter(([, n]) => n).map(([k, n]) => `${n} ${k.toLowerCase()}`).join(' · ');
+        const opens = drives.map((d) => `<article class="item job" data-drive="${d.id}"><div class="row between"><span class="label">${esc(ui.orgName(d.orgId))} · ${esc(ui.fmtDate(d.when))}</span>${ui.status(d.status === 'Open' ? 'Open' : 'Closed')}</div><b class="ink">${esc(d.title)}</b><span class="muted" style="font-size:13px">${d.seats} students ready · ${esc(d.caps.map(ui.capName).join(', '))}</span></article>`).join('') || note('No drives yet.');
+        const post = is('head') ? `<form class="stack" data-form="post-drive"><span class="eyebrow">Open a hiring drive</span>
+          <label class="field">Title<input id="pd-title" name="title" value="Campus placement week" required></label>
+          <div class="form-grid"><label class="field">Date<input id="pd-when" name="when" type="date" value="2026-12-05" required></label><label class="field">Students ready<input id="pd-seats" name="seats" type="number" min="1" value="30" required></label></div>
+          ${capSelect('pd-cap')}<button class="btn primary" type="submit">Open the drive</button></form>
+          <div class="card tight flat"><span class="eyebrow">Placement readiness · cohort A</span>${ui.kpis([{ label: 'Shortlisted by employers', v: 21 }, { label: 'Interviews', v: 14 }, { label: 'Offers', v: 5 }])}<span class="muted tiny">Demo count · illustrative</span></div>` : note(signed ? 'Colleges open these.' : 'Colleges open these. ') + signin('head', 'a college', 'open a drive');
+        let resp;
+        if (is('industry')) {
+          resp = drives.map((d) => { const rp = d.replies.find((x) => x.orgId === u.orgId); if (!rp) return ''; return `<article class="item"><b class="ink">${esc(d.title)}</b><span class="muted" style="font-size:13px">${esc(ui.orgName(d.orgId))}</span>${rp.status === 'Pending' ? `<div class="row"><button class="btn small primary" data-act="drive-reply" data-id="${d.id}" data-to="Accepted">Accept</button><button class="btn small ghost" data-act="drive-reply" data-id="${d.id}" data-to="Declined">Decline</button></div>` : `<div class="row">${ui.status(rp.status)}</div>`}</article>`; }).join('') || note('No drive has invited you yet.');
+        } else if (is('head')) {
+          resp = drives.filter((d) => d.orgId === u.orgId).map((d) => `<article class="item"><b class="ink">${esc(d.title)}</b>${d.replies.map((x) => `<div class="row between"><span>${esc(ui.orgName(x.orgId))}</span>${ui.status(x.status)}</div>`).join('') || note('No replies yet.')}${d.status === 'Open' ? `<button class="btn small" data-act="drive-close" data-id="${d.id}">Close the drive</button>` : ui.status('Closed')}</article>`).join('') || note('Open a drive to invite companies.');
+        } else {
+          resp = note('Companies accept or decline each drive. Only the college can close it.') + drives.map((d) => `<div class="row between"><span>${esc(d.title)}</span><span class="muted tiny">${esc(sum(d)) || 'No replies yet'}</span></div>`).join('') + `<div class="btn-row">${signin('industry', 'industry', 'answer a drive')}</div>`;
+        }
+        return [panel('opens', l.opens, opens + post), panel('responds', l.responds, resp)];
+      }
+
+      /* ---- lane 3: open-cohort calls ---- */
+      function laneCohort(l) {
+        const calls = ops.filter((o) => laneOf(o) === 'cohort');
+        const opens = calls.map((o) => row(o, `<span class="muted" style="font-size:13px">${esc(o.note || '')}</span>`)).join('') || note('No calls yet.');
+        const post = is('admin') ? `<form class="stack" data-form="post-cohort"><span class="eyebrow">Open a cohort call</span><label class="field">Title<input id="pc-title" name="title" value="Open cohort · Decision-log project" required></label>${capSelect('pc-cap')}<button class="btn primary" type="submit">Open the call</button></form>` : note(signed ? 'UMO admin opens these.' : 'UMO opens these. ') + signin('admin', 'UMO admin', 'open a call');
+        let resp;
+        if (is('open')) resp = calls.map((o) => `<article class="item"><b class="ink">${esc(o.title)}</b>${D.applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The UMO team replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`}</article>`).join('');
+        else if (is('admin')) resp = calls.map((o) => { const apps = D.applications.filter((a) => a.opportunityId === o.id); return `<article class="item"><b class="ink">${esc(o.title)}</b><span class="label">Applicants · ${apps.length}</span>${apps.map((a) => `<div class="row between"><span>${esc(ui.nameOf(a.studentId))}</span><span class="muted tiny">${esc(ui.fmtDate(a.at))}</span></div>`).join('') || note('No applicants yet.')}</article>`; }).join('');
+        else resp = note('Open learners apply to these calls. Free.') + `<div class="btn-row">${signin('open', 'an open learner', 'apply')}</div>`;
+        return [panel('opens', l.opens, opens + post), panel('responds', l.responds, resp)];
+      }
+
+      /* ---- lane 4: referrals ---- */
+      function laneReferral(l) {
+        const refs = D.referrals.filter((x) => viewer && rules.referralVisible(x, viewer));
+        const roleOf = (x) => ops.find((o) => o.id === x.opportunityId);
+        const line = (x, extra) => `<article class="item" data-ref="${x.id}"><div class="row between"><b class="ink">${esc(ui.nameOf(x.studentId))} → ${esc(roleOf(x) ? roleOf(x).title : '')}</b>${ui.status(x.status === 'Waiting' ? 'Requested' : x.status === 'Confirmed' ? 'Verified' : 'Closed', REF_STATUS[x.status])}</div><span class="muted" style="font-size:13px">Referred by ${esc(ui.nameOf(x.byId))} · ${esc(ui.orgName(x.orgId))}</span><p style="font-size:14px">${esc(x.note)}</p>${extra || ''}</article>`;
+        let opens;
+        if (is('mentor', 'faculty')) {
+          const students = D.users.filter((x) => x.role === 'student');
+          opens = `<form class="stack" data-form="refer"><span class="eyebrow">Refer a student</span>
+            <label class="field">Student<select id="rf-student" name="student">${students.map((x) => `<option value="${x.id}">${esc(x.name)} · ${esc(ui.orgName(x.orgId))}</option>`).join('')}</select></label>
+            <label class="field">Role<select id="rf-role" name="role">${ops.filter((o) => laneOf(o) === 'role' && o.status !== 'Closed').map((o) => `<option value="${o.id}">${esc(o.title)} · ${esc(ui.orgName(o.orgId))}</option>`).join('')}</select></label>
+            <label class="field">Why this student<textarea id="rf-note" name="note" required>Clear thinking in review and careful with decisions.</textarea></label>
+            <span class="muted" style="font-size:12.5px">The student confirms first. Until then no employer sees it.</span><button class="btn primary" type="submit">Send the referral</button></form>${refs.filter((x) => x.byId === u.id).map((x) => line(x)).join('')}`;
+        } else if (is('admin')) {
+          opens = refs.map((x) => line(x)).join('') || note('No referrals yet.');
+        } else {
+          opens = note('Mentors and faculty refer a student to a role. A referral stays private until the student confirms it.') + `<div class="btn-row">${signin('mentor', 'a mentor', 'refer a student')}</div>`;
+        }
+        let resp;
+        if (is('student')) resp = refs.filter((x) => x.studentId === u.id).map((x) => line(x, x.status === 'Waiting' ? `<div class="row"><button class="btn small primary" data-act="ref-confirm" data-id="${x.id}" data-accept="1">Confirm</button><button class="btn small ghost" data-act="ref-confirm" data-id="${x.id}" data-accept="0">Decline</button></div>` : '')).join('') || note('No one has referred you yet.');
+        else if (is('industry')) resp = refs.filter((x) => x.status === 'Confirmed').map((x) => { const seen = D.passports.filter((p) => p.studentId === x.studentId && rules.employerCanSee(p)); return line(x, seen.map((p) => `<span class="row" style="gap:8px">${ui.lvlDots(p.level)} ${esc(ui.capName(p.capSlug))} · <a href="#passport-${esc(p.code)}">verify</a></span>`).join('') || '<span class="muted" style="font-size:13px">No shared evidence yet.</span>'); }).join('') || note('No confirmed referrals for your roles yet.');
+        else if (is('admin')) resp = note(`${D.referrals.filter((x) => x.status === 'Confirmed').length} confirmed · ${D.referrals.filter((x) => x.status === 'Waiting').length} waiting for a student.`);
+        else resp = note('The student confirms a referral. Only then does the employer see it.') + `<div class="btn-row">${signin('student', 'a student', 'confirm a referral')}</div>`;
+        return [panel('opens', l.opens, opens), panel('responds', l.responds, resp)];
+      }
+
+      const build = { role: laneRole, drive: laneDrive, cohort: laneCohort, referral: laneReferral };
+      const order = signed ? LANE_ORDER[r] : ['role', 'drive', 'cohort', 'referral'];
+      const lanes = order.map((id) => LANES.find((x) => x.id === id)).map((l) => {
+        const mine = signed && l.yours.includes(r);
+        const [a, b] = build[l.id](l);
+        return `<section class="job-lane ${mine ? 'is-yours' : ''}" id="lane-${l.id}" data-lane="${l.id}" aria-labelledby="lane-t-${l.id}">
+          <header class="lane-head"><span class="lane-num pxnum" aria-hidden="true">${l.n}</span><div class="stack" style="gap:2px"><h2 id="lane-t-${l.id}">${esc(l.title)}</h2><span class="muted tiny">${esc(l.opens)} open it · ${esc(l.responds)} respond</span></div>${mine ? '<span class="tag info">Yours</span>' : ''}</header>
+          <div class="lane-panels">${a}${b}</div></section>`;
+      }).join('');
+      const intro = signed ? JOBS_LINE[r] : 'Four ways a design job starts. In each one, one side opens it and the other side responds. Sign in as a role to take part.';
+      return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '08 · GET A DESIGN JOB', title: 'Design Jobs.', lede: intro, meta: ui.simTag() })}
+        ${lanes}
+        <div class="notice"><span class="px cyan"></span><span>Looking for any design job? <a href="https://uxin.co" target="_blank" rel="noopener">UXIN</a> carries general jobs. LEAD lists only evidence-backed roles.</span></div></div>`;
     },
   };
 
@@ -309,8 +411,28 @@
     const lc = kind === 'internship' ? { id: uid('lc'), mentor: fd.get('mentor'), plan: fd.get('plan'), stipend: fd.get('stipend'), duration: '3 months' } : null;
     if (lc) L().learningContracts.push(lc);
     const o = { id: uid('op'), orgId: me().orgId, title: fd.get('title'), kind, caps: [fd.get('cap')], status: 'Open', open: false, learningContractId: lc ? lc.id : null };
-    store.commit('Opportunity posted', 'opportunity', o.id, () => { L().opportunities.unshift(o); return o; });
+    store.commit('Role opened', 'opportunity', o.id, () => { L().opportunities.unshift(o); return o; });
     ui.toast('Posted.');
+  };
+  LEAD.forms['post-cohort'] = (fd) => {
+    const title = String(fd.get('title')).trim(); if (!title) { ui.toast('Add a title.'); return; }
+    const o = { id: uid('op'), orgId: 'umo', title, kind: 'open cohort', caps: [fd.get('cap')], status: 'Open', open: true, lane: 'cohort', note: 'Applications open to the open community' };
+    store.commit('Open-cohort call opened', 'opportunity', o.id, () => { L().opportunities.unshift(o); return o; });
+    ui.toast('Call opened.');
+  };
+  LEAD.forms['post-drive'] = (fd) => {
+    const title = String(fd.get('title')).trim(); const seats = Number(fd.get('seats'));
+    if (!title || !(seats > 0)) { ui.toast('Add a title and a number of students.'); return; }
+    const d = { id: uid('dr'), orgId: me().orgId, title, when: String(fd.get('when')), seats, caps: [fd.get('cap')], status: 'Open', replies: INDUSTRY_ORGS.map((o) => ({ id: uid('rp'), orgId: o, status: 'Pending', at: null })) };
+    store.commit('Hiring drive opened', 'drive', d.id, () => { L().drives.unshift(d); return d; });
+    ui.toast('Drive opened. Companies can now answer.');
+  };
+  LEAD.forms.refer = (fd) => {
+    const o = L().opportunities.find((x) => x.id === fd.get('role')); const note = String(fd.get('note')).trim();
+    if (!o || !fd.get('student') || !note) { ui.toast('Choose a student and a role, and say why.'); return; }
+    const ref = { id: uid('rf'), byId: me().id, studentId: fd.get('student'), opportunityId: o.id, orgId: o.orgId, note, status: 'Waiting', at: Date.now() };
+    store.commit('Referral sent (private until the student confirms)', 'referral', ref.id, () => { L().referrals.unshift(ref); return ref; });
+    ui.toast('Sent. The student confirms before any employer sees it.');
   };
   Object.assign(LEAD.act, {
     'op-short'(el) {
@@ -328,9 +450,32 @@
       ui.toast(`Outcome recorded: ${result}. It counts in the Impact Ledger.`);
     },
     'op-open-apply'(el) {
+      if (L().applications.some((x) => x.opportunityId === el.dataset.id && x.studentId === me().id)) return;
       const a = { id: uid('ap'), opportunityId: el.dataset.id, studentId: me().id, passportIds: [], shortlisted: false, at: Date.now() };
-      store.commit('Open-cohort application', 'application', a.id, () => { L().applications.push(a); return a; });
-      ui.toast('Applied to the open cohort.');
+      store.commit('Application sent', 'application', a.id, () => { L().applications.push(a); return a; });
+      ui.toast('Applied.');
+    },
+    'drive-reply'(el) {
+      const d = L().drives.find((x) => x.id === el.dataset.id); const rp = d && d.replies.find((x) => x.orgId === me().orgId);
+      if (!rp) return;
+      const res = rules.driveReply(rp, el.dataset.to, me().orgId);
+      if (!res.ok) { ui.toast(res.reason); return; }
+      store.commit(`Hiring drive reply: ${res.status}`, 'drive', d, () => { rp.status = res.status; rp.at = Date.now(); return d; });
+      ui.toast(`${res.status}. The college can see your answer.`);
+    },
+    'drive-close'(el) {
+      const d = L().drives.find((x) => x.id === el.dataset.id);
+      const res = rules.canCloseDrive(d, me().orgId);
+      if (!res.ok) { ui.toast(res.reason); return; }
+      store.commit('Hiring drive closed', 'drive', d, () => { d.status = 'Closed'; return d; });
+      ui.toast('Drive closed.');
+    },
+    'ref-confirm'(el) {
+      const ref = L().referrals.find((x) => x.id === el.dataset.id);
+      const res = rules.confirmReferral(ref, me().id, el.dataset.accept === '1');
+      if (!res.ok) { ui.toast(res.reason); return; }
+      store.commit(`Referral ${res.status.toLowerCase()} by the student`, 'referral', ref, () => { ref.status = res.status; return ref; });
+      ui.toast(res.status === 'Confirmed' ? 'Confirmed. The employer can now see this referral.' : 'Declined. No employer saw it.');
     },
     toast(el) { ui.toast(el.dataset.msg); },
   });

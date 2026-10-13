@@ -85,7 +85,7 @@
     ['Feedback thread', 'RW own team', 'R own cohort', '—', '—', 'RW assigned', '—', '—'],
     ['Hand-in', 'RW own team', 'R own cohort', 'R agg', 'R anonymised', 'R, blind until lock', 'R', '—'],
     ['Passport entry', 'R own; share', 'R if consented', 'R agg', 'R if shared', 'R I assessed', 'RW 2nd approval', '—'],
-    ['Opportunities', 'R; apply', 'R', 'R', 'RW own', '—', 'RW', 'R open board'],
+    ['Design Jobs', 'R; apply', 'R', 'R', 'RW own', '—', 'RW', 'R open-cohort calls'],
     ['Impact Ledger', 'R own', 'R cohort', 'R own inst.', 'R own org', 'R own hours', 'RW', 'R public'],
     ['Calendar', 'R', 'RW own campus', 'RW own', 'RW own', 'R', 'RW', 'R public'],
     ['Audit log', '—', '—', 'R own inst.', 'R own org', '—', 'R', '—'],
@@ -138,7 +138,7 @@
         const a = rules.aggregate(n);
         return [{ label: 'Verified Passports · live', v: a.value, hidden: a.hidden }, { label: 'Live Projects this term', v: L.matches.filter((m) => m.institutionId === me.orgId).length }, { label: 'Mock sign-ups', v: store.pricing.signups.length }];
       }
-      case 'open': return [{ label: 'Capabilities followed', v: L.follows.filter((f) => f.userId === me.id).length }, { label: 'Open opportunities', v: L.opportunities.filter((o) => o.open).length }, { label: 'Public events', v: L.events.filter((e) => e.visibility === 'public').length }];
+      case 'open': return [{ label: 'Capabilities followed', v: L.follows.filter((f) => f.userId === me.id).length }, { label: 'Open-cohort calls', v: L.opportunities.filter((o) => o.open).length }, { label: 'Public events', v: L.events.filter((e) => e.visibility === 'public').length }];
       default: return [];
     }
   }
