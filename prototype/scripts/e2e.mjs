@@ -213,7 +213,7 @@ await page.click('.head-join'); await page.click('#sheet-body .opt >> nth=0');
 await page.click('[data-act="pkg-choose"] >> nth=0'); await page.selectOption('select[data-k=campus]', 'campus-b'); await page.locator('input[type=checkbox][data-k=codex]').check(); await page.waitForTimeout(300);
 await page.click('[data-act="confirm"]');
 ok('Join: a student who links Campus B signs in as a student there', (await page.evaluate(() => LEAD.store.me().name)) === 'Tara Bose');
-await goRaw(page, 'join-faculty'); await page.click('[data-act="pkg-choose"] >> nth=0'); await page.selectOption('select[data-k=campus]', 'none');
+await goRaw(page, 'join-faculty'); await page.click('[data-act="pkg-choose"] >> nth=0'); await page.selectOption('select[data-k=campus]', 'none'); await page.waitForTimeout(500);
 ok('Join: a campus that is not listed shows the note to copy', await page.locator('#join-note').count() === 1 && await page.locator('[data-act="join-copy"]').count() === 1);
 await goRaw(page, 'join-college'); await goRaw(page, 'join-industry');
 ok('Join: arriving on a join page from anywhere else starts on the package details', await page.locator('#join-package').count() === 1);
@@ -445,6 +445,7 @@ ok('S17 same organisation cannot reuse a max-per-org coupon', await page.locator
 /* ---------- S14, S15, S20: live propagation across tabs ---------- */
 const tab2 = await ctx.newPage(); watch(tab2);
 await tab2.goto(BASE + '#join-industry');
+await tab2.click('[data-act="pkg-choose"] >> nth=0');
 await tab2.waitForSelector('#q-industry');
 await tab2.fill('#ji-name', 'Tab Two Ltd'); await tab2.waitForTimeout(400);
 const t0 = Date.now();
@@ -557,7 +558,7 @@ ok('S22 the 1 Million Women page shows the tally and the role cards', await page
 await go(page, 'join-sponsor'); await as(page, 'industry'); await go(page, 'join-sponsor');
 await page.click('[data-act="women-cohort"]');
 ok('S23 sponsor can add a women’s cohort of 10 seats', await page.locator('#jw-sponsor').inputValue() === '10' && (await page.locator('#q-sponsor >> text=10 seats for women').count()) === 1);
-await tab2.goto(BASE + '#join-industry'); await tab2.waitForSelector('#q-industry .women-note');
+await tab2.goto(BASE + '#join-industry'); await tab2.click('[data-act="pkg-choose"] >> nth=0'); await tab2.waitForSelector('#q-industry .women-note');
 await as(page, 'admin'); await go(page, 'admin');
 await page.fill('#ws-pct', '80'); await page.click('form[data-form="women-share"] button[type="submit"]');
 ok('S24 admin cannot set a share above 50%', (await page.locator('#ws-pct:invalid').count()) === 1 && await page.evaluate(() => LEAD.store.pricing.settings.womenSharePct) === 5);

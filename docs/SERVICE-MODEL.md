@@ -190,3 +190,23 @@ The homepage map section (was "Who is in LEAD") now answers two questions: what 
 | Hours given | 441 | A UMO admin marks a women's teaching offer Done (R23: 10 hours = 1 seat) |
 
 The 1 Million Women page shows the count, the split by source, and one card per role with its running total and its real action. The photo is a vocational training class of women.
+
+
+## Round 8 (v0.9): LEAD by UMO Design, Live Projects, one join flow, Design Jobs
+
+**Name.** The product is **LEAD by UMO Design**: a LEAD wordmark, a small "by", then the UMO Design logo. "Commons" is retired.
+
+**Live Projects.** Challenges are now **Live Projects**, with codes `PJ-n`. A six-step strip explains how one works, and each persona gets one first action. Routes are `#projects` and `#project-<id>`. The old `#challenges` routes still work. Sub-pages: My team, Mentor sessions, Hand in, Scoring.
+
+**One join flow.** Every Join option for every persona goes to **Package details → Cart → Confirm**. Confirm signs you in as that persona and offers Go to My path and one next step. Personas: student (free account or a Path), faculty (free, through a campus), college (campus licence), industry (membership or sponsor a Live Project), mentor (free, unverified until a UMO admin approves), open learner (free). Nothing routes to Live Projects. Arriving on a join page from elsewhere starts at the package details.
+
+**Design Jobs** (was Opportunities, `#jobs`, old `#opportunities` works). Four lanes. Each lane has two panels in the same order: who opens, then who responds.
+
+| Lane | Opens | Responds |
+|---|---|---|
+| 1 Roles and internships | Industry | Students and open learners |
+| 2 Campus hiring drives | Colleges | Industry accepts or declines |
+| 3 Open-cohort calls | UMO admin | Open learners |
+| 4 Referrals | Mentors and faculty | The student, then the employer |
+
+The signed-in persona's own lanes come first, tagged Yours. Signed out shows all four read-only. **R24:** a referral stays private until the student confirms it. **R25:** a drive reply moves Pending to Accepted or Declined, and only the college that opened a drive can close it. Every action writes an audit entry.
