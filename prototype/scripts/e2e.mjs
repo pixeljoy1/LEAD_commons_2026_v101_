@@ -534,7 +534,7 @@ await go(page, 'join-college'); await page.click('[data-act="join-again"][data-f
 await go(page, 'women');
 const aft = await page.evaluate(() => LEAD.store.womenTally().bySource);
 ok('S39 a college pledge adds to College pledges on the page', aft.college === 3150 + 25 && (await page.locator('[data-src="college"]').textContent()).replace(/,/g, '') === '3175', JSON.stringify(aft));
-await go(page, 'admin');
+await as(page, 'admin'); await go(page, 'admin');
 await page.fill('#ws-hps', '5'); await page.click('form[data-form="women-share"] button[type="submit"]');
 ok('S39 the admin sets how many hours make a seat, and it is audited', await page.evaluate(() => LEAD.store.pricing.settings.womenHoursPerSeat) === 5 && await page.evaluate(() => LEAD.store.womenTally().bySource.hours) === 441 + 6);
 await page.fill('#ws-hps', '10'); await page.click('form[data-form="women-share"] button[type="submit"]');
