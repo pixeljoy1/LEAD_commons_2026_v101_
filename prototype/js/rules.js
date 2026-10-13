@@ -1,4 +1,4 @@
-/* LEAD · business rules R1–R22 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
+/* LEAD · business rules R1–R23 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
   const enums = isNode ? require('./enums.js') : root.LEAD.enums;
@@ -331,6 +331,14 @@
     return ok();
   }
 
+  /* R23 Hours of teaching for women in design count as seats: a whole number of hours (1 to 100) makes one seat. */
+  function validateHoursPerSeat(raw) {
+    const n = Number(raw);
+    if (raw === '' || raw == null || !Number.isInteger(n)) return no('Enter a whole number of hours.');
+    if (n < 1 || n > 100) return no('Use between 1 and 100 hours.');
+    return Object.assign(ok(), { hours: n });
+  }
+
   /* The registry the A4.2 endpoint returns: GET /api/enums. */
   function registry(plans, coupons, now) {
     const live = plans.filter((p) => !p.archived);
@@ -350,7 +358,7 @@
     canScore, canContact, NDA_CHECKS, ndaSafe, canSubmit, auditEntry,
     lastPrice, setPrice, validatePlan,
     needsSecondApproval, validateCouponFields, createCoupon, approveCoupon, setCouponStatus,
-    keyInUse, canRenameOrDelete, sellable, registry, validateWomenShare,
+    keyInUse, canRenameOrDelete, sellable, registry, validateWomenShare, validateHoursPerSeat,
     moduleCode, validateModuleCode, markLesson, scoreCheck, recordCheck, moduleProgress, OFFER_ROLES, validateOffer, validateRequest, addVote,
   };
 });

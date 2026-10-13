@@ -148,14 +148,16 @@
     render(roleId) {
       const r = content.roleById[roleId];
       if (!r) return LEAD.views.notfound.render();
-      if (store.session.role !== roleId) { store.session.role = roleId; store.session.userId = store.loop.defaultUser[roleId]; }
+      const s = store.session;
+      const other = s.role !== roleId || !s.signedIn;
       const stagesTouched = r.journey.map((j) => j.stage);
       const cur = curStage[roleId] && stagesTouched.includes(curStage[roleId]) ? curStage[roleId] : stagesTouched[0];
       const j = r.journey.find((x) => x.stage === cur);
       const stage = content.stages.find((s) => s.id === j.stage);
       const feats = j.feats.map((id) => content.featureById[id]).filter(Boolean);
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: `${esc(r.lens)} lens · ${esc(r.access)}`, title: r.name + '.', lede: esc(r.goal), meta: `${ui.tag(r.person, 'ind')}<a class="btn small" href="#choose">Switch role</a>` })}
+        ${ui.hero({ compact: true, eyebrow: `${esc(r.lens)} lens · ${esc(r.access)}`, title: r.name + '.', lede: esc(r.goal), meta: `${ui.tag(r.person, 'ind')}<a class="btn small" href="#choose">Switch persona</a>` })}
+        ${other ? `<div class="notice"><span class="px cyan"></span><span>${s.signedIn ? `You are signed in as ${esc(ui.roleName(s.role))}. This is the ${esc(r.name)} path.` : `This is the ${esc(r.name)} path. Sign in to use it.`}</span><button class="btn small primary" data-act="as" data-role="${roleId}" data-to="w-${roleId}">Sign in as ${esc(r.short)}</button></div>` : ''}
         ${ui.kpis(live(roleId).map((k) => Object.assign({ d: k.d || 'Live in this demo' }, k)))}
         <section class="section">
           ${ui.sectionHead('Journey', 'Your path through the loop', '', 'Highlighted stages are the ones this role touches. Select a stage.')}

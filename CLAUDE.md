@@ -14,8 +14,10 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - Learning codes: `LM-<mode>-<n>` for a module (SP self-paced, IL instructor-led, PL peer circle, CB inside a challenge), `LP-n` for a Learning Path, `TP-n` open topic, `RQ-n` request, `OF-n` offer. Show the code on every card, step and button. Rules R20 to R22 live in `rules.js` with tests.
 - There is no UMO steward role. UMO admin runs the loop and the pricing. Never show “mock” on admin or persona labels; priced customer screens keep “Mock pricing. Not an offer.”
 - Homepage map section is titled “What is in it for you”. Its four steps are: Today, by hand · In this demo · Next: first pilots · Later: the full platform. The map drawing itself does not change.
+- The demo starts signed out (Join, “Sign in as…”). Picking a persona signs in: Log out replaces Join and “My path” (Admin for UMO admin) joins the top menu until Log out. Join is UMO blue (`--umo-blue`, dark text).
+- 1 Million Women counts seats funded only, from five sources: share of paid plans, top-up seats, college pledges, sponsored cohorts, and hours given (default 10 hours = 1 seat, counted when an admin marks the offer Done). Rule R23. Seeded at 12,341.
 - Mobile first. Dark theme is the reference design; light theme must also pass.
-- Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum, R18–R22 added in rounds 4 and 5).
+- Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum, R18–R23 added in rounds 4 to 7).
 - Prices, plans and coupons are data in the database, never hard-coded. Sign-up records store enumerated keys (addendum A4).
 - Mock pricing only. Every priced screen says "Mock pricing. Not an offer." Nothing is charged.
 - Look and feel priority: LEAD identity, then umo.design and umodesign.school, then ixdf.org patterns. Copy IxDF patterns only, never its logo, text, images or colours. Link to UMO Design School, UMO Mentors & Catalysts and UXIN; do not duplicate them.

@@ -103,10 +103,11 @@
   }
 
   function womenCard() {
-    const st = store.pricing.settings; const t = P.womenTally(store.pricing.signups, st);
+    const st = store.pricing.settings; const t = store.womenTally();
     return `<form class="card" data-form="women-share" style="gap:12px;max-width:640px">
       <div class="form-grid">
         <label class="field">Share of every paid plan (%)<span class="hint">0 to 50. Whole or half percents.</span><input id="ws-pct" type="number" step="0.5" min="0" max="50" name="pct" value="${esc(st.womenSharePct)}" required ${dis()}></label>
+        <label class="field">Hours of teaching that count as one seat<span class="hint">1 to 100. Counted when you mark an offer Done.</span><input id="ws-hps" type="number" min="1" max="100" name="hps" value="${esc(st.womenHoursPerSeat)}" required ${dis()}></label>
         <div class="stack" style="gap:4px"><span class="label">Tally</span><b class="ink tnum">${t.seats.toLocaleString('en-IN')} of ${t.target.toLocaleString('en-IN')} seats</b><span class="muted tiny">Seat price for top-ups: ${ui.inr(st.womenSeatPrice)}</span></div>
       </div>
       <div class="btn-row"><button class="btn primary" type="submit" ${dis()}>Save share</button><a class="btn ghost" href="#women">See the public page</a></div>
@@ -189,9 +190,11 @@
     if (!canWrite()) return;
     const res = rules.validateWomenShare(fd.get('pct'));
     if (!res.ok) { say('women', res.reason, 'err'); LEAD.render({ keepScroll: true }); return; }
-    const before = { womenSharePct: store.pricing.settings.womenSharePct };
-    store.pricingCommit('1 Million Women share set', 'setting', 'womenSharePct', before, (p) => { p.settings.womenSharePct = res.pct; return { womenSharePct: res.pct }; });
-    say('women', `Saved. ${res.pct}% of every paid plan now goes to 1 Million Women in Design.`);
+    const hps = rules.validateHoursPerSeat(fd.get('hps'));
+    if (!hps.ok) { say('women', hps.reason, 'err'); LEAD.render({ keepScroll: true }); return; }
+    const before = { womenSharePct: store.pricing.settings.womenSharePct, womenHoursPerSeat: store.pricing.settings.womenHoursPerSeat };
+    store.pricingCommit('1 Million Women settings set', 'setting', 'womenSharePct', before, (p) => { p.settings.womenSharePct = res.pct; p.settings.womenHoursPerSeat = hps.hours; return { womenSharePct: res.pct, womenHoursPerSeat: hps.hours }; });
+    say('women', `Saved. ${res.pct}% of every paid plan goes to 1 Million Women in Design. ${hps.hours} hours of teaching count as one seat.`);
     LEAD.render({ keepScroll: true });
   };
 

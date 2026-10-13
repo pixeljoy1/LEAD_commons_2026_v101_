@@ -173,3 +173,20 @@ The Lexicon is now the **Skills Guide**, in plain words with four levels per ski
 ## Round 6 (v0.7): "What is in it for you"
 
 The homepage map section (was "Who is in LEAD") now answers two questions: what is in it for me, and how the whole system works. The map drawing is unchanged. The big tab bar is replaced by a four-step control in the side panel, "When does this work?": **Today, by hand** · **In this demo** · **Next: first pilots** · **Later: the full platform**. The value chips read Money · Real problems · Skills and learning · Proof of work · Jobs and hiring · Hours given · Credit and thanks · Privacy and consent. A selected group shows "What they give", "What they get" and "Why they stay", and its button opens that role's path.
+
+
+## Round 7 (v0.8): sign in, My path, and the route to a million
+
+**Sign in and out.** The demo opens signed out: the public view, Join in UMO blue, and a "Sign in as…" menu. Picking a persona signs in. Log out replaces Join, and **My path** (Admin for UMO admin) appears in the top menu until Log out. Logging out returns to the homepage.
+
+**1 Million Women: seats funded only, seeded at 12,341.**
+
+| Source | Seeded | Grows when |
+|---|---|---|
+| Share of paid plans | 5,240 | Any paid sign-up (share ÷ seat price) |
+| Top-up seats | 2,310 | A learner or company adds seats at sign-up |
+| College pledges | 3,150 | A college pledges seats in its sign-up |
+| Sponsored cohorts | 1,200 | A company sponsors a women's cohort (10 seats) |
+| Hours given | 441 | A UMO admin marks a women's teaching offer Done (R23: 10 hours = 1 seat) |
+
+The 1 Million Women page shows the count, the split by source, and one card per role with its running total and its real action. The photo is a vocational training class of women.

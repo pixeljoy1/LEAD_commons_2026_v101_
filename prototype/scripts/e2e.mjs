@@ -33,6 +33,7 @@ const page = await ctx.newPage();
 watch(page);
 
 async function go(p, token) { await p.evaluate((t) => { if (location.hash.slice(1) === t) LEAD.render(); else location.hash = t; }, token); await p.waitForTimeout(120); }
+async function openSheet(p) { await p.evaluate(() => LEAD.store.signOut()); await p.waitForSelector('.head-join'); await p.click('.head-join'); }
 async function as(p, role) {
   await p.click('.persona-btn');
   await p.click(`.persona-item[data-role="${role}"]`);
@@ -139,24 +140,24 @@ await page.waitForTimeout(600);
 const imgs = await page.evaluate(() => { const l = [...document.querySelectorAll('main img')]; return { n: l.length, ok: l.filter((i) => i.complete && i.naturalWidth > 0).length, caps: document.querySelectorAll('main .ph .ph-cap').length, figs: document.querySelectorAll('main .ph').length }; });
 ok('Home: every photo loads and carries its caption', imgs.n >= 11 && imgs.ok === imgs.n && imgs.caps === imgs.figs, JSON.stringify(imgs));
 const credits = await page.evaluate(() => document.querySelectorAll('.foot-about a').length);
-ok('Home: footer credits every photographer', credits === 15, `${credits} credits`);
+ok('Home: footer credits every photographer', credits === 16, `${credits} credits`);
 
 ok('Home: six doors, each with Join', await page.locator('.door').count() === 6 && await page.locator('.door [data-act="sheet"]').count() === 6);
 
 /* join sheet */
-await page.click('.head-join');
+await openSheet(page);
 ok('Sheet: opens on the student routes', await page.locator('.sheet').isVisible() && (await page.locator('.sheet .opt').count()) === 3 && (await page.locator('[data-act="sheet-role"][aria-pressed="true"]').textContent()) === 'Student');
 await page.keyboard.press('Escape');
 ok('Sheet: Escape closes it and returns focus', await page.locator('.sheet').count() === 0 && await page.evaluate(() => document.activeElement.getAttribute('data-act') === 'sheet'));
-await page.click('.head-join');
+await openSheet(page);
 await page.locator('.sheet .opt:has-text("free account")').click();
 ok('Sheet: student free account goes to the open sign-up', page.url().endsWith('#join-open'));
 await go(page, 'home');
-await page.click('.head-join');
+await openSheet(page);
 await page.locator('.sheet .opt:has-text("Enrol on a Path")').click();
 ok('Sheet: student Path goes to path enrolment', page.url().includes('#join-path'));
 await go(page, 'home');
-await page.click('.head-join');
+await openSheet(page);
 await page.locator('.sheet .opt:has-text("Link my campus")').click();
 await page.locator('.sheet [data-campus="campus-b"]').click();
 ok('Sheet: linking a campus signs in as a student there', (await page.evaluate(() => LEAD.store.me().name)) === 'Tara Bose' && page.url().endsWith('#challenges'));
@@ -367,21 +368,95 @@ const said = await tab2.locator('#sum-industry >> text=Price updated.').count();
 const total = await tab2.evaluate(() => document.querySelector('#q-industry').textContent);
 ok('S15 after the admin pauses the coupon, the open quote shows the new total and asks again', said === 1 && !total.includes('20% off'));
 
+/* ---------- S33–S36: sign in and out, My path, Join colour ---------- */
+await page.evaluate(() => LEAD.store.resetDemo());
+await go(page, 'home');
+ok('S33 the demo starts signed out: Join and “Sign in as…”, no My path, no Log out', await page.locator('.head-join').isVisible() && (await page.locator('.persona-btn .pname').textContent()).includes('Sign in as') && await page.locator('.nav-path').count() === 0 && await page.locator('.head-logout').count() === 0 && await page.evaluate(() => LEAD.store.session.signedIn === false));
+const lum = (hex) => { const c = hex.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const rgb = (str) => str.match(/\d+/g).slice(0, 3).map(Number);
+const contrastOf = async (pg) => { const [bg, fg] = await pg.evaluate(() => { const e = document.querySelector('.head-join'); const cs = getComputedStyle(e); return [cs.backgroundColor, cs.color]; }); const a = lum(rgb(bg)); const b = lum(rgb(fg)); return { bg: rgb(bg), ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) }; };
+const cd = await contrastOf(page);
+ok('S33 Join is UMO blue with text above 4.5:1 contrast (dark theme)', cd.bg.join(',') === '0,176,240' && cd.ratio >= 4.5, `${cd.bg} · ${cd.ratio.toFixed(1)}:1`);
+const lightCtx = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: 'light' });
+const lightPage = await lightCtx.newPage(); await lightPage.goto(BASE + '#home'); await lightPage.waitForSelector('.head-join');
+const cl = await contrastOf(lightPage);
+ok('S33 Join keeps that contrast in the light theme', cl.bg.join(',') === '0,176,240' && cl.ratio >= 4.5, `${cl.ratio.toFixed(1)}:1`);
+await lightCtx.close();
+const LANDING = { student: 'w-student', faculty: 'w-faculty', head: 'w-head', industry: 'w-industry', mentor: 'w-mentor', open: 'w-open', admin: 'admin' };
+let signedOk = true; const bad = [];
+for (const r of Object.keys(LANDING)) {
+  await as(page, r); await page.waitForTimeout(250);
+  const ok1 = await page.locator('.head-logout').isVisible() && await page.locator('.head-join').count() === 0 && (await page.locator('.nav-path').getAttribute('href')) === '#' + LANDING[r] && (await page.locator('.nav-path').textContent()) === (r === 'admin' ? 'Admin' : 'My path');
+  if (!ok1) { signedOk = false; bad.push(r + ':' + JSON.stringify(await page.evaluate(() => ({ h: location.hash, p: document.querySelector('.nav-path') && document.querySelector('.nav-path').outerHTML, o: !!document.querySelector('.head-logout'), j: !!document.querySelector('.head-join') }))) ); }
+}
+ok('S34 signing in as each persona shows Log out and My path to its landing, and hides Join', signedOk, bad.join(','));
+await as(page, 'faculty');
+await page.click('.nav-path'); await page.waitForTimeout(150);
+ok('S34 My path opens the persona landing and is highlighted', page.url().endsWith('#w-faculty') && await page.locator('.nav-path[aria-current="page"]').count() === 1);
+await page.click('.head-logout'); await page.waitForTimeout(200);
+ok('S35 Log out returns to the public home with Join back and no My path', page.url().endsWith('#home') && await page.locator('.head-join').isVisible() && await page.locator('.nav-path').count() === 0 && await page.locator('.head-logout').count() === 0 && await page.evaluate(() => LEAD.store.session.signedIn === false));
+await as(page, 'mentor'); await page.click('.persona-btn'); await page.click('#persona-menu [data-act="logout"]'); await page.waitForTimeout(150);
+ok('S35 the persona menu also has Log out', await page.locator('.head-join').isVisible());
+await go(page, 'home');
+await page.click('[data-act="persona-menu"]');
+ok('S35 the signed-out menu says “Sign in as” and marks nobody', (await page.locator('#persona-menu').getAttribute('aria-label')) === 'Sign in as' && await page.locator('#persona-menu [aria-checked="true"]').count() === 0);
+await page.keyboard.press('Escape');
+
+/* ---------- S37–S39: the route to 1 million ---------- */
+await page.evaluate(() => LEAD.store.resetDemo());
+await go(page, 'women');
+const seats0 = await page.evaluate(() => LEAD.store.womenTally());
+ok('S37 the count starts at 12,341 and the five sources add up to it', seats0.seats === 12341 && Object.values(seats0.bySource).reduce((a, b) => a + b, 0) === 12341 && (await page.locator('#women-seats').textContent()).trim() === '12,341');
+const legend = await page.locator('.src-legend [data-src]').allTextContents();
+ok('S37 the page shows each source number', legend.map((t) => t.replace(/,/g, '')).join('|') === '5240|2310|3150|1200|441', legend.join('|'));
+ok('S37 six cards, one per way in, each with its running total', await page.locator('.women-role').count() === 6 && await page.locator('.women-role .pxnum').count() === 6);
+await as(page, 'mentor'); await go(page, 'women');
+ok('S37 a signed-in persona sees their card first, marked You', (await page.locator('.women-role').first().getAttribute('data-role')) === 'mentor' && await page.locator('.women-role.is-you .tag:has-text("You")').count() === 1);
+await page.click('.women-role.is-you [data-act="lrn-women-offer"]');
+await page.waitForSelector('#of-women');
+ok('S38 “Offer hours for women” opens the Learn form with the women tick on', await page.locator('#of-women').isChecked() && page.url().endsWith('#learn'));
+await page.fill('#of-topic', 'Portfolio clinic for women designers'); await page.fill('#of-hours', '30');
+await page.click('form[data-form="offer-new"] button[type="submit"]');
+const offerW = await page.evaluate(() => LEAD.store.loop.learning.offers.find((o) => o.topic === 'Portfolio clinic for women designers'));
+ok('S38 the offer is saved for women and waits for the admin', offerW && offerW.women === true && offerW.state === 'Proposed');
+await as(page, 'admin'); await go(page, 'learn');
+const hoursBefore = await page.evaluate(() => LEAD.store.womenTally().bySource.hours);
+await page.click('li.give-row:has-text("Portfolio clinic for women designers") [data-act="ct-advance"]');
+await page.click('li.give-row:has-text("Portfolio clinic for women designers") [data-act="ct-advance"]');
+await page.click('li.give-row:has-text("Portfolio clinic for women designers") [data-act="ct-advance"]');
+const hoursAfter = await page.evaluate(() => LEAD.store.womenTally().bySource.hours);
+ok('S38 once the admin marks it done, 30 hours add 3 seats to Hours given', hoursBefore === 441 && hoursAfter === 444, `${hoursBefore} → ${hoursAfter}`);
+ok('S38 the credit is in the audit log', await page.evaluate(() => LEAD.store.loop.audit.some((a) => /adds 3 seats to 1 Million Women/.test(a.action))));
+const of4 = await page.evaluate(() => LEAD.store.loop.learning.offers.find((x) => x.id === 'OF-4').state);
+ok('S38 an offer that is still scheduled does not count yet', of4 === 'Scheduled' && hoursAfter === 444);
+await go(page, 'join-college');
+await page.fill('#jw-college', '25'); await page.waitForTimeout(400);
+await page.click('#go-college'); await page.waitForTimeout(200);
+await go(page, 'join-college'); await page.click('[data-act="join-again"][data-flow="college"]');
+await go(page, 'women');
+const aft = await page.evaluate(() => LEAD.store.womenTally().bySource);
+ok('S39 a college pledge adds to College pledges on the page', aft.college === 3150 + 25 && (await page.locator('[data-src="college"]').textContent()).replace(/,/g, '') === '3175', JSON.stringify(aft));
+await go(page, 'admin');
+await page.fill('#ws-hps', '5'); await page.click('form[data-form="women-share"] button[type="submit"]');
+ok('S39 the admin sets how many hours make a seat, and it is audited', await page.evaluate(() => LEAD.store.pricing.settings.womenHoursPerSeat) === 5 && await page.evaluate(() => LEAD.store.womenTally().bySource.hours) === 441 + 6);
+await page.fill('#ws-hps', '10'); await page.click('form[data-form="women-share"] button[type="submit"]');
+await page.evaluate(() => LEAD.store.resetDemo());
+
 /* ---------- S21–S24: 1 Million Women in Design ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
 await as(page, 'head'); await go(page, 'join-college');
 await page.waitForSelector('#q-college .total');
 const tot0 = await page.evaluate(() => LEAD.store.pricing.settings.womenSharePct);
 ok('S21 the quote says 5% goes to 1 Million Women, at no extra cost', tot0 === 5 && (await page.locator('#q-college .women-note').textContent()).includes('5%'));
-const before21 = await page.evaluate(() => LEAD.pricing.womenTally(LEAD.store.pricing.signups, LEAD.store.pricing.settings).seats);
+const before21 = await page.evaluate(() => LEAD.store.womenTally().seats);
 await page.fill('#jw-college', '3'); await page.waitForTimeout(450);
 ok('S21 pledging 3 seats adds them to the quote as a line', (await page.locator('#q-college >> text=3 seats for women').count()) === 1);
 await page.click('#go-college'); await page.waitForTimeout(200);
 const rec = await page.evaluate(() => { const s = LEAD.store.pricing.signups[0]; return { seats: s.womenSeats, share: s.womenShare, top: s.topUp }; });
-const after21 = await page.evaluate(() => LEAD.pricing.womenTally(LEAD.store.pricing.signups, LEAD.store.pricing.settings).seats);
+const after21 = await page.evaluate(() => LEAD.store.womenTally().seats);
 ok('S22 the sign-up record keeps the share and seats, and the tally rises', rec.seats === 3 && rec.share > 0 && rec.top === 300000 && after21 >= before21 + 3, JSON.stringify(rec));
 await go(page, 'women');
-ok('S22 the 1 Million Women page shows the tally and the role cards', await page.locator('#women-tally').count() === 1 && await page.locator('main article:has-text("Pledge seats")').count() === 1 && await page.locator('nav a[href="#women"]').count() === 1);
+ok('S22 the 1 Million Women page shows the tally and the role cards', await page.locator('#women-tally').count() === 1 && await page.locator('.women-role[data-role="head"]').count() === 1 && await page.locator('.women-role').count() === 6 && await page.locator('nav a[href="#women"]').count() === 1);
 await go(page, 'join-sponsor'); await as(page, 'industry'); await go(page, 'join-sponsor');
 await page.click('[data-act="women-cohort"]');
 ok('S23 sponsor can add a women’s cohort of 10 seats', await page.locator('#jw-sponsor').inputValue() === '10' && (await page.locator('#q-sponsor >> text=10 seats for women').count()) === 1);
@@ -391,7 +466,7 @@ await page.fill('#ws-pct', '80'); await page.click('form[data-form="women-share"
 ok('S24 admin cannot set a share above 50%', (await page.locator('#ws-pct:invalid').count()) === 1 && await page.evaluate(() => LEAD.store.pricing.settings.womenSharePct) === 5);
 await page.fill('#ws-pct', '10'); await page.click('form[data-form="women-share"] button[type="submit"]');
 await tab2.waitForFunction(() => { const n = document.querySelector('#q-industry .women-note'); return n && n.textContent.includes('10%'); }, null, { timeout: 6000 }).then(() => ok('S24 a new share reaches an open sign-up in another tab', true), () => ok('S24 a new share reaches an open sign-up in another tab', false));
-ok('S24 the share change is in the audit log', await page.evaluate(() => LEAD.store.pricing.audit.some((a) => /Million Women share/.test(a.action))));
+ok('S24 the share change is in the audit log', await page.evaluate(() => LEAD.store.pricing.audit.some((a) => /Million Women settings/.test(a.action))));
 
 /* ---------- S32: "What is in it for you" ---------- */
 await go(page, 'home');

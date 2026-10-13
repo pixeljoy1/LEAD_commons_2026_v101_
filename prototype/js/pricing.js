@@ -358,24 +358,41 @@
     return errors;
   }
 
-  /* R19: the running tally. Every sign-up adds its top-up seats and the seats its automatic share buys. */
-  function womenTally(signups, settings) {
+  /* R23: hours of teaching count as seats, a fixed number of hours to a seat. */
+  function seatsFromHours(hours, perSeat) {
+    const per = Number(perSeat) || 0;
+    const h = Number(hours) || 0;
+    return per > 0 && h > 0 ? Math.floor(h / per) : 0;
+  }
+
+  /*
+   * R19 and R23: the running tally of seats funded, by source.
+   * signups: confirmed sign-ups (share, top-up seats, college pledges, sponsored cohorts).
+   * doneOffers: teaching offers for women in design that an admin marked Done (hours become seats).
+   */
+  function womenTally(signups, settings, doneOffers) {
     const st = settings || {};
     const seatPrice = st.womenSeatPrice || 0;
-    let seats = st.womenSeatsBase || 0;
+    const base = st.womenBase || {};
+    const by = { share: base.share || 0, topup: base.topup || 0, college: base.college || 0, sponsor: base.sponsor || 0, hours: base.hours || 0 };
     let sharePaise = 0;
     (signups || []).forEach((s) => {
-      seats += s.womenSeats || 0;
       sharePaise += s.womenShare || 0;
+      const n = s.womenSeats || 0;
+      if (s.flow === 'COLLEGE_ONBOARDING') by.college += n;
+      else if (s.flow === 'CHALLENGE_SPONSORSHIP') by.sponsor += n;
+      else by.topup += n;
     });
     const fromShare = seatPrice > 0 ? Math.floor(sharePaise / seatPrice) : 0;
-    const total = seats + fromShare;
+    by.share += fromShare;
+    (doneOffers || []).forEach((o) => { by.hours += seatsFromHours(o.hours, st.womenHoursPerSeat); });
+    const seats = by.share + by.topup + by.college + by.sponsor + by.hours;
     const target = st.womenTarget || 1000000;
-    return { seats: total, fromShare, target, pct: Math.min(100, (total / target) * 100) };
+    return { seats, fromShare, bySource: by, target, pct: Math.min(100, (seats / target) * 100) };
   }
 
   return {
-    womenTally,
+    womenTally, seatsFromHours,
     roundHalfUp, formatINR, rupeesToPaise, formatDate, unitWord, toMs,
     currentVersion, isPriced, tierFor, remaining, percentBooked, fromPrice,
     findCoupon, effectiveCouponStatus, appliesTo, appliesText, validateCoupon,

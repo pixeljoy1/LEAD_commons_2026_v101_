@@ -47,7 +47,7 @@
   }
 
   function leafWomen(l) {
-    const t = P.womenTally(store.pricing.signups, store.pricing.settings);
+    const t = store.womenTally();
     return `<div class="leaf-main"><span class="eyebrow">An initiative of UMO Design Foundation</span><h2 class="leaf-h">${esc(l.head)}</h2>
         <p class="lede">${esc(l.line)}</p>
         <div class="stack" style="gap:6px"><span class="tnum ink"><b>${t.seats.toLocaleString('en-IN')}</b> of ${t.target.toLocaleString('en-IN')} seats funded</span>${ui.meter(Math.max(1, Math.round(t.pct)), { px: true })}<span class="muted tiny">Demo count.</span></div>

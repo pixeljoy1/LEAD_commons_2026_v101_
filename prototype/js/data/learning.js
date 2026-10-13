@@ -106,6 +106,7 @@
       offers: [
         { id: 'OF-1', by: 'm1', topic: 'Coaching in 45 minutes', mode: 'IL', hours: 6, when: 'Nov', state: 'Approved', at: D('2026-10-03') },
         { id: 'OF-2', by: 'i2', topic: 'Reading a brief like a product manager', mode: 'IL', hours: 4, when: 'Dec', state: 'Proposed', at: D('2026-10-10') },
+        { id: 'OF-4', by: 'm3', topic: 'Office hour for women in design', mode: 'IL', hours: 12, when: 'Nov', state: 'Scheduled', women: true, at: D('2026-10-11') },
         { id: 'OF-3', by: 'f2', topic: 'A studio critique that works', mode: 'IL', hours: 8, when: 'Nov', state: 'Scheduled', at: D('2026-10-05') },
       ],
       progress: {},

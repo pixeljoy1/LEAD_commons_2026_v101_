@@ -36,7 +36,7 @@
   const store = {
     loop: LEAD.seed.build(),
     pricing: readPricing(),
-    session: { role: 'student', userId: 's1', adminActor: 'Admin A', demo: false, demoStep: 0 },
+    session: { signedIn: false, role: 'open', userId: 'o1', adminActor: 'Admin A', demo: false, demoStep: 0 },
 
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
@@ -49,8 +49,14 @@
     org(id) { return this.loop.orgs.find((o) => o.id === id) || null; },
     setRole(role, userId) {
       if (role === 'steward') role = 'admin'; // the steward role was folded into UMO admin
+      this.session.signedIn = true;
       this.session.role = role;
       this.session.userId = userId || this.loop.defaultUser[role];
+      emit({ kind: 'session' });
+    },
+    /* Log out: back to the public view, which acts as an Open learner underneath. */
+    signOut() {
+      Object.assign(this.session, { signedIn: false, role: 'open', userId: 'o1', demo: false, demoStep: 0 });
       emit({ kind: 'session' });
     },
     actorLabel() {
@@ -84,10 +90,17 @@
       return result;
     },
 
+    /* Seats funded for 1 Million Women in Design, by source (R19, R23). Hours count once an admin marks the offer Done. */
+    womenTally() {
+      const offers = ((this.loop.learning && this.loop.learning.offers) || []).filter((o) => o.women && o.state === 'Done');
+      return LEAD.pricing.womenTally(this.pricing.signups, this.pricing.settings, offers);
+    },
+
     pricingData() { return { plans: this.pricing.plans, coupons: this.pricing.coupons, settings: this.pricing.settings }; },
     plan(key) { return this.pricing.plans.find((p) => p.key === key) || null; },
 
     resetDemo() {
+      Object.assign(this.session, { signedIn: false, role: 'open', userId: 'o1', demo: false, demoStep: 0 });
       try { root.localStorage && root.localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
       this.loop = LEAD.seed.build();
       this.pricing = LEAD.pricingSeed.build();

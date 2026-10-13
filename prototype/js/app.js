@@ -60,8 +60,12 @@
     const org = me && me.orgId ? store.org(me.orgId) : null;
     const r = content.roleById[s.role];
     const theme = document.documentElement.getAttribute('data-theme');
-    const items = content.roles.map((x) => `<button class="persona-item" role="menuitemradio" aria-checked="${x.id === s.role}" data-act="as" data-role="${x.id}" data-to="${x.id === 'admin' ? 'admin' : 'w-' + x.id}">
-        ${ui.glyph(x.id)}<span><b>${esc(x.name)}</b><small>${esc(x.lens)}</small></span>${x.id === s.role ? '<span class="px cyan" aria-hidden="true"></span>' : ''}</button>`).join('');
+    const on = s.signedIn;
+    const items = content.roles.map((x) => `<button class="persona-item" role="menuitemradio" aria-checked="${on && x.id === s.role}" data-act="as" data-role="${x.id}" data-to="${x.id === 'admin' ? 'admin' : 'w-' + x.id}">
+        ${ui.glyph(x.id)}<span><b>${esc(x.name)}</b><small>${esc(x.lens)}</small></span>${on && x.id === s.role ? '<span class="px cyan" aria-hidden="true"></span>' : ''}</button>`).join('');
+    const myPath = on ? (s.role === 'admin' ? ['admin', 'Admin'] : ['w-' + s.role, 'My path']) : null;
+    const pathActive = on && (view === 'w' || (s.role === 'admin' && view === 'admin'));
+    const USER = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5"/></svg>';
     return `${bannerHTML()}
     <header class="site-head">
       <div class="wrap head-row">
@@ -70,22 +74,23 @@
           <span class="brand-div" aria-hidden="true"></span>
           <b class="brand-name">LEAD Commons</b>
         </a>
-        <nav class="nav" aria-label="Main">${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}<a class="nav-join" href="#join" data-act="sheet" data-role="student">Join</a></nav>
+        <nav class="nav" aria-label="Main">${myPath ? `<a class="nav-path" href="#${myPath[0]}" ${pathActive ? 'aria-current="page"' : ''}>${myPath[1]}</a>` : ''}${NAV.map(([k, l]) => `<a href="#${k}" ${k === active ? 'aria-current="page"' : ''}>${l}</a>`).join('')}${on ? '<a class="nav-join nav-out" href="#home" data-act="logout">Log out</a>' : '<a class="nav-join" href="#join" data-act="sheet" data-role="student">Join</a>'}</nav>
         <div class="head-tools">
           <button class="btn small demo-btn" data-act="demo-toggle" aria-pressed="${s.demo}" title="Walk the current persona through the loop">${s.demo ? 'Exit demo' : 'Demo'}</button>
           <div class="persona-wrap">
-            <button class="persona-btn" data-act="persona-menu" aria-haspopup="menu" aria-expanded="${menu.open}" aria-controls="persona-menu" title="Switch persona">
-              ${ui.glyph(s.role)}<span class="pname">${esc(r.short)}</span>${CARET}
+            <button class="persona-btn" data-act="persona-menu" aria-haspopup="menu" aria-expanded="${menu.open}" aria-controls="persona-menu" title="${on ? 'Switch persona' : 'Sign in as one of the demo personas'}" aria-label="${on ? 'Signed in as ' + esc(r.short) + '. Switch persona' : 'Sign in as…'}">
+              ${on ? ui.glyph(s.role) : USER}<span class="pname">${on ? esc(r.short) : 'Sign in as…'}</span>${CARET}
             </button>
-            <div class="persona-menu" id="persona-menu" role="menu" aria-label="Switch persona" ${menu.open ? '' : 'hidden'}>
-              <div class="persona-head"><span class="label">Acting as</span><b class="ink">${esc(me ? me.name : '')}</b>${org && org.kind !== 'open' ? `<span class="muted">${esc(org.name)}</span>` : ''}${ui.tag('Demo only · nothing saved or charged', 'sim')}</div>
+            <div class="persona-menu" id="persona-menu" role="menu" aria-label="${on ? 'Switch persona' : 'Sign in as'}" ${menu.open ? '' : 'hidden'}>
+              <div class="persona-head">${on ? `<span class="label">Signed in as</span><b class="ink">${esc(me ? me.name : '')}</b>${org && org.kind !== 'open' ? `<span class="muted">${esc(org.name)}</span>` : ''}` : '<span class="label">Demo sign-in</span><b class="ink">Pick who you want to be</b>'}${ui.tag('Demo only · nothing saved or charged', 'sim')}</div>
               ${items}
               <div class="divider"></div>
+              ${on ? '<button class="persona-item" role="menuitem" data-act="logout"><span class="glyph-gap"></span><span><b>Log out</b><small>Back to the public view</small></span></button>' : ''}
               <button class="persona-item" role="menuitem" data-act="theme"><span class="glyph-gap">${theme === 'light' ? MOON : SUN}</span><span><b>Switch theme</b><small>Now ${theme || 'system'}</small></span></button>
               <button class="persona-item" role="menuitem" data-act="reset"><span class="glyph-gap"></span><span><b>Reset demo</b><small>Clear demo data and start again</small></span></button>
             </div>
           </div>
-          <a class="btn join head-join" href="#join" data-act="sheet" data-role="student">Join</a>
+          ${on ? '<a class="btn head-logout" href="#home" data-act="logout">Log out</a>' : '<a class="btn join head-join" href="#join" data-act="sheet" data-role="student">Join</a>'}
         </div>
       </div>
     </header>`;
@@ -113,7 +118,7 @@
         <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${[...new Map(LEAD.photos.list.map((p) => [p.by, p])).values()].map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
       </details>
       <div class="foot-base">
-        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.7 · Synthetic data only. No real people or student data.</span></span>
+        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.8 · Synthetic data only. No real people or student data.</span></span>
         <span class="uxi"><span>With</span><span class="logo-tile"><img src="../public/brand/UXINDIA_logo.png" alt="UXINDIA, Design Leadership Week 2026" width="523" height="102"></span></span>
       </div>
     </div></footer>`;
@@ -243,10 +248,18 @@
       r.setAttribute('data-theme', effective === 'dark' ? 'light' : 'dark');
       render({ keepScroll: true });
     },
+    logout() {
+      setMenu(false);
+      store.signOut();
+      go('home');
+      ui.toast('You are logged out.');
+    },
     as(el) {
       setMenu(false);
       const role = el.getAttribute('data-role');
+      const was = store.session.signedIn;
       store.setRole(role, el.getAttribute('data-user') || undefined);
+      if (!was) ui.toast(`Demo: signed in as ${store.me() ? store.me().name : content.roleById[role].name}.`);
       if (store.session.demo) { store.session.demoStep = 0; go(script(role)[0].route); return; }
       const to = el.getAttribute('data-to');
       if (to) go(to); else render({ keepScroll: true });
@@ -258,6 +271,7 @@
     },
     'demo-toggle'() {
       if (store.session.demo) { store.session.demo = false; render({ keepScroll: true }); return; }
+      if (!store.session.signedIn) store.setRole(content.demoOrder[0]);
       store.session.demo = true; store.session.demoStep = 0;
       go(script(store.session.role)[0].route);
     },

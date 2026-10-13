@@ -3,6 +3,9 @@
    mono caps labels, and a steady 12-column grid that drops to one column on phones. Dark is the reference. */
 
 :root {
+  /* UMO blue, sampled from the logo. Dark text on it keeps contrast above 7:1 in both themes. */
+  --umo-blue: #00B0F0;
+  --on-umo-blue: #07101F;
   /* dark (reference) */
   --bg: #14110F;
   --ink: #F3EEE9;
@@ -196,7 +199,7 @@ ul.px-list.yes li::before { background: var(--pos); }
   .logo-tile img { height: 32px; }
 }
 @media (max-width: 640px) {
-  .head-tools .head-join { display: none; }
+  .head-tools .head-join, .head-tools .head-logout { display: none; }
   .nav-join { display: flex !important; }
   .persona-btn .pname { display: none; }
   .demo-btn { padding-inline: 10px; }
@@ -249,8 +252,11 @@ button.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); bor
 .btn:hover { border-color: var(--muted); color: var(--ink); }
 .btn.primary { background: var(--indigo); border-color: var(--indigo); color: var(--on-accent); }
 .btn.primary:hover { filter: brightness(1.08); color: var(--on-accent); }
-.btn.join { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.btn.join:hover { color: var(--bg); filter: brightness(.95); }
+.btn.join { background: var(--umo-blue); color: var(--on-umo-blue); border-color: var(--umo-blue); font-weight: 700; }
+.btn.join:hover { color: var(--on-umo-blue); background: #33C2F4; border-color: #33C2F4; }
+.btn.head-logout { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.head-logout:hover { border-color: var(--ink); }
+.nav a.nav-join:not(.nav-out) { background: var(--umo-blue); color: var(--on-umo-blue) !important; border-radius: 8px; font-weight: 700; }
 .btn.ghost { background: transparent; }
 .btn.danger { color: var(--red); }
 .btn.small { min-height: 36px; padding: 8px 12px; font-size: 13px; border-radius: 8px; }
@@ -766,3 +772,17 @@ fieldset.q legend { padding: 0 6px; }
 .when-step:hover { border-color: var(--ink); }
 .when-step[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); }
 .when-step[aria-pressed="true"] b, .when-step[aria-pressed="true"] small, .when-step[aria-pressed="true"] .when-n { color: var(--bg); }
+
+/* 1 Million Women: where the seats come from, and the role cards */
+.src-bar { display: flex; height: 18px; gap: 2px; border-radius: 3px; overflow: hidden; background: var(--panel-2); }
+.src-bar .src { display: block; min-width: 4px; }
+.src-share { background: var(--cyan); } .src-topup { background: var(--indigo); } .src-college { background: var(--red); }
+.src-sponsor { background: var(--pos); } .src-hours { background: #E8B84A; }
+.src-legend { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 6px 18px; font-size: 14px; }
+.src-legend li { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
+.src-dot { width: 12px; height: 12px; display: inline-block; }
+.women-role.is-you { border-color: var(--umo-blue); box-shadow: 0 0 0 1px var(--umo-blue); }
+
+/* header room for "My path" while signed in */
+.nav a.nav-path { color: var(--ink); font-weight: 700; }
+@media (min-width: 1181px) { .nav a { padding-inline: 10px; } .site-head .wrap { max-width: 1320px; } }

@@ -10,7 +10,7 @@
   const uid = () => { const m = me(); return m ? m.id : null; };
   const f = { mode: '', skill: '', q: '', all: false };
   const play = { code: null, phase: 'list', lesson: null, result: null };
-  const open = { teach: false, topic: false, request: false };
+  const open = { teach: false, topic: false, request: false, women: false };
 
   const byCode = (c) => Lr().modules.find((m) => m.code === c) || null;
   const rec = (code) => ((Lr().progress[uid()] || {})[code]) || null;
@@ -127,7 +127,8 @@
       ${role() === 'admin' && ['Matched', 'Scheduled'].includes(r.state) ? `<button class="btn small" data-act="ct-advance" data-kind="request" data-id="${r.id}">Move to ${r.state === 'Matched' ? 'Scheduled' : 'Done'}</button>` : ''}</div></li>`;
   }
   function offerRow(o) {
-    return `<li class="row between give-row"><span><b class="ink">${esc(o.id)}</b> · ${esc(o.topic)}<br><span class="muted tiny">${esc(ui.nameOf(o.by))} · ${esc(enums.ModeLabel[o.mode])} · ${o.hours} hours · ${esc(o.when)}</span></span>
+    const seats = o.women ? P.seatsFromHours(o.hours, store.pricing.settings.womenHoursPerSeat) : 0;
+    return `<li class="row between give-row"><span><b class="ink">${esc(o.id)}</b> · ${esc(o.topic)} ${o.women ? '<span class="tag">Women in Design</span>' : ''}<br><span class="muted tiny">${esc(ui.nameOf(o.by))} · ${esc(enums.ModeLabel[o.mode])} · ${o.hours} hours · ${esc(o.when)}${o.women ? ` · adds ${seats} ${seats === 1 ? 'seat' : 'seats'} to 1 Million Women when done` : ''}</span></span>
       <span class="row">${ui.status(o.state)}${role() === 'admin' && o.state !== 'Done' ? `<button class="btn small ${o.state === 'Proposed' ? 'primary' : ''}" data-act="ct-advance" data-kind="offer" data-id="${o.id}">${o.state === 'Proposed' ? 'Approve' : o.state === 'Approved' ? 'Schedule' : 'Mark done'}</button>` : ''}</span></li>`;
   }
 
@@ -145,6 +146,7 @@
           <label class="field">Hours you can give<span class="hint">1 to 60</span><input id="of-hours" name="hours" type="number" min="1" max="60" value="4" required></label>
           <label class="field">When<input id="of-when" name="when" value="Nov or Dec"></label>
         </div>
+        <label class="check"><input type="checkbox" id="of-women" name="women" ${open.women ? 'checked' : ''}> This is for women in design. ${store.pricing.settings.womenHoursPerSeat} hours count as one seat for <a href="#women">1 Million Women in Design</a>.</label>
         <div class="btn-row"><button class="btn primary" type="submit">Offer my hours</button></div><span class="muted tiny">A UMO admin approves every offer before it is listed.</span>
         ${note('offer')}
       </form></details>`;
@@ -355,6 +357,7 @@
     'lm-skill'(el) { f.skill = el.dataset.k; rerender(); },
     'lrn-go'(el) { scrollTo(el.dataset.id); },
     'lrn-teach'() { open.teach = true; rerender(); scrollTo('give'); },
+    'lrn-women-offer'() { open.teach = true; open.women = true; if (location.hash.slice(1) !== 'learn') location.hash = 'learn'; else rerender(); setTimeout(() => scrollTo('give'), 150); },
     'lrn-request'() { open.request = true; rerender(); scrollTo('give'); },
     'tp-pledge'(el) {
       const t = Lr().topics.find((x) => x.id === el.dataset.id); if (!t || t.pledges.includes(uid())) return;
@@ -386,7 +389,8 @@
       const x = kind[1].find((y) => y.id === el.dataset.id);
       const states = { teaching_offer: ['Proposed', 'Approved', 'Scheduled', 'Done'], learning_request: ['Open', 'Matched', 'Scheduled', 'Done'] }[kind[0]];
       const to = states[states.indexOf(x.state) + 1]; if (!to) return;
-      store.commit(`${kind[0] === 'teaching_offer' ? 'Offer' : 'Request'} moved to ${to}`, kind[0], x, () => { x.state = rules.transition(kind[0], x.state, to); return x; }); rerender();
+      const credit = kind[0] === 'teaching_offer' && x.women && to === 'Done' ? P.seatsFromHours(x.hours, store.pricing.settings.womenHoursPerSeat) : 0;
+      store.commit(`${kind[0] === 'teaching_offer' ? 'Offer' : 'Request'} moved to ${to}${credit ? ` · adds ${credit} seats to 1 Million Women` : ''}`, kind[0], x, () => { x.state = rules.transition(kind[0], x.state, to); return x; }); rerender();
     },
   });
 
@@ -406,7 +410,7 @@
     const o = { topic: String(fd.get('topic')).trim(), mode: fd.get('mode'), hours: fd.get('hours'), when: String(fd.get('when')).trim() || 'To agree', role: role(), completed: completedAny() };
     const v = rules.validateOffer(o);
     if (!v.ok) { say('offer', v.reason, 'err'); open.teach = true; rerender(); return; }
-    const item = { id: nextNum(Lr().offers, 'OF'), by: uid(), topic: o.topic, mode: o.mode, hours: Number(o.hours), when: o.when, state: 'Proposed', at: Date.now() };
+    const item = { id: nextNum(Lr().offers, 'OF'), by: uid(), topic: o.topic, mode: o.mode, hours: Number(o.hours), when: o.when, state: 'Proposed', women: !!fd.get('women'), at: Date.now() };
     store.commit('Teaching offered', 'teaching_offer', item.id, () => { Lr().offers.push(item); return item; });
     say('offer', `Thank you. ${item.id} is with the UMO admin for approval.`); open.teach = true; rerender();
   };
