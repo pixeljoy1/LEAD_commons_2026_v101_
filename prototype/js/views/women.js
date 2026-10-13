@@ -20,13 +20,15 @@
 
   function roleCards() {
     const cards = [
-      ['Student', 'Join a women’s circle as a step in your path.', [['Join as a student', 'sheet', 'student'], ['See the circles', 'go', 'calendar']]],
-      ['College', 'Pledge seats for women students when you sign up.', [['Pledge at sign-up', 'go', 'join-college']]],
-      ['Industry', 'Sponsor a women’s cohort on a real challenge.', [['Sponsor a cohort', 'go', 'join-sponsor']]],
-      ['Mentor', 'Offer a session or an office hour for women designers.', [['Offer your hours', 'sheet', 'mentor']]],
-      ['Faculty', 'Run or join a dedicated session for your studio.', [['See the sessions', 'go', 'calendar']]],
+      ['Student', 'women-field', 'Join a women’s circle as a step in your path.', [['Join as a student', 'sheet', 'student'], ['Women in Design circle', 'go', 'learn-LM-PL-2']]],
+      ['Faculty', 'women-circle', 'Run or join a dedicated session for your studio.', [['See the sessions', 'go', 'calendar']]],
+      ['College', 'women-market', 'Pledge seats for women students when you sign up.', [['Pledge at sign-up', 'go', 'join-college']]],
+      ['Industry', 'women-work', 'Sponsor a women’s cohort on a real challenge.', [['Sponsor a cohort', 'go', 'join-sponsor']]],
+      ['Mentor', 'women-tea', 'Offer a session or an office hour for women designers.', [['Offer your hours', 'sheet', 'mentor']]],
+      ['Learn', null, 'Start with LM-SP-5, a free 30-minute module for women entering design.', [['Open LM-SP-5', 'go', 'learn-LM-SP-5']]],
     ];
-    return cards.map(([name, line, btns]) => `<article class="card tight"><span class="eyebrow">${esc(name)}</span><p class="ink">${esc(line)}</p>
+    const ph = (slot) => { const p = LEAD.photos.bySlot[slot]; return p ? `<figure class="ph door-ph"><img src="${p.src}" alt="${esc(p.alt)}" decoding="async" loading="lazy"><span class="ph-chk" aria-hidden="true"></span><figcaption class="ph-cap">Illustrative · not the person</figcaption></figure>` : ''; };
+    return cards.map(([name, slot, line, btns]) => `<article class="card tight women-role">${slot ? ph(slot) : ''}<span class="eyebrow">${esc(name)}</span><p class="ink">${esc(line)}</p>
       <div class="btn-row">${btns.map(([l, k, v], i) => k === 'sheet'
         ? `<button class="btn ${i ? 'ghost' : 'primary'}" data-act="sheet" data-role="${v}">${esc(l)}</button>`
         : `<button class="btn ${i ? 'ghost' : 'primary'}" data-go="${v}">${esc(l)}</button>`).join('')}</div></article>`).join('');
@@ -34,7 +36,7 @@
 
   function sessions() {
     const list = store.loop.events.filter((e) => e.women).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
-    return `<ul class="list">${list.map((e) => `<li class="row between"><span><b class="ink">${esc(e.title)}</b><br><span class="muted tiny">${esc(ui.fmtDate(e.at))} · ${esc(e.where)}</span></span><a class="btn small ghost" href="#calendar">Calendar</a></li>`).join('') || '<li class="muted">No sessions yet.</li>'}</ul>`;
+    return `<ul class="list">${list.map((e) => `<li class="row between give-row"><span><b class="ink">${esc(e.title)}</b><br><span class="muted tiny">${esc(ui.fmtDate(e.at))} · ${esc(e.where)}</span></span><a class="btn small ghost" href="#calendar">Calendar</a></li>`).join('') || '<li class="muted">No sessions yet.</li>'}</ul>`;
   }
 
   LEAD.views.women = {

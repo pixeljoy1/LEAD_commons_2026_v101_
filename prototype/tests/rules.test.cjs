@@ -15,9 +15,9 @@ test('R1 blind-first: names hidden while any of my scores is unlocked', () => {
 
 test('R2 two-person approval', () => {
   const entry = { status: 'Proposed', submissionId: 's1', assessorId: 'a1' };
-  const steward = { id: 'st1', role: 'steward' };
+  const steward = { id: 'Admin A', role: 'admin' };
   assert.equal(R.canVerify(entry, scores('a1', false, 6), steward, 6).ok, false);
-  assert.equal(R.canVerify(entry, scores('a1', true, 6), { id: 'a1', role: 'steward' }, 6).ok, false);
+  assert.equal(R.canVerify(entry, scores('a1', true, 6), { id: 'a1', role: 'admin' }, 6).ok, false);
   assert.equal(R.canVerify(entry, scores('a1', true, 6), { id: 'x', role: 'mentor' }, 6).ok, false);
   assert.equal(R.canVerify(entry, scores('a1', true, 6), steward, 6).ok, true);
 });

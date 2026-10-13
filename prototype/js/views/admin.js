@@ -1,4 +1,4 @@
-/* LEAD · UMO admin (mock), one page: pricing models, coupons, recent sign-ups. */
+/* LEAD · UMO admin, one page: the operations links, pricing models, coupons, the women share, recent sign-ups. */
 (function (root) {
   const LEAD = root.LEAD;
   const { ui, store, pricing: P, rules, enums } = LEAD;
@@ -89,6 +89,19 @@
     </form>`;
   }
 
+  function opsStrip() {
+    const L = store.loop;
+    const items = [
+      ['#demand', 'Intake queue', `${L.demandSignals.filter((d) => d.status === 'Submitted').length} to review`],
+      ['#challenges', 'Challenges', `${L.challenges.filter((c) => ['Draft', 'Shaped'].includes(c.status)).length} to shape or match`],
+      ['#sprints', 'Mentor pool', `${L.users.filter((u) => u.role === 'mentor' && !u.verified).length} to verify`],
+      ['#passports', 'Passports', `${L.passports.filter((p) => p.status === 'Proposed').length} to approve`],
+      ['#learn', 'Learning catalogue', `${LEAD.learn ? LEAD.learn.pending() : 0} to review`],
+      ['#audit', 'Audit log', `${L.audit.length} entries`],
+    ];
+    return `<div class="ops" role="group" aria-label="UMO operations">${items.map(([h, t, n]) => `<a class="card tight ops-item" href="${h}"><b class="ink">${esc(t)}</b><span class="muted tiny">${esc(n)}</span></a>`).join('')}</div>`;
+  }
+
   function womenCard() {
     const st = store.pricing.settings; const t = P.womenTally(store.pricing.signups, st);
     return `<form class="card" data-form="women-share" style="gap:12px;max-width:640px">
@@ -111,13 +124,13 @@
   LEAD.views.admin = {
     title: () => 'Pricing admin',
     render() {
-      if (!['admin', 'steward'].includes(role())) return ui.guard(['admin'], 'The pricing admin');
+      if (role() !== 'admin') return ui.guard(['admin'], 'The pricing admin');
       const pr = store.pricing;
       const html = `<div class="page wrap">
         <div class="stack" style="gap:12px">
-          <div class="row between"><div class="stack" style="gap:6px"><span class="eyebrow">UMO admin (mock)</span><h1 style="font-size:clamp(34px,5vw,54px)">Pricing.</h1></div><div class="row">${ui.mockTag()}<a class="btn small ghost" href="#audit">Change log</a></div></div>
-          <p>Stage the prices and offers every sign-up screen reads. A change reaches open sign-up screens within seconds. Nothing is charged.</p>
-          ${canWrite() ? '' : '<div class="msg info">Stewards can read prices and coupons. Only the UMO admin changes them.</div>'}
+          <div class="row between"><div class="stack" style="gap:6px"><span class="eyebrow">UMO admin</span><h1 style="font-size:clamp(34px,5vw,54px)">Admin.</h1></div><div class="row"><a class="btn small ghost" href="#audit">Change log</a></div></div>
+          <p>Run the loop and stage the prices every sign-up screen reads. A price change reaches open sign-up screens within seconds. Nothing is charged.</p>
+          ${opsStrip()}
         </div>
         <section class="section">
           ${ui.sectionHead('01', 'Pricing models', '', 'Each plan is a priced offer. Saving creates a new price version; past sign-ups keep the one they accepted.')}

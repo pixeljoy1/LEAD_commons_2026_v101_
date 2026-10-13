@@ -140,7 +140,7 @@
 
   function matrix() {
     const core = content.actors.filter((a) => !a.ext);
-    const short = (a) => a.label.replace('Institution head', 'Inst. head').replace('Mentor & assessor', 'Mentor').replace('Industry leader', 'Industry').replace('Industry Challenge', 'Challenge').replace('Open community', 'Open').replace('UMO steward', 'Steward');
+    const short = (a) => a.label.replace('Institution head', 'Inst. head').replace('Mentor & assessor', 'Mentor').replace('Industry leader', 'Industry').replace('Industry Challenge', 'Challenge').replace('Open community', 'Open').replace('UMO admin', 'Admin');
     const head = `<tr><th>Gives ↓ · Gets →</th>${core.map((a) => `<th>${esc(short(a))}</th>`).join('')}</tr>`;
     const rows = core.map((g) => `<tr><td><b>${esc(short(g))}</b></td>${core.map((r) => {
       if (g.id === r.id) return '<td class="self"></td>';
@@ -175,7 +175,7 @@
   }
 
   function stayCards() {
-    return ['student', 'faculty', 'head', 'industry', 'mentor', 'steward', 'open', 'challenge'].map((id) => {
+    return ['student', 'faculty', 'head', 'industry', 'mentor', 'admin', 'open', 'challenge'].map((id) => {
       const a = actorById[id]; const s = content.stays[id];
       return `<button class="card" data-act="eco-actor" data-id="${id}" data-scroll="1">
         <span class="label">${esc(a.group)}</span>

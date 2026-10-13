@@ -5,7 +5,7 @@
   const { esc } = ui;
 
   const NAV = [
-    ['lexicon', 'Learn'],
+    ['learn', 'Learn'],
     ['challenges', 'Challenges'],
     ['calendar', 'Community'],
     ['opportunities', 'Opportunities'],
@@ -13,15 +13,16 @@
     ['women', '1M Women'],
   ];
   const NAV_MATCH = {
-    lexicon: ['lexicon', 'demand'], challenges: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
+    learn: ['learn', 'skills', 'demand'], challenges: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
     calendar: ['calendar', 'provisions'], opportunities: ['opportunities', 'passports', 'passport'], impact: ['impact', 'audit'],
   };
 
   /* token → [view, param] */
   function parse(token) {
-    const t = !token || token === 'model' ? 'home' : token; // the homepage is the model
+    let t = !token || token === 'model' ? 'home' : token; // the homepage is the model
+    if (t === 'lexicon' || t.startsWith('lexicon-')) t = 'skills' + t.slice(7); // the Lexicon is now the Skills Guide
     if (/^admin-/.test(t)) return ['admin', null]; // old admin routes now live on one page
-    const prefixes = ['w-', 'lexicon-', 'challenge-', 'team-', 'passport-', 'join-path-', 'join-sponsor-'];
+    const prefixes = ['w-', 'learn-', 'skills-', 'challenge-', 'team-', 'passport-', 'join-path-', 'join-sponsor-'];
     for (const p of prefixes) if (t.startsWith(p)) return [p.slice(0, -1), t.slice(p.length)];
     return [t, null];
   }
@@ -109,7 +110,7 @@
       </div>
       <details class="foot-about"><summary>About the model and photo credits</summary>
         <p>LEAD borrows its structure from open learning communities such as the Interaction Design Foundation (IxDF), and adds real industry problems, mentoring and validation. No IxDF content, branding or text is used.</p>
-        <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${LEAD.photos.list.map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
+        <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${[...new Map(LEAD.photos.list.map((p) => [p.by, p])).values()].map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
       </details>
       <div class="foot-base">
         <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.5 · Synthetic data only. No real people or student data.</span></span>

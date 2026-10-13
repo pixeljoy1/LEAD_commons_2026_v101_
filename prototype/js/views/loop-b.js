@@ -25,7 +25,7 @@
     title: () => 'Assessment day',
     render() {
       const r = role(); const u = me();
-      if (!['mentor', 'industry', 'steward', 'faculty'].includes(r)) return ui.guard(['mentor', 'industry', 'steward'], 'Assessment day');
+      if (!['mentor', 'industry', 'admin', 'faculty'].includes(r)) return ui.guard(['mentor', 'industry', 'admin'], 'Assessment day');
       const ad = L().assessmentDays[0];
       const subs = L().submissions.filter((s) => ['In scoring', 'Scored', 'Moderated'].includes(s.status) && challengeOf(teamOf(s)).id === ad.challengeId);
       const scorer = r === 'mentor' || r === 'industry';
@@ -87,7 +87,7 @@
           ${ws.map((x) => `<tr><td>${esc(ui.nameOf(x.a))}</td><td>${x.locked ? ui.status('Complete', 'Locked') : ui.status('In progress', 'Scoring')}</td><td class="num">${x.w == null ? '—' : x.w.toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">No scores yet.</td></tr>'}
         </tbody></table></div>
         <div class="row between"><span>Spread between assessors: <b class="ink tnum">${spread == null ? 'needs two locked assessors' : spread.toFixed(2)}</b>${spread != null && spread > 0.75 ? ' ' + ui.tag('Review', 'sim') : ''}</span>
-        ${role() === 'steward' && s.status === 'Scored' ? `<button class="btn small" data-act="moderate" data-sub="${s.id}">Mark moderated</button>` : ''}</div>
+        ${role() === 'admin' && s.status === 'Scored' ? `<button class="btn small" data-act="moderate" data-sub="${s.id}">Mark moderated</button>` : ''}</div>
       </article>`;
     }).join('');
   }
@@ -116,7 +116,7 @@
         store.commit('Passport entry proposed', 'passport_entry', e.id, () => { L().passports.push(e); return e; });
       });
       if (lockedBy(subId).length >= 2 && sub.status === 'In scoring') move('submission', sub, 'Scored');
-      ui.toast('Locked. Names are now shown. Passport entries proposed for the steward.');
+      ui.toast('Locked. Names are now shown. Passport entries proposed for the UMO team.');
     },
     moderate(el) { const s = L().submissions.find((x) => x.id === el.dataset.sub); if (move('submission', s, 'Moderated')) ui.toast('Moderated.'); },
     'rubric-ok'() { store.commit('Rubric v2 approved', 'rubric', 'v2', () => ({ approvedBy: me().name })); ui.toast('Rubric approved.'); },
@@ -151,12 +151,12 @@
         const cons = L().consents.filter((c) => c.userId === u.id);
         body = `<div class="split"><section class="grid g2">${mine.map((p) => passportCard(p, {
           actions: p.status === 'Verified' ? `<button class="btn primary" data-act="pp-share" data-id="${p.id}">Share with employers</button>`
-            : p.status === 'Shared' ? `<button class="btn" data-act="pp-unshare" data-id="${p.id}">Stop sharing</button>` : `<span class="muted" style="font-size:13px">Waiting for the steward’s second approval.</span>`,
+            : p.status === 'Shared' ? `<button class="btn" data-act="pp-unshare" data-id="${p.id}">Stop sharing</button>` : `<span class="muted" style="font-size:13px">Waiting for the UMO team’s second approval.</span>`,
         })).join('') || '<div class="empty">No entries yet. They appear after assessment.</div>'}</section>
         <aside class="card"><span class="eyebrow">F-GV-01 · Consent manager</span><p style="font-size:14px">You control what is shared. Revoking takes effect at once (R3).</p>
           ${PURPOSES.map(([k, l]) => { const c = cons.find((x) => x.purpose === k); return `<label class="check"><input type="checkbox" id="cs-${k}" data-on="consent" data-k="${k}" ${c && c.granted ? 'checked' : ''}> ${esc(l)}</label>`; }).join('')}
           <span class="muted" style="font-size:12.5px">Retention and lawful basis: decision for counsel under India’s data protection law.</span></aside></div>`;
-      } else if (r === 'steward') {
+      } else if (r === 'admin') {
         const queue = P.filter((p) => p.status === 'Proposed');
         body = `<section class="section">${ui.sectionHead('F-VA-06 · Integrity', 'Waiting for second approval', ui.tag(`${queue.length} pending`, queue.length ? 'mock' : 'live'))}
           <div class="grid g3">${queue.map((p) => { const chk = rules.canVerify(p, L().scores, u, L().rubric.length); return passportCard(p, { actions: `${chk.ok ? '' : `<div class="msg err">${esc(chk.reason)}</div>`}<button class="btn primary" data-act="pp-approve" data-id="${p.id}" ${chk.ok ? '' : 'disabled'}>Approve</button>` }); }).join('') || '<div class="empty">Queue clear.</div>'}</div></section>
@@ -176,9 +176,9 @@
         body = `${ui.kpis([{ label: 'Verified or shared', v: agg(['Verified', 'Shared']).value, hidden: agg(['Verified', 'Shared']).hidden, d: 'R4 hides groups under 5' }, { label: 'Proposed', v: agg(['Proposed']).value, hidden: agg(['Proposed']).hidden }, { label: 'Students consenting to share', v: consented.length }])}
           ${r === 'faculty' ? `<section class="section">${ui.sectionHead('Cohort', 'Entries your students consented to share')}<div class="grid g3">${consented.map((p) => passportCard(p)).join('') || '<div class="empty">No consented entries.</div>'}</div></section>` : '<p class="muted">Institution heads see aggregates only. An individual’s feedback needs their consent.</p>'}`;
       } else {
-        return ui.guard(['student', 'steward', 'industry'], 'Passports');
+        return ui.guard(['student', 'admin', 'industry'], 'Passports');
       }
-      return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '06 · VALIDATE · F-VA-06, F-VA-08 · R2, R3', title: 'Passport.', lede: 'Verified evidence of what a student can do. An assessor proposes; a steward gives the second approval; the student decides who sees it.', meta: ui.simTag() })}${body}</div>`;
+      return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: '06 · VALIDATE · F-VA-06, F-VA-08 · R2, R3', title: 'Passport.', lede: 'Verified evidence of what a student can do. An assessor proposes; a UMO admin gives the second approval; the student decides who sees it.', meta: ui.simTag() })}${body}</div>`;
     },
   };
 
@@ -232,7 +232,7 @@
           <span class="code" style="font-size:28px;font-family:var(--f-pixel);background:none;padding:0">${esc(p.code)}</span>
           <h1 style="font-size:clamp(30px,5vw,48px)">${esc(ui.capName(p.capSlug))}</h1>
           <p class="ink" style="font-size:17px">${esc(ui.nameOf(p.studentId))} showed this capability at level ${p.level} of 4, <b>${LEVELS[p.level - 1]}</b>, on a real industry challenge.</p>
-          <div class="kv"><span>Challenge</span><span>${esc(c.title)}</span><span>Sponsor</span><span>${esc(ui.orgName(c.sponsorOrgId))}</span><span>Scored</span><span>Blind-first, shared rubric</span><span>Approved by</span><span>UMO steward (second approval)</span><span>Evidence</span><span><a href="${esc(sub ? sub.deliverable : '#')}" target="_blank" rel="noopener">Deliverable</a> · decision log</span><span>Issued</span><span>${ui.fmtDate(p.at)}</span></div>
+          <div class="kv"><span>Challenge</span><span>${esc(c.title)}</span><span>Sponsor</span><span>${esc(ui.orgName(c.sponsorOrgId))}</span><span>Scored</span><span>Blind-first, shared rubric</span><span>Approved by</span><span>UMO admin (second approval)</span><span>Evidence</span><span><a href="${esc(sub ? sub.deliverable : '#')}" target="_blank" rel="noopener">Deliverable</a> · decision log</span><span>Issued</span><span>${ui.fmtDate(p.at)}</span></div>
           <p class="muted" style="font-size:13px">Issued under the LEAD Codex by UMO Design Foundation. Synthetic demo record.</p>
         </div></div>`;
     },
@@ -287,7 +287,7 @@
           <label class="field">Stipend note<input id="po-stipend" name="stipend" value="Field only; policy not set"></label>
           <button class="btn primary" type="submit">Post</button></form></aside></div>`;
       } else if (r === 'open') {
-        body = `<div class="grid g2">${ops.filter((o) => o.open).map((o) => card(o, L().applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The steward replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`)).join('')}
+        body = `<div class="grid g2">${ops.filter((o) => o.open).map((o) => card(o, L().applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The UMO team replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`)).join('')}
           <article class="card"><span class="label">General design jobs</span><h3>Looking for any design role?</h3><p>UXIN carries general jobs. LEAD lists only evidence-backed roles.</p><a class="btn" href="https://uxin.co" target="_blank" rel="noopener">Find a job on UXIN</a></article></div>`;
       } else {
         const sim = r === 'head' ? `<section class="section">${ui.sectionHead('F-OP-03 · Placement readiness · cohort A', 'Readiness', ui.simTag())}${ui.kpis([{ label: 'Shortlisted by employers', v: 21 }, { label: 'Interviews', v: 14 }, { label: 'Offers', v: 5 }])}<button class="btn small" data-act="toast" data-msg="Shared with the placement cell (mock).">Share with placement cell</button></section>` : '';
@@ -349,19 +349,19 @@
       const byState = (s) => D.challenges.filter((c) => c.status === s).length;
       const spreads = D.submissions.map((s) => { const ws = lockedBy(s.id).map((a) => weighted(s.id, a)); return ws.length > 1 ? Math.max(...ws) - Math.min(...ws) : null; }).filter((x) => x != null);
       const agree = spreads.length ? (spreads.reduce((a, b) => a + b, 0) / spreads.length).toFixed(2) : '—';
-      const scope = { student: 'Your own record', faculty: 'Your cohort', head: 'Your institution', industry: 'Your organisation', mentor: 'Your hours', steward: 'The whole loop', open: 'Public totals', admin: 'Public totals' }[r];
+      const scope = { student: 'Your own record', faculty: 'Your cohort', head: 'Your institution', industry: 'Your organisation', mentor: 'Your hours', open: 'Public totals', admin: 'The whole loop' }[r];
       const fsi = D.capabilities.map((c) => {
         const demand = c.asks + D.demandSignals.filter((d) => d.capSlug === c.slug).length;
         const supply = D.passports.filter((p) => p.capSlug === c.slug && p.level >= 3 && ['Verified', 'Shared'].includes(p.status)).length;
         return { c, demand, supply, gap: supply ? demand / supply : null };
       }).sort((a, b) => b.demand - a.demand).slice(0, 8);
       const maxD = Math.max(...fsi.map((x) => x.demand));
-      const sponsorRecords = D.problemRecords.filter((p) => { const c = D.challenges.find((x) => x.id === p.challengeId); return r === 'steward' || (r === 'industry' && c && c.sponsorOrgId === u.orgId); });
+      const sponsorRecords = D.problemRecords.filter((p) => { const c = D.challenges.find((x) => x.id === p.challengeId); return r === 'admin' || (r === 'industry' && c && c.sponsorOrgId === u.orgId); });
       return `<div class="page wrap">
         ${ui.hero({ compact: true, eyebrow: 'Measurement layer · F-OP-05, F-OP-06 · “What do you measure??”', title: 'Impact.', lede: 'The headline is industry problems solved, confirmed by the sponsor’s named owner. Programmes run do not count.', meta: `${ui.tag(`Scope: ${scope}`, 'ind')}${ui.simTag()}` })}
         <section class="section">
           <div class="row between"><div class="stack" style="gap:2px"><span class="eyebrow">Headline</span><span class="pxnum" style="font-size:clamp(56px,8vw,96px)">${String(solved).padStart(2, '0')}</span><b class="ink" style="font-size:20px">industry problems solved</b><span class="muted">${partly} partly solved, counted separately. Each challenge counts once.</span></div>
-          ${r === 'steward' ? '<button class="btn primary" data-act="report">Publish day-30 report</button>' : ''}</div>
+          ${r === 'admin' ? '<button class="btn primary" data-act="report">Publish day-30 report</button>' : ''}</div>
           ${ui.kpis([
             { label: 'Challenges live', v: byState('Live') + byState('In assessment'), d: `${D.challenges.length} posted · ${byState('Closed')} closed` },
             { label: 'Verified Passports', v: verified, d: 'Verified or shared' },
@@ -380,7 +380,7 @@
             <div style="display:grid;gap:3px"><div class="meter"><span style="width:${Math.round((x.demand / maxD) * 100)}%;background:var(--red)"></span></div><div class="meter"><span style="width:${Math.round((x.supply / maxD) * 100)}%"></span></div></div>
           </div>`).join('')}<div class="legend"><span><span class="vk" style="background:var(--red)"></span> Demand</span><span><span class="vk" style="background:var(--cyan)"></span> Verified supply</span></div></div>
         </section>
-        ${r === 'head' || r === 'steward' ? `<section class="section">${ui.sectionHead('F-VA-07 · Outcomes · cohort A', 'Outcomes view', ui.simTag(), 'No student names. Groups under 5 are hidden (R4).')}
+        ${r === 'head' || r === 'admin' ? `<section class="section">${ui.sectionHead('F-VA-07 · Outcomes · cohort A', 'Outcomes view', ui.simTag(), 'No student names. Groups under 5 are hidden (R4).')}
           ${ui.kpis([{ label: 'Passports validated', v: '38 of 60' }, { label: 'Challenges completed', v: 12 }, { label: 'Faculty hours', v: 54 }, (() => { const a = rules.aggregate(D.passports.filter((p) => store.user(p.studentId).orgId === 'campus-c').length); return { label: 'Campus C · live entries', v: a.value, hidden: a.hidden }; })()])}</section>` : ''}
       </div>`;
     },
@@ -398,7 +398,7 @@
   LEAD.views.audit = {
     title: () => 'Audit log',
     render() {
-      if (!['steward', 'admin'].includes(role())) return ui.guard(['steward', 'admin'], 'The audit log');
+      if (role() !== 'admin') return ui.guard(['admin'], 'The audit log');
       const rows = L().audit.map((a) => Object.assign({ src: 'Loop' }, a)).concat(store.pricing.audit.map((a) => Object.assign({ src: 'Pricing' }, a))).sort((a, b) => b.at - a.at).slice(0, 200);
       return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: 'F-GV-03 · R8, R16', title: 'Audit.', lede: 'Every state change, with who did it and what it was before and after.' })}
         <div class="table-wrap"><table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Entity</th><th>Source</th></tr></thead><tbody>

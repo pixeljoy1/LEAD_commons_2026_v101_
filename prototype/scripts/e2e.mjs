@@ -45,17 +45,18 @@ await page.goto(BASE + '#model'); // old link: must land on the homepage
 await page.waitForSelector('.eco-canvas svg');
 
 /* ---------- crawl: every route × every role ---------- */
-const ROUTES = ['home', 'model', 'verdict', 'choose', 'lexicon', 'lexicon-problem-framing', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'women', 'calendar', 'provisions', 'audit',
+const ROUTES = ['home', 'model', 'verdict', 'choose', 'skills', 'skills-problem-framing', 'lexicon-problem-framing', 'learn', 'learn-LM-SP-1', 'learn-LM-IL-1', 'learn-LM-CB-1', 'learn-LM-PL-2', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'women', 'calendar', 'provisions', 'audit',
   'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans'];
-const simulated = [];
-const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'steward', 'open', 'admin'];
+const simulated = []; const oldWords = [];
+const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'open', 'admin'];
 for (const r of ROLES) {
   await as(page, r);
   await go(page, 'w-' + r);
-  for (const t of ROUTES) { await go(page, t); if (await page.evaluate(() => /Simulated/i.test(document.body.innerText))) simulated.push(`${r}:${t}`); }
+  for (const t of ROUTES) { await go(page, t); if (await page.evaluate(() => /Simulated/i.test(document.body.innerText))) simulated.push(`${r}:${t}`); if (await page.evaluate(() => /\bsteward|co-sign|\bLexicon\b/i.test(document.body.innerText))) oldWords.push(`${r}:${t}`); }
 }
 ok('Crawl: no script errors on 37 routes × 8 roles', errors.length === 0, errors.slice(0, 5).join(' | '));
 ok('The word “Simulated” appears nowhere', simulated.length === 0, simulated.slice(0, 5).join(', '));
+ok('No steward, co-signing or Lexicon wording on any screen', oldWords.length === 0, oldWords.slice(0, 8).join(', '));
 
 /* ---------- S9: access rules per role ---------- */
 await as(page, 'open'); await go(page, 'team-t1');
@@ -71,9 +72,9 @@ await go(page, 'home');
 await page.click('.persona-btn');
 const menuItems = await page.locator('.persona-item[data-role]').count();
 await page.keyboard.press('Escape');
-ok('Header: persona menu lists 8 personas and closes on Escape', menuItems === 8 && await page.locator('#persona-menu').isHidden());
+ok('Header: persona menu lists 7 personas (no steward) and closes on Escape', menuItems === 7 && await page.locator('#persona-menu').isHidden());
 await as(page, 'admin');
-ok('Header: choosing Admin goes straight to the single admin page', page.url().endsWith('#admin') && await page.locator('h1:has-text("Pricing.")').count() === 1);
+ok('Header: choosing Admin goes straight to the single admin page', page.url().endsWith('#admin') && await page.locator('h1:has-text("Admin.")').count() === 1);
 ok('Header: one logo lockup, no repeated wordmark, no role bar', (await page.locator('.brand-name').count()) === 1 && (await page.locator('.brand-word').count()) === 0 && (await page.locator('.rolebar').count()) === 0 && (await page.locator('.demo-btn').count()) === 1);
 await as(page, 'industry');
 await page.click('.demo-btn');
@@ -82,7 +83,7 @@ for (let i = 0; i < 4; i++) { await page.click('.demo [data-act="demo-step"][dat
 const handLabel = await page.locator('.demo [data-act="demo-step"][data-d="1"]').textContent();
 await page.click('.demo [data-act="demo-step"][data-d="1"]');
 const handedTo = await page.evaluate(() => LEAD.store.session.role);
-ok('Header: Demo runs by persona and hands off to the next', demoText.includes('Industry leader') && handLabel.includes('Hand off to') && handedTo === 'steward', `${handLabel.trim()} → ${handedTo}`);
+ok('Header: Demo runs by persona and hands off to the next', demoText.includes('Industry leader') && handLabel.includes('Hand off to') && handedTo === 'student', `${handLabel.trim()} → ${handedTo}`);
 await page.click('.demo-btn');
 ok('Header: Exit demo removes the strip', await page.locator('.demo').count() === 0);
 
@@ -138,7 +139,7 @@ await page.waitForTimeout(600);
 const imgs = await page.evaluate(() => { const l = [...document.querySelectorAll('main img')]; return { n: l.length, ok: l.filter((i) => i.complete && i.naturalWidth > 0).length, caps: document.querySelectorAll('main .ph .ph-cap').length, figs: document.querySelectorAll('main .ph').length }; });
 ok('Home: every photo loads and carries its caption', imgs.n >= 11 && imgs.ok === imgs.n && imgs.caps === imgs.figs, JSON.stringify(imgs));
 const credits = await page.evaluate(() => document.querySelectorAll('.foot-about a').length);
-ok('Home: footer credits every photographer', credits === 11, `${credits} credits`);
+ok('Home: footer credits every photographer', credits === 15, `${credits} credits`);
 
 ok('Home: six doors, each with Join', await page.locator('.door').count() === 6 && await page.locator('.door [data-act="sheet"]').count() === 6);
 
@@ -185,22 +186,22 @@ await go(page, 'home');
 await page.locator('.door [data-act="sheet"][data-role="mentor"]').click();
 await page.check('#sh-codex');
 await page.click('.sheet form[data-form="mentor-apply"] button[type="submit"]');
-await page.click('.sheet [data-act="sheet-steward"]');
-ok('Sheet: a mentor application lands in the steward pool, unverified', page.url().endsWith('#sprints') && await page.locator('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]').count() === 1);
+await page.click('.sheet [data-act="sheet-admin"]');
+ok('Sheet: a mentor application lands in the UMO admin pool, unverified', page.url().endsWith('#sprints') && await page.locator('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]').count() === 1);
 await page.click('tr:has-text("Dana Fernandes") button[data-act="mentor-verify"]');
-ok('Sheet: the steward approves the applicant', await page.locator('tr:has-text("Dana Fernandes") >> text=Verified').count() > 0);
+ok('Sheet: the admin approves the applicant', await page.locator('tr:has-text("Dana Fernandes") >> text=Verified').count() > 0);
 await as(page, 'student');
 
 /* ---------- S1: intake → merge → publish ---------- */
 await as(page, 'industry'); await go(page, 'demand');
 await page.fill('#in-problem', 'Junior analysts never test the first framing of a problem.');
 await page.click('form[data-form="intake"] button[type="submit"]');
-await as(page, 'steward'); await go(page, 'demand');
+await as(page, 'admin'); await go(page, 'demand');
 const before = await page.locator('.col:nth-child(1) .item').count();
 await page.locator('.col:nth-child(1) .item').first().locator('button:has-text("Mark reviewed")').click();
 await page.locator('.col:nth-child(2) .item').first().locator('button:has-text("Publish as own theme")').click();
 await page.waitForTimeout(100);
-ok('S1 steward reviews and publishes an intake', (await page.locator('.col:nth-child(4) .item').count()) >= 3 && before >= 1);
+ok('S1 admin reviews and publishes an intake', (await page.locator('.col:nth-child(4) .item').count()) >= 3 && before >= 1);
 
 /* ---------- S2: shape (R6) → match → map → Live ---------- */
 await go(page, 'challenge-c3');
@@ -265,7 +266,7 @@ await page.waitForTimeout(80);
 ok('S6 names hidden until scores lock (R1)', hiddenBefore > 0 && (await page.locator('text=Names shown').count()) > 0);
 card = await scoreAll('m2');
 await card.locator('button[data-act="lock"]').click();
-await as(page, 'steward'); await go(page, 'assess');
+await as(page, 'admin'); await go(page, 'assess');
 ok('S6 moderator sees the spread between assessors', await page.locator('text=Spread between assessors').count() > 0);
 
 /* ---------- S7: second approval, share, public link ---------- */
@@ -392,10 +393,91 @@ await page.fill('#ws-pct', '10'); await page.click('form[data-form="women-share"
 await tab2.waitForFunction(() => { const n = document.querySelector('#q-industry .women-note'); return n && n.textContent.includes('10%'); }, null, { timeout: 6000 }).then(() => ok('S24 a new share reaches an open sign-up in another tab', true), () => ok('S24 a new share reaches an open sign-up in another tab', false));
 ok('S24 the share change is in the audit log', await page.evaluate(() => LEAD.store.pricing.audit.some((a) => /Million Women share/.test(a.action))));
 
+/* ---------- S25–S31: Learn ---------- */
+await page.evaluate(() => LEAD.store.resetDemo());
+await as(page, 'student'); await go(page, 'learn');
+await page.waitForSelector('#lm-list .lm-card');
+const codes = await page.locator('#lm-list .lm-card .lmcode').allTextContents();
+ok('S25 every catalogue card carries a code like LM-SP-1', codes.length >= 6 && codes.every((c) => /^LM-(SP|IL|PL|CB)-\d+$/.test(c.trim())), codes.join(','));
+ok('S25 LM-SP-1 is pinned first, with the code key on the page', codes[0].trim() === 'LM-SP-1' && await page.locator('#learn-start:has-text("Pinned")').count() === 1 && await page.locator('#code-key:has-text("Learning Module")').count() === 1);
+await page.click('[data-act="lm-mode"][data-k="PL"]');
+const plCodes = await page.locator('#lm-list .lm-card .lmcode').allTextContents();
+ok('S25 the format filter keeps only peer circles', plCodes.length >= 1 && plCodes.every((c) => c.includes('-PL-')), plCodes.join(','));
+await page.click('[data-act="lm-mode"][data-k=""]');
+await page.fill('#lm-q', 'framing'); await page.waitForTimeout(150);
+ok('S25 search narrows the list', (await page.locator('#lm-list .lm-card').count()) >= 1 && (await page.locator('#lm-list .lm-card').count()) < codes.length);
+await page.fill('#lm-q', ''); await page.waitForTimeout(150);
+
+/* a student cannot lead a peer circle before finishing a module (R22) */
+await page.click('[data-act="lrn-teach"]');
+await page.fill('#of-hours', '2');
+await page.click('form[data-form="offer-new"] button[type="submit"]');
+ok('S26 a student must finish a module before leading a circle', (await page.locator('form[data-form="offer-new"] >> text=Finish a module first').count()) >= 1);
+
+/* the demo course */
+await page.click('#learn-start a.btn.primary');
+await page.waitForSelector('.lesson-page');
+for (let i = 0; i < 3; i++) { await page.click('[data-act="lm-done"]'); await page.waitForTimeout(120); }
+ok('S27 after three lessons the quick check opens', await page.locator('form[data-form="lm-check"]').count() === 1);
+for (const [q, v] of [[0, 0], [1, 1], [2, 0]]) await page.check(`input[name="q${q}"][value="${v}"]`);
+await page.click('form[data-form="lm-check"] button[type="submit"]');
+ok('S27 a failed check says what is needed and lets you try again', (await page.locator('.msg.warn:has-text("You need 2")').count()) === 1);
+for (const [q, v] of [[0, 1], [1, 0], [2, 2]]) await page.check(`input[name="q${q}"][value="${v}"]`);
+await page.click('form[data-form="lm-check"] button[type="submit"]');
+ok('S27 a passed check completes the module', (await page.locator('h1:has-text("You finished Day 1 readiness")').count()) === 1);
+const saved = await page.evaluate(() => { const r = LEAD.store.loop.learning.progress['s1']['LM-SP-1']; return { done: r.done.length, passed: r.check.passed, audit: LEAD.store.loop.audit.filter((a) => /Lesson completed|Check passed|Module started/.test(a.action)).length }; });
+ok('S27 progress is saved and every change is in the audit log', saved.done === 3 && saved.passed === true && saved.audit >= 5, JSON.stringify(saved));
+await page.click('.lesson-page [data-act="lm-leave"]');
+await page.waitForSelector('#lm-list');
+ok('S27 Learn then shows the module as complete', (await page.locator('#learn-start:has-text("Complete")').count()) === 1);
+await page.click('[data-act="lm-skill"][data-k=""]').catch(() => null);
+await page.click('[data-act="lrn-teach"]'); await page.fill('#of-hours', '2');
+await page.click('form[data-form="offer-new"] button[type="submit"]');
+ok('S27 after finishing a module a student can offer a peer circle', (await page.locator('form[data-form="offer-new"] >> text=with the UMO admin').count()) >= 1);
+
+/* the shelf follows the persona */
+const shelfFor = async (r) => { await as(page, r); await go(page, 'learn'); return page.locator('#learn-shelf .shelf-item .lmcode').allTextContents(); };
+const mentorShelf = await shelfFor('mentor'); const facultyShelf = await shelfFor('faculty'); const studentShelf = await shelfFor('student');
+ok('S28 the shelf changes with the persona', mentorShelf.includes('LM-IL-2') && facultyShelf.includes('LM-IL-1') && studentShelf.includes('LM-SP-2') && !studentShelf.includes('LM-IL-2'), `${mentorShelf} | ${facultyShelf} | ${studentShelf}`);
+
+/* give back: offer, topic, request, me too, teach, approve, match */
+await as(page, 'mentor'); await go(page, 'learn');
+await page.click('[data-act="lrn-teach"]'); await page.fill('#of-topic', 'Portfolio reviews'); await page.fill('#of-hours', '5');
+await page.click('form[data-form="offer-new"] button[type="submit"]');
+ok('S29 a mentor offers hours; it waits for a UMO admin', await page.evaluate(() => LEAD.store.loop.learning.offers.some((o) => o.topic === 'Portfolio reviews' && o.state === 'Proposed')));
+await as(page, 'open'); await go(page, 'learn');
+await page.click('[data-act="lrn-request"]'); await page.fill('#rq-title', 'Drawing on a tablet for beginners');
+await page.click('form[data-form="request-new"] button[type="submit"]');
+const rq = await page.evaluate(() => LEAD.store.loop.learning.requests[0]);
+ok('S29 anyone can open a request, and it is visible to others', rq.title.startsWith('Drawing on a tablet') && /^RQ-\d+$/.test(rq.id) && rq.state === 'Open');
+await as(page, 'student'); await go(page, 'learn');
+await page.click(`[data-act="rq-me-too"][data-id="${rq.id}"]`);
+ok('S29 another persona can say me too', await page.evaluate((id) => LEAD.store.loop.learning.requests.find((r) => r.id === id).votes.length, rq.id) === 2);
+await as(page, 'mentor'); await go(page, 'learn');
+await page.click(`[data-act="rq-teach"][data-id="${rq.id}"]`);
+await as(page, 'admin'); await go(page, 'learn');
+const pend = await page.evaluate(() => LEAD.learn.pending());
+await page.click('[data-act="ct-approve"][data-kind="topic"]');
+await page.click('li.give-row:has-text("Portfolio reviews") [data-act="ct-advance"]');
+await page.click(`[data-act="ct-match"][data-id="${rq.id}"]`);
+const after = await page.evaluate((id) => ({ req: LEAD.store.loop.learning.requests.find((r) => r.id === id).state, offer: LEAD.store.loop.learning.offers.find((o) => o.topic === 'Portfolio reviews').state }), rq.id);
+ok('S30 the admin approves, and matches a teacher to the request', pend >= 2 && after.req === 'Matched' && after.offer === 'Approved', JSON.stringify(after));
+ok('S30 only the admin sees approve and match', await (async () => { await as(page, 'student'); await go(page, 'learn'); return (await page.locator('[data-act="ct-approve"], [data-act="ct-match"], [data-act="ct-advance"]').count()) === 0; })());
+await as(page, 'admin'); await go(page, 'admin');
+ok('S30 the admin page has the operations strip and no “mock” label', await page.locator('.ops .ops-item').count() === 6 && !(await page.locator('main .eyebrow:has-text("mock")').count()));
+
+/* women imagery */
+await go(page, 'women');
+const wsrc = await page.evaluate(() => [...document.querySelectorAll('main img')].map((i) => i.getAttribute('src')));
+const openSrc = await page.evaluate(() => LEAD.photos.bySlot['door-open'].src);
+ok('S31 every picture on the women page is different, none is the Just curious photo', wsrc.length >= 6 && new Set(wsrc).size === wsrc.length && !wsrc.includes(openSrc), `${wsrc.length} images`);
+const oldRoles = await page.evaluate(() => /steward/i.test(document.body.innerText));
+ok('S31 no steward role anywhere on the page', !oldRoles);
+
 /* ---------- screenshots and layout ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
-const SHOTS = ['home', 'women', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'lexicon'];
-const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'steward', admin: 'admin', impact: 'steward', 'join-college': 'head' };
+const SHOTS = ['home', 'women', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'learn', 'skills'];
+const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'admin', admin: 'admin', impact: 'admin', 'join-college': 'head' };
 for (const scheme of ['dark', 'light']) {
   const c = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: scheme });
   const p = await c.newPage(); watch(p);
@@ -411,7 +493,7 @@ const m = await browser.newContext({ viewport: { width: 390, height: 844 }, colo
 const mp = await m.newPage(); watch(mp);
 await mp.goto(BASE + '#model'); await mp.waitForTimeout(600);
 const wide = [];
-for (const r of ['steward', 'student', 'admin']) {
+for (const r of ['student', 'admin']) {
   await as(mp, r);
   for (const t of ROUTES) {
     await go(mp, t);

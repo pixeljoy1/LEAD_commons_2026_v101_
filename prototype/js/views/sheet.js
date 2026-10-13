@@ -20,14 +20,14 @@
     const step = (s, title, desc) => `<button class="opt" data-act="sheet-step" data-step="${s}"><b>${esc(title)}</b><span>${esc(desc)}</span></button>`;
     switch (role) {
       case 'student': return [
-        go('join-open', 'Start with a free account', 'Read the Lexicon, join circles and try an open challenge. You agree to the Codex first.'),
+        go('join-open', 'Start with a free account', 'Read the Skills Guide, join circles and try an open challenge. You agree to the Codex first.'),
         step('campus', 'Link my campus', 'If your college is on LEAD, you see the challenges running in your term.'),
         go('join-path', 'Enrol on a Path', 'Short modules tied to a live challenge, with one mentor sprint. Mock price.'),
       ].join('');
       case 'faculty': return [
         step('campus', 'Join through my campus', 'Your college is already on LEAD. See the challenges and your cohort.'),
         go('join-college', 'Ask my college to join', 'Start the campus sign-up for your institution.'),
-        go('join-open', 'Start with a free account', 'Read the Lexicon and join circles while your college decides.'),
+        go('join-open', 'Start with a free account', 'Read the Skills Guide and join circles while your college decides.'),
       ].join('');
       case 'head': return [
         go('join-college', 'Start a campus licence', 'Priced by number of students. Mock price, and nothing is charged.'),
@@ -39,7 +39,7 @@
         step('role-mentor', 'Offer your own hours as a mentor', 'Coach a team yourself.'),
       ].join('');
       case 'open': return [
-        go('join-open', 'Start with a free account', 'The Lexicon, circles and open challenges.'),
+        go('join-open', 'Start with a free account', 'The Skills Guide, circles and open challenges.'),
         go('join-path', 'Take a Path', 'Short modules tied to a live challenge. Mock price.'),
       ].join('');
       default: return '';
@@ -49,9 +49,9 @@
   function body() {
     const role = st.role;
     if (st.done === 'mentor') {
-      return `<div class="stack"><div class="msg ok">Thank you. Your application is with the UMO steward. Practitioners are checked before they are listed.</div>
-        <p class="muted" style="font-size:13.5px">In this demo you can play the steward and approve yourself.</p>
-        <div class="btn-row"><button class="btn primary" data-act="sheet-steward">See the mentor pool as steward</button><button class="btn ghost" data-act="sheet-close">Close</button></div></div>`;
+      return `<div class="stack"><div class="msg ok">Thank you. Your application is with the UMO admin. Practitioners are checked before they are listed.</div>
+        <p class="muted" style="font-size:13.5px">In this demo you can play the UMO team and approve yourself.</p>
+        <div class="btn-row"><button class="btn primary" data-act="sheet-admin">See the mentor pool as UMO admin</button><button class="btn ghost" data-act="sheet-close">Close</button></div></div>`;
     }
     if (st.step === 'campus') {
       return `<div class="stack"><button class="btn small ghost" data-act="sheet-step" data-step="options">Back</button>
@@ -73,7 +73,7 @@
     }
     if (role === 'mentor' || st.step === 'role-mentor') {
       return `<form class="stack" data-form="mentor-apply"><h3>Offer your hours</h3>
-        <p class="muted" style="font-size:14px">Three 45-minute sessions per team. A UMO steward checks every practitioner before they are listed.</p>
+        <p class="muted" style="font-size:14px">Three 45-minute sessions per team. A UMO admin checks every practitioner before they are listed.</p>
         <label class="field">Your name<input id="sh-name" name="name" required autocomplete="name" value="Dana Fernandes"></label>
         <label class="field">What you do<input id="sh-practice" name="practice" required value="Senior product designer, healthtech"></label>
         <label class="field">Hours you can give this term<input id="sh-hours" name="hours" type="number" min="1" max="60" value="6" required></label>
@@ -143,7 +143,7 @@
       const fallback = () => { const n = document.getElementById('sheet-note'); if (n) { const r = document.createRange(); r.selectNodeContents(n); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } ui.toast('Select and copy the text.'); };
       try { navigator.clipboard.writeText(text).then(() => ui.toast('Copied.'), fallback); } catch (e) { fallback(); }
     },
-    'sheet-steward'() { store.setRole('steward'); finish('sprints'); },
+    'sheet-admin'() { store.setRole('admin'); finish('sprints'); },
   });
 
   LEAD.forms['mentor-apply'] = (fd) => {

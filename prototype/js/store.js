@@ -48,6 +48,7 @@
     },
     org(id) { return this.loop.orgs.find((o) => o.id === id) || null; },
     setRole(role, userId) {
+      if (role === 'steward') role = 'admin'; // the steward role was folded into UMO admin
       this.session.role = role;
       this.session.userId = userId || this.loop.defaultUser[role];
       emit({ kind: 'session' });

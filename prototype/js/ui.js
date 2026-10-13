@@ -94,7 +94,7 @@
   /* A small deterministic pixel glyph per role, in the LEAD pixel-square motif. */
   const GLYPHS = {
     student: '0110100110010110', faculty: '1111010001000100', head: '0110111101100110', industry: '1001100111111001',
-    mentor: '1010010110100101', steward: '1111100110011111', open: '0100111001000000', admin: '1110101011100010',
+    mentor: '1010010110100101', open: '0100111001000000', admin: '1110101011100010',
   };
   function glyph(role) {
     const g = GLYPHS[role] || '1001011001101001';

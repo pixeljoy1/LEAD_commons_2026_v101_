@@ -30,10 +30,9 @@
       U('m4', 'Aditya Kumar', 'mentor', 'umo', { title: 'Independent practitioner', verified: true, hoursOffered: 6 }),
       U('m5', 'Fatima Sheikh', 'mentor', 'umo', { title: 'Service designer', verified: false, hoursOffered: 4 }),
       U('m6', 'Gaurav Menon', 'mentor', 'umo', { title: 'Product design manager', verified: true, hoursOffered: 6 }),
-      U('st1', 'Nisha Thomas', 'steward', 'umo'), U('st2', 'Farhan Ali', 'steward', 'umo'),
       U('o1', 'Dev Malhotra', 'open', 'open'), U('o2', 'Ritu Bansal', 'open', 'open'), U('o3', 'Joel Fernandes', 'open', 'open'),
     ];
-    const defaultUser = { student: 's1', faculty: 'f1', head: 'h1', industry: 'i1', mentor: 'm1', steward: 'st1', open: 'o1', admin: 'adminA' };
+    const defaultUser = { student: 's1', faculty: 'f1', head: 'h1', industry: 'i1', mentor: 'm1', open: 'o1', admin: 'adminA' };
 
     const C = (slug, name, definition, position, asks, status, extra) => Object.assign({ slug, name, definition, position, asks, status: status || 'draft', followers: 0 }, extra || {});
     const capabilities = [
@@ -204,7 +203,7 @@
       P('Equity of access', 'Tier-2 and tier-3 campuses, scholarships, low bandwidth, regional languages, accessibility.', 'Open tier', 'Reserved'),
       P('Credit recognition', 'The industry-taught credit window and NEP credit structures.', 'Faculty Toolkit', 'Needs an owner'),
       P('AI-use policy', 'How AI may be used in challenges, and how it is assessed.', 'Codex', 'Reserved'),
-      P('Beyond design', '“Core is dying: pie-shaped and inter-disciplinary.” Extend the Lexicon to product, engineering, business.', 'Lexicon', 'Reserved'),
+      P('Beyond design', '“Core is dying: pie-shaped and inter-disciplinary.” Extend the Skills Guide to product, engineering, business.', 'Skills Guide', 'Reserved'),
       P('Awareness', 'The row that did not travel. Career-path awareness belongs in the open tier.', 'Open tier', 'Reserved'),
       P('1 Million Women initiative', 'A cohort overlay with its own funding and metrics.', 'Cohort overlay', 'Reserved'),
       P('Design Pitch', 'A showcase module.', 'CONNECT', 'Reserved'),
@@ -222,6 +221,7 @@
       orgs, users, defaultUser, capabilities, levels, demandSignals, themes, challenges, matches, teams, sprints,
       rubric, submissions, scores, assessmentDays, passports, learningContracts, opportunities, applications, outcomes,
       problemRecords, events, provisions, consents, audit: [], follows: [], circles: [],
+      learning: LEAD.learningData.build(),
     };
   }
 

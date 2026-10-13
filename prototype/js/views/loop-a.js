@@ -25,7 +25,7 @@
     if (role() === 'student') return L().teams.filter((t) => t.memberIds.includes(u.id));
     if (role() === 'mentor') return L().teams.filter((t) => L().sprints.some((s) => s.teamId === t.id && s.mentorId === u.id));
     if (role() === 'faculty') return L().teams.filter((t) => { const m = matchOf(t); return m && m.facultyId === u.id; });
-    if (role() === 'steward') return L().teams.slice();
+    if (role() === 'admin') return L().teams.slice();
     return [];
   }
   function activeTeam() {
@@ -42,18 +42,18 @@
       const sig = L().demandSignals;
       const caps = L().capabilities;
       const asks = (slug) => sig.filter((d) => d.capSlug === slug).length + (caps.find((c) => c.slug === slug) || {}).asks;
-      const themes = L().themes.filter((t) => t.published || r === 'steward');
+      const themes = L().themes.filter((t) => t.published || r === 'admin');
       const top = caps.slice().sort((a, b) => asks(b.slug) - asks(a.slug)).slice(0, 6);
       const maxA = Math.max(...top.map((c) => asks(c.slug)));
       const intake = r === 'industry' ? intakeForm() : '';
       const mine = r === 'industry' ? sig.filter((d) => d.orgId === me().orgId) : [];
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '01 · IDENTIFY · F-ID-01, F-ID-05, F-ID-06', title: 'Demand.', lede: 'What employers asked LEAD to build this term, in plain words. Industry states the need; the steward merges and publishes it.', meta: ui.simTag() })}
+        ${ui.hero({ compact: true, eyebrow: '01 · IDENTIFY · F-ID-01, F-ID-05, F-ID-06', title: 'Demand.', lede: 'What employers asked LEAD to build this term, in plain words. Industry states the need; the UMO team merges and publishes it.', meta: ui.simTag() })}
         <div class="split">
           <section class="section">
             ${ui.sectionHead('Skills Opportunity Map', 'Asked for this term')}
             <div class="card">${top.map((c) => `<div class="stack" style="gap:6px;padding:6px 0">
-              <div class="row between"><a href="#lexicon-${c.slug}" class="ink" style="font-weight:600">${esc(c.name)}</a><span class="tnum ink">${asks(c.slug)} <span class="muted">companies</span></span></div>
+              <div class="row between"><a href="#skills-${c.slug}" class="ink" style="font-weight:600">${esc(c.name)}</a><span class="tnum ink">${asks(c.slug)} <span class="muted">companies</span></span></div>
               ${ui.meter(Math.round((asks(c.slug) / maxA) * 100))}
             </div>`).join('')}</div>
             <div class="grid g3">${themes.map((t) => `<article class="card tight"><div class="row between"><span class="label">Theme</span>${ui.status(t.published ? 'Published' : 'Draft', t.published ? 'Published' : 'Not published')}</div><h4>${esc(t.name)}</h4><p class="muted" style="font-size:13px">${t.capSlugs.map(ui.capName).join(', ')} · ${sig.filter((d) => d.themeId === t.id).length} intakes</p></article>`).join('')}</div>
@@ -61,10 +61,10 @@
           <aside class="stack" style="gap:16px">
             ${intake}
             ${r === 'industry' ? `<div class="card"><span class="eyebrow">My intakes</span>${mine.map((d) => `<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span>${esc(ui.capName(d.capSlug))}<br><span class="muted" style="font-size:12.5px">${esc(d.problem)}</span></span>${ui.status(d.status)}</div>`).join('') || '<p class="muted">None yet.</p>'}</div>` : ''}
-            ${r !== 'industry' && r !== 'steward' ? `<div class="card"><span class="eyebrow">Your view</span><p>${r === 'student' ? 'Pick a capability, then find a live challenge that needs it.' : 'Themes are public once the steward publishes them.'}</p><a class="btn" href="#challenges">Open challenges</a></div>` : ''}
+            ${r !== 'industry' && r !== 'admin' ? `<div class="card"><span class="eyebrow">Your view</span><p>${r === 'student' ? 'Pick a capability, then find a live challenge that needs it.' : 'Themes are public once the UMO team publishes them.'}</p><a class="btn" href="#challenges">Open challenges</a></div>` : ''}
           </aside>
         </div>
-        ${r === 'steward' ? stewardQueue() : ''}
+        ${r === 'admin' ? opsQueue() : ''}
       </div>`;
     },
   };
@@ -79,7 +79,7 @@
       <label class="field">Assessor seats you can offer<input id="in-seats" type="number" min="0" max="20" name="seats" value="3"></label>
       <label class="field">Mentor hours you can offer<input id="in-hours" type="number" min="0" name="hours" value="6"></label></div>
       <label class="check"><input type="checkbox" name="sensitive" id="in-sens"> Some data or IP is sensitive</label>
-      <button class="btn primary" type="submit">Submit to steward</button>
+      <button class="btn primary" type="submit">Submit to UMO</button>
     </form>`;
   }
 
@@ -88,14 +88,14 @@
     const d = { id: uid('d'), orgId: u.orgId, by: u.id, capSlug: fd.get('cap'), problem: String(fd.get('problem') || '').trim(), needBy: fd.get('needBy'), seats: Number(fd.get('seats') || 0), mentorHours: Number(fd.get('hours') || 0), sensitive: !!fd.get('sensitive'), status: 'Submitted', themeId: null, at: Date.now() };
     if (!d.problem) { ui.toast('Describe the problem in a sentence.'); return; }
     store.commit('Intake submitted', 'demand_signal', d.id, () => { L().demandSignals.unshift(d); return d; });
-    ui.toast('Submitted to the steward.');
+    ui.toast('Submitted to the UMO team.');
   };
 
-  function stewardQueue() {
+  function opsQueue() {
     const cols = ['Submitted', 'Reviewed', 'Merged', 'Published'];
     const themes = L().themes;
     return `<section class="section">
-      ${ui.sectionHead('Steward queue · F-ID-06', 'Review, merge, publish')}
+      ${ui.sectionHead('UMO queue · F-ID-06', 'Review, merge, publish')}
       <div class="board">${cols.map((col) => {
         const items = L().demandSignals.filter((d) => d.status === col);
         return `<div class="col"><header><span class="label">${col}</span><span class="tnum muted">${items.length}</span></header>${items.map((d) => `<div class="item">
@@ -151,7 +151,7 @@
       case 'faculty': return all.filter((c) => !['Draft'].includes(c.status));
       case 'industry': return all.filter((c) => c.sponsorOrgId === u.orgId);
       case 'mentor': return all.filter((c) => myTeams().some((t) => { const x = challengeOf(t); return x && x.id === c.id; }));
-      case 'steward': return all;
+      case 'admin': return all;
       default: return null;
     }
   }
@@ -172,7 +172,7 @@
       }
       const r = role();
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '03 · APPLY · F-AP-01, F-AP-07, F-AP-09', title: 'Challenges.', lede: 'Real, scoped, NDA-safe problems taken into a term. Each one is shaped by the steward and matched to a campus.', meta: `${ui.simTag()}${r === 'industry' ? '<a class="btn primary" href="#demand">State a new need</a><a class="btn" href="#join-sponsor">Sponsor a challenge</a>' : ''}` })}
+        ${ui.hero({ compact: true, eyebrow: '03 · APPLY · F-AP-01, F-AP-07, F-AP-09', title: 'Challenges.', lede: 'Real, scoped, NDA-safe problems taken into a term. Each one is shaped by the UMO team and matched to a campus.', meta: `${ui.simTag()}${r === 'industry' ? '<a class="btn primary" href="#demand">State a new need</a><a class="btn" href="#join-sponsor">Sponsor a challenge</a>' : ''}` })}
         <div class="grid g2">${list.map((c) => `<a class="card" href="#challenge-${c.id}">
           <div class="row between"><span class="label">${esc(ui.orgName(c.sponsorOrgId))}</span>${ui.status(c.status)}</div>
           <h3>${esc(c.title)}</h3>
@@ -190,12 +190,12 @@
       const c = L().challenges.find((x) => x.id === id);
       if (!c) return LEAD.views.notfound.render();
       const vis = visibleChallenges();
-      if (vis === null || !vis.some((x) => x.id === c.id)) return ui.guard(['steward', 'industry', 'faculty'], 'This brief');
+      if (vis === null || !vis.some((x) => x.id === c.id)) return ui.guard(['admin', 'industry', 'faculty'], 'This brief');
       const r = role(); const u = me();
       const nda = rules.ndaSafe(c.nda);
       const matches = L().matches.filter((m) => m.challengeId === c.id);
       const teams = L().teams.filter((t) => matches.some((m) => m.id === t.matchId));
-      const canEdit = (r === 'steward' || (r === 'industry' && c.sponsorOrgId === u.orgId)) && ['Draft', 'Shaped'].includes(c.status);
+      const canEdit = (r === 'admin' || (r === 'industry' && c.sponsorOrgId === u.orgId)) && ['Draft', 'Shaped'].includes(c.status);
       const field = (k, label, long) => canEdit
         ? `<label class="field">${label}${long ? `<textarea id="cf-${k}" data-on="cfield" data-id="${c.id}" data-k="${k}">${esc(c[k])}</textarea>` : `<input id="cf-${k}" data-on="cfield" data-id="${c.id}" data-k="${k}" value="${esc(c[k])}">`}</label>`
         : `<div class="stack" style="gap:4px"><span class="label">${label}</span><p class="${c[k] ? 'ink' : 'muted'}">${esc(c[k] || 'Not written yet.')}</p></div>`;
@@ -213,7 +213,7 @@
             ${field('constraints', 'Constraints', true)}
             ${field('data', 'Sanitised data note', true)}
             ${field('ambiguity', 'Deliberate ambiguity', true)}
-            <div class="row" style="gap:20px"><span><span class="label">Capabilities</span><br>${c.caps.map((s) => `<a href="#lexicon-${s}">${esc(ui.capName(s))}</a>`).join(', ')}</span><span><span class="label">Assessor seats</span><br><b class="ink">${c.seats}</b></span><span><span class="label">IP terms</span><br><b class="ink">${esc(c.ipTerms || 'Not chosen')}</b></span></div>
+            <div class="row" style="gap:20px"><span><span class="label">Capabilities</span><br>${c.caps.map((s) => `<a href="#skills-${s}">${esc(ui.capName(s))}</a>`).join(', ')}</span><span><span class="label">Assessor seats</span><br><b class="ink">${c.seats}</b></span><span><span class="label">IP terms</span><br><b class="ink">${esc(c.ipTerms || 'Not chosen')}</b></span></div>
           </section>
           <aside class="stack" style="gap:16px">
             <div class="card">
@@ -223,7 +223,7 @@
               ${!nda.ok ? `<div class="msg err">${esc(nda.reason)}</div>` : ''}
               ${c.status === 'Draft' && canEdit ? `<button class="btn primary" data-act="ch-shape" data-id="${c.id}" ${nda.ok ? '' : 'disabled'}>Mark shaped</button>` : ''}
             </div>
-            ${r === 'steward' && ['Shaped', 'Matched', 'Live'].includes(c.status) ? `<form class="card" data-form="match" data-id="${c.id}">
+            ${r === 'admin' && ['Shaped', 'Matched', 'Live'].includes(c.status) ? `<form class="card" data-form="match" data-id="${c.id}">
               <span class="eyebrow">F-AP-09 · Match to a campus</span>
               <div class="form-grid"><label class="field">Campus<select name="campus" id="mt-campus">${L().orgs.filter((o) => o.kind === 'institution').map((o) => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select></label>
               <label class="field">Faculty lead<select name="faculty" id="mt-fac">${L().users.filter((x) => x.role === 'faculty').map((f) => `<option value="${f.id}">${esc(f.name)} · ${esc(ui.orgName(f.orgId))}</option>`).join('')}</select></label></div>
@@ -237,8 +237,8 @@
             </form>` : ''}
             <div class="card"><span class="eyebrow">Matched campuses</span>${matches.map((m) => `<div class="row between" style="padding:8px 0;border-top:1px solid var(--line)"><span><b class="ink">${esc(ui.orgName(m.institutionId))}</b> · ${esc(m.cohort)}<br><span class="muted" style="font-size:12.5px">${esc(ui.nameOf(m.facultyId))} · ${esc(m.module || 'module not mapped')}</span></span>${m.mapped ? ui.status('Live', 'Mapped') : ui.status('Matched', 'Awaiting faculty')}</div>`).join('') || '<p class="muted">Not matched yet.</p>'}</div>
             ${teams.length && (r !== 'industry') ? `<div class="card"><span class="eyebrow">Teams</span>${teams.map((t) => `<a class="row between" style="padding:8px 0;border-top:1px solid var(--line);text-decoration:none" href="#team-${t.id}"><span class="ink">${esc(t.name)}</span><span class="muted">${t.memberIds.length} members</span></a>`).join('')}</div>` : ''}
-            ${r === 'steward' && c.status === 'Live' ? `<button class="btn" data-act="ch-assess" data-id="${c.id}">Open assessment</button>` : ''}
-            ${r === 'steward' && c.status === 'In assessment' ? `<button class="btn" data-act="ch-close" data-id="${c.id}">Close and ask the sponsor</button>` : ''}
+            ${r === 'admin' && c.status === 'Live' ? `<button class="btn" data-act="ch-assess" data-id="${c.id}">Open assessment</button>` : ''}
+            ${r === 'admin' && c.status === 'In assessment' ? `<button class="btn" data-act="ch-close" data-id="${c.id}">Close and ask the sponsor</button>` : ''}
           </aside>
         </div>
       </div>`;
@@ -295,7 +295,7 @@
     title: () => 'Team workspace',
     render(id) {
       const r = role();
-      if (!['student', 'mentor', 'faculty', 'steward'].includes(r)) return ui.guard(['student', 'mentor', 'faculty'], 'The team workspace');
+      if (!['student', 'mentor', 'faculty', 'admin'].includes(r)) return ui.guard(['student', 'mentor', 'faculty'], 'The team workspace');
       const t = id ? L().teams.find((x) => x.id === id) : activeTeam();
       if (!t) return `<div class="page wrap"><div class="empty"><h3>No team yet.</h3><p>Join a live challenge on your campus first.</p><a class="btn" href="#challenges">Open challenges</a></div></div>`;
       if (!myTeams().some((x) => x.id === t.id)) return ui.guard(['student', 'mentor', 'faculty'], 'This team’s workspace');
@@ -361,7 +361,7 @@
     title: () => 'Mentor sprints',
     render() {
       const r = role(); const u = me();
-      if (!['student', 'mentor', 'steward', 'faculty'].includes(r)) return ui.guard(['student', 'mentor', 'steward'], 'Mentor sprints');
+      if (!['student', 'mentor', 'admin', 'faculty'].includes(r)) return ui.guard(['student', 'mentor', 'admin'], 'Mentor sprints');
       const hoursOf = (mid) => L().sprints.filter((s) => s.mentorId === mid).flatMap((s) => s.sessions.filter((x) => x.done)).reduce((a, x) => a + x.minutes, 0) / 60;
       let main = '';
       if (r === 'student' || r === 'faculty') {
@@ -376,7 +376,7 @@
         main = `<div class="stack">${L().sprints.map((s) => sprintCard(s, false, false, true)).join('')}</div>`;
       }
       const mentors = L().users.filter((x) => x.role === 'mentor');
-      const pool = r === 'steward' ? `<section class="section">${ui.sectionHead('F-ME-05 · Mentor pool and credit ledger', 'Mentor pool')}
+      const pool = r === 'admin' ? `<section class="section">${ui.sectionHead('F-ME-05 · Mentor pool and credit ledger', 'Mentor pool')}
         <div class="table-wrap"><table><thead><tr><th>Mentor</th><th>Practice</th><th>Verified</th><th class="num">Hours offered</th><th class="num">Hours logged</th><th class="num">Teams</th><th></th></tr></thead><tbody>
           ${mentors.map((x) => `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.title || '')}</td><td>${x.verified ? ui.status('Verified') : ui.status('Proposed', 'Not yet')}</td><td class="num">${x.hoursOffered || 0}</td><td class="num">${hoursOf(x.id).toFixed(1)}</td><td class="num">${L().sprints.filter((s) => s.mentorId === x.id).length}</td><td>${x.verified ? '' : `<button class="btn small" data-act="mentor-verify" data-id="${x.id}">Approve</button>`}</td></tr>`).join('')}
         </tbody></table></div><p class="muted" style="font-size:13px">Seed the pool from UMO Mentors & Catalysts, each person by consent.</p></section>` : '';
@@ -412,7 +412,7 @@
     'sp-request'(el) {
       const sp = { id: uid('sp'), teamId: el.dataset.team, mentorId: null, status: 'Requested', sessions: [0, 1, 2].map(() => ({ at: null, minutes: 45, done: false })) };
       store.commit('Mentor sprint requested', 'mentor_sprint', sp.id, () => { L().sprints.push(sp); return sp; });
-      ui.toast('Requested. The steward assigns a mentor.');
+      ui.toast('Requested. The UMO team assigns a mentor.');
     },
     'sp-assign'(el) {
       const sp = spById(el.dataset.id); const sel = document.getElementById('as-' + sp.id);

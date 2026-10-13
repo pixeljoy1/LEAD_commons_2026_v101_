@@ -15,9 +15,16 @@
     P('door-college', 'assets/photos/door-college.jpg', 'Students walk across a college campus', 'Zoshua Colah', 'zoshuacolah', 'kaZHJj-DhC4'),
     P('door-industry', 'assets/photos/door-industry.jpg', 'A team meets in a bright co-working office', 'Smartworks Coworking', 'smartworkscoworking', 'cW4lLTavU80'),
     P('door-mentor', 'assets/photos/door-mentor.jpg', 'Two people talk while looking at a laptop', 'KOBU Agency', 'kobuagency', '7okkFhxrxNw'),
-    P('door-open', 'assets/photos/door-open.jpg', 'A young woman learns on her laptop at home', 'Good Faces', 'goodfacesagency', 'gy5SlRW9OGA'),
+    P('door-open', 'assets/photos/door-open.jpg', 'A student reads a book and checks her phone at a library table', 'Shantanu Kumar', 'theshantanukr', 'WCdGIzAT3qc'),
+    /* 1 Million Women in Design: working women in India. Skilled work, shown with dignity. */
+    P('women-hero', 'assets/photos/women-hero.jpg', 'Women in bright saris tend a vegetable field together', 'EqualStock', 'equalstock', '71L0v2kw424'),
+    P('women-circle', 'assets/photos/women-circle.jpg', 'A group of women sit together in a circle and talk', 'EqualStock', 'equalstock', 'V-3YgB-GsFg'),
+    P('women-field', 'assets/photos/women-field.jpg', 'A woman in a red scarf works in a field with other women', 'EqualStock', 'equalstock', '0vu32v6BmSg'),
+    P('women-work', 'assets/photos/women-work.jpg', 'A woman works at a spinning wheel in a workshop', 'Aman Chaturvedi', 'amanchaturvediii', 'K84VkqSa3nQ'),
+    P('women-market', 'assets/photos/women-market.jpg', 'Women sort flowers together in a market', 'Sehajpal Singh', 'fujix_pal', 'wXVV77pcB-E'),
+    P('women-tea', 'assets/photos/women-tea.jpg', 'A line of women tea pickers with their full bags', 'Rohit Dey', 'rohit16dey', 'hpNpWJlylmM'),
   ];
   const bySlot = Object.fromEntries(list.map((p) => [p.slot, p]));
-  bySlot.women = bySlot['door-open'];
+  bySlot.women = bySlot['women-hero'];
   LEAD.photos = { list, bySlot };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

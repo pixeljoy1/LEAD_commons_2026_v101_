@@ -18,6 +18,12 @@
   const TierKey = freeze(['SMALL', 'MEDIUM', 'LARGE']);
   const FundedBy = freeze(['UMO', 'SPONSOR', 'PARTNER']);
 
+  /* Learning (round 5): the mode letter in a module code, LM-<mode>-<n>. */
+  const ModuleMode = freeze(['SP', 'IL', 'PL', 'CB']);
+  const ModeLabel = Object.freeze({ SP: 'Self-paced', IL: 'Instructor-led', PL: 'Peer circle', CB: 'Inside a challenge' });
+  const ModeWord = Object.freeze({ SP: 'Learn on your own, online', IL: 'Taught live by a person', PL: 'Learn with peers, led by a peer', CB: 'Learn while working on a real challenge' });
+  const MODULE_CODE_RE = /^LM-(SP|IL|PL|CB)-([1-9]\d{0,2})$/;
+
   const PlanKindLabel = Object.freeze({
     CAMPUS_LICENCE: 'campus licences',
     INDUSTRY_MEMBERSHIP: 'industry memberships',
@@ -59,6 +65,7 @@
   }
 
   return {
+    ModuleMode, ModeLabel, ModeWord, MODULE_CODE_RE,
     PlanKind, PricingModel, BillingPeriod, SignupFlow, SignupStatus, CouponStatus,
     CouponKind, CouponKindBuilt, TierKey, FundedBy, PlanKindLabel, QuantityUnit, FlowForKind,
     PLAN_KEY_RE, COUPON_CODE_RE, normaliseCode, oneOf,

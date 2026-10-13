@@ -1,4 +1,4 @@
-/* LEAD · Lexicon (F-ID-07, F-ID-02), Joint Design Calendar (F-CO-01), Provisions board (F-GV-05). */
+/* LEAD · Skills Guide (what each design skill means), Joint Design Calendar, Provisions board. */
 (function (root) {
   const LEAD = root.LEAD;
   const { ui, store } = LEAD;
@@ -17,9 +17,13 @@
   ];
   const asksOf = (c) => c.asks + L().demandSignals.filter((d) => d.capSlug === c.slug).length;
 
-  /* ================= Lexicon ================= */
-  LEAD.views.lexicon = {
-    title: (slug) => (slug ? ui.capName(slug) : 'Lexicon'),
+  /* Plain tags for where a skill sits. The room's own codes stay in the data, not on screen. */
+  const plainPos = (pos) => (/Do First/.test(pos) ? 'Core skill' : /Plan For/.test(pos) ? 'Build over time' : /Quick Wins/.test(pos) ? 'Quick win' : /Bud/.test(pos) ? 'Growing skill' : 'On our watch list');
+  const agreed = (c) => c.status === 'cosigned';
+
+  /* ================= Skills Guide ================= */
+  LEAD.views.skills = {
+    title: (slug) => (slug ? ui.capName(slug) : 'Skills Guide'),
     render(slug) {
       if (slug) return detail(slug);
       const q = lex.q.trim().toLowerCase();
@@ -27,21 +31,21 @@
       const groups = {};
       list.forEach((c) => { const k = c.name[0].toUpperCase(); (groups[k] = groups[k] || []).push(c); });
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: '01 · IDENTIFY · F-ID-07 · EXPLORE', title: 'Lexicon.', lede: 'Plain definitions of what “core” means, co-signed by industry and academia. Each one carries how many employers asked for it.', meta: `${ui.tag('All definitions are drafts for co-signing', 'mock')}<a class="btn small" href="#demand">See demand</a>` })}
+        ${ui.hero({ compact: true, eyebrow: 'Learn · Skills Guide', title: 'Skills Guide.', lede: 'What each design skill means, in plain words, and how many employers ask for it. Every skill has four levels, so you can see where you are.', meta: `${ui.tag('Being reviewed with employers and colleges', 'info')}<a class="btn small" href="#learn">Back to Learn</a><a class="btn small" href="#demand">What employers ask for</a>` })}
         <div class="split rev">
           <aside class="stack" style="gap:16px">
-            <div class="card"><span class="eyebrow">F-ID-02 · Readiness profile</span><h3>Day 1 readiness, defined</h3>
+            <div class="card"><span class="eyebrow">Start here · LM-SP-1</span><h3>Day 1 readiness, defined</h3>
               <p style="font-size:14px">A graduate is Day 1 ready when they show, on real work, at level 2 or above:</p>
               <ul class="px-list">${['Problem framing', 'Design Decision Training', 'Trust and Compliance', 'Soft-skills + Ownership'].map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
-              <span class="muted" style="font-size:12.5px">Draft. Co-signing: 1 of 2 sides. The room used the phrase; neither side had defined it.</span></div>
+              <a class="btn small primary" href="#learn-LM-SP-1">Take the 25-minute module</a></div>
             <div class="card"><span class="eyebrow">A–Z</span><div class="pill-list">${Object.keys(groups).map((k) => `<a class="chip" href="#lx-${k}" data-act="lx-jump" data-k="${k}">${k}</a>`).join('')}</div></div>
           </aside>
           <section class="stack" style="gap:18px">
-            <label class="field"><span class="sr">Search the Lexicon</span><input id="lex-q" type="search" data-on="lexq" placeholder="Search capabilities, for example framing" value="${esc(lex.q)}"></label>
-            ${Object.keys(groups).map((k) => `<div class="stack" id="lx-${k}" style="gap:10px"><span class="pxnum" style="font-size:34px">${k}</span><div class="grid g2">${groups[k].map((c) => `<a class="card tight" href="#lexicon-${c.slug}">
-              <div class="row between"><span class="label">${esc(c.position)}</span>${ui.status(c.status, c.status === 'cosigned' ? 'Co-signed' : 'Draft')}</div>
+            <label class="field"><span class="sr">Search the Skills Guide</span><input id="lex-q" type="search" data-on="lexq" placeholder="Search skills, for example framing" value="${esc(lex.q)}"></label>
+            ${Object.keys(groups).map((k) => `<div class="stack" id="lx-${k}" style="gap:10px"><span class="pxnum" style="font-size:34px">${k}</span><div class="grid g2">${groups[k].map((c) => `<a class="card tight" href="#skills-${c.slug}">
+              <div class="row between"><span class="label">${esc(plainPos(c.position))}</span>${ui.status(c.status, agreed(c) ? 'Agreed' : 'In review')}</div>
               <h4 style="font-size:17px">${esc(c.name)}</h4><p style="font-size:14px">${esc(c.definition)}</p>
-              <span class="muted" style="font-size:12.5px">Asked by ${asksOf(c)} companies${L().follows.some((f) => f.slug === c.slug && f.userId === me().id) ? ' · following' : ''}</span></a>`).join('')}</div></div>`).join('') || '<div class="empty">Nothing matches. Try a shorter word.</div>'}
+              <span class="muted" style="font-size:12.5px">${asksOf(c)} employers ask for this${L().follows.some((f) => f.slug === c.slug && f.userId === me().id) ? ' · following' : ''}</span></a>`).join('')}</div></div>`).join('') || '<div class="empty">Nothing matches. Try a shorter word.</div>'}
           </section>
         </div>
       </div>`;
@@ -54,16 +58,16 @@
     const following = L().follows.some((f) => f.slug === slug && f.userId === me().id);
     const chs = L().challenges.filter((x) => x.caps.includes(slug) && ['Live', 'In assessment', 'Closed'].includes(x.status));
     return `<div class="page wrap">
-      <nav class="crumbs"><a href="#lexicon">Lexicon</a><span>/</span><span>${esc(c.name)}</span></nav>
-      ${ui.hero({ compact: true, eyebrow: `${esc(c.position)} · asked by ${asksOf(c)} companies`, title: c.name, lede: esc(c.definition), meta: `${ui.status(c.status, c.status === 'cosigned' ? 'Co-signed' : 'Draft for co-signing')}${role() !== 'admin' ? `<button class="btn ${following ? '' : 'primary'}" data-act="follow" data-slug="${slug}">${following ? 'Following' : 'Follow'}</button>` : ''}${role() === 'steward' && c.status !== 'cosigned' ? `<button class="btn" data-act="cosign" data-slug="${slug}">Record co-signing</button>` : ''}` })}
+      <nav class="crumbs"><a href="#learn">Learn</a><span>/</span><a href="#skills">Skills Guide</a><span>/</span><span>${esc(c.name)}</span></nav>
+      ${ui.hero({ compact: true, eyebrow: `${esc(plainPos(c.position))} · ${asksOf(c)} employers ask for this`, title: c.name, lede: esc(c.definition), meta: `${ui.status(c.status, agreed(c) ? 'Agreed by employers and colleges' : 'Being reviewed')}${role() !== 'admin' ? `<button class="btn ${following ? '' : 'primary'}" data-act="follow" data-slug="${slug}">${following ? 'Following' : 'Follow'}</button>` : ''}${role() === 'admin' && c.status !== 'cosigned' ? `<button class="btn" data-act="cosign" data-slug="${slug}">Record co-signing</button>` : ''}` })}
       <div class="split">
         <section class="card"><span class="eyebrow">Four levels · plain descriptors</span>
           ${LEVEL_TEXT.map((f, i) => `<div class="score-row"><span class="row" style="gap:12px;flex-wrap:nowrap"><span class="pxnum" style="font-size:28px">${i + 1}</span><span>${esc(f(c.name))}</span></span>${ui.lvlDots(i + 1)}</div>`).join('')}
         </section>
         <aside class="stack" style="gap:16px">
-          <div class="card"><span class="eyebrow">Co-signed by</span>${ui.kv([['Industry', c.cosignedIndustry || 'Not yet'], ['Academia', c.cosignedAcademia || 'Not yet']])}</div>
+          <div class="card"><span class="eyebrow">Agreed by</span>${ui.kv([['An employer', c.cosignedIndustry || 'Not yet'], ['A college', c.cosignedAcademia || 'Not yet']])}</div>
           <div class="card"><span class="eyebrow">Practised in</span>${chs.map((x) => `<a href="#challenge-${x.id}">${esc(x.title)}</a>`).join('<br>') || '<p class="muted">No live challenge yet.</p>'}</div>
-          <div class="card"><span class="eyebrow">Learn more</span><p style="font-size:14px">Course content lives at the UMO Design School. LEAD links to it, and does not host it.</p><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">UMO Design School</a></div>
+          <div class="card"><span class="eyebrow">Learn this skill</span>${(LEAD.learn ? LEAD.learn.taughtBy(slug) : []).map((m) => `<a class="shelf-item" href="#learn-${m.code}"><span class="lmcode">${esc(m.code)}</span><span>${esc(m.title)}</span></a>`).join('') || '<p class="muted" style="font-size:14px">No module yet. Ask for one in Learn.</p>'}<p style="font-size:13px" class="muted">Longer courses live at the UMO Design School. LEAD links to them.</p><a class="btn small" href="https://umodesign.school" target="_blank" rel="noopener">UMO Design School</a></div>
         </aside>
       </div>
     </div>`;
@@ -79,8 +83,8 @@
     },
     cosign(el) {
       const c = L().capabilities.find((x) => x.slug === el.dataset.slug);
-      store.commit('Definition co-signed', 'capability', c, () => { c.status = 'cosigned'; c.cosignedIndustry = c.cosignedIndustry || 'Northwind Bank'; c.cosignedAcademia = c.cosignedAcademia || 'Campus A'; return c; });
-      ui.toast('Co-signed by industry and academia.');
+      store.commit('Definition agreed', 'capability', c, () => { c.status = 'cosigned'; c.cosignedIndustry = c.cosignedIndustry || 'Northwind Bank'; c.cosignedAcademia = c.cosignedAcademia || 'Campus A'; return c; });
+      ui.toast('Recorded: agreed by an employer and a college.');
     },
   });
 
@@ -91,13 +95,13 @@
     const r = role(); const u = me();
     return L().events.filter((e) => {
       if (e.visibility === 'public') return true;
-      if (r === 'steward') return true;
+      if (r === 'admin') return true;
       if (['student', 'faculty', 'head'].includes(r)) return e.host === u.orgId;
       if (r === 'industry' || r === 'mentor') return e.host === u.orgId || e.kind === 'Assessment day';
       return false;
     }).filter((e) => !cal.kind || e.kind === cal.kind).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
   }
-  const canWriteCal = () => ['faculty', 'head', 'industry', 'steward'].includes(role());
+  const canWriteCal = () => ['faculty', 'head', 'industry', 'admin'].includes(role());
 
   LEAD.views.calendar = {
     title: () => 'Joint Design Calendar',
@@ -114,7 +118,7 @@
             ${Object.keys(months).map((m) => `<div class="card"><span class="eyebrow">${esc(m)}</span>${months[m].map((e) => { const d = ui.fmtDay(e.at); return `<div class="cal-row">
               <div class="stack" style="gap:2px"><span class="cal-day">${d.day}</span><span class="label">${d.wk} · ${d.time}</span></div>
               <div class="stack" style="gap:4px;min-width:0"><b class="ink">${esc(e.title)}</b><span class="muted" style="font-size:13px">${esc(e.kind)} · ${esc(e.where)} · host ${esc(ui.orgName(e.host))}</span></div>
-              <div class="row">${ui.tag(e.visibility === 'public' ? 'Public' : 'Campus', e.visibility === 'public' ? 'info' : 'ind')}${canWriteCal() && (role() === 'steward' || e.host === me().orgId) ? `<button class="btn small ghost" data-act="cal-edit" data-id="${e.id}">Edit</button>` : ''}<button class="btn small" data-act="toast" data-msg="RSVP saved for ${esc(e.title)}.">RSVP</button></div>
+              <div class="row">${ui.tag(e.visibility === 'public' ? 'Public' : 'Campus', e.visibility === 'public' ? 'info' : 'ind')}${canWriteCal() && (role() === 'admin' || e.host === me().orgId) ? `<button class="btn small ghost" data-act="cal-edit" data-id="${e.id}">Edit</button>` : ''}<button class="btn small" data-act="toast" data-msg="RSVP saved for ${esc(e.title)}.">RSVP</button></div>
             </div>`; }).join('')}</div>`).join('') || '<div class="empty">No events for this filter.</div>'}
           </section>
           <aside>${canWriteCal() ? `<form class="card" data-form="event" ${ed ? `data-id="${ed.id}"` : ''}>
@@ -125,7 +129,7 @@
             <div class="form-grid"><label class="field">Where<input id="ev-where" name="where" value="${esc(ed ? ed.where : 'Online')}"></label>
             <label class="field">Who can see it<select id="ev-vis" name="visibility"><option value="public" ${ed && ed.visibility === 'public' ? 'selected' : ''}>Public</option><option value="campus" ${ed && ed.visibility === 'campus' ? 'selected' : ''}>My organisation</option></select></label></div>
             <div class="btn-row"><button class="btn primary" type="submit">${ed ? 'Save' : 'Add event'}</button>${ed ? '<button class="btn ghost" type="button" data-act="cal-cancel">Cancel</button><button class="btn danger" type="button" data-act="cal-del">Delete</button>' : ''}</div>
-          </form>` : `<div class="card"><span class="eyebrow">Your access</span><p>${esc(ui.roleName(role()))} can read the calendar. Faculty, institution heads, industry and the steward add events.</p></div>`}</aside>
+          </form>` : `<div class="card"><span class="eyebrow">Your access</span><p>${esc(ui.roleName(role()))} can read the calendar. Faculty, institution heads, industry and the UMO team add events.</p></div>`}</aside>
         </div>
       </div>`;
     },
@@ -159,7 +163,7 @@
     title: () => 'Provisions',
     render() {
       const P = L().provisions;
-      const steward = role() === 'steward';
+      const steward = role() === 'admin';
       return `<div class="page wrap">
         ${ui.hero({ compact: true, eyebrow: 'Governance · F-GV-05 · spec §14', title: 'Provisions.', lede: 'Reserved slots for things that are easy to miss and costly to bolt on later. Add your own.', meta: `${ui.tag(`${P.filter((p) => p.status === 'Needs an owner').length} need an owner`, 'mock')}${ui.tag('Stays for this session only', 'sim')}` })}
         <div class="split">
@@ -170,9 +174,9 @@
             ${steward ? `<div class="row"><select id="pv-${p.id}" data-on="pv-status" data-id="${p.id}" aria-label="Status of ${esc(p.title)}">${['Reserved', 'Needs an owner', 'Owned'].map((s) => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>` : ''}
           </article>`).join('')}</section>
           <aside><form class="card" data-form="provision"><span class="eyebrow">Add a provision</span>
-            <label class="field">Title<input id="pv-title" name="title" required placeholder="For example: regional-language Lexicon"></label>
+            <label class="field">Title<input id="pv-title" name="title" required placeholder="For example: regional-language Skills Guide"></label>
             <label class="field">Why it matters<textarea id="pv-why" name="why" placeholder="One or two sentences"></textarea></label>
-            <label class="field">Plugs into<input id="pv-plugs" name="plugs" placeholder="Lexicon, Codex, a stage…"></label>
+            <label class="field">Plugs into<input id="pv-plugs" name="plugs" placeholder="Skills Guide, Codex, a stage…"></label>
             <button class="btn primary" type="submit">Add</button></form></aside>
         </div>
       </div>`;

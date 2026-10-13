@@ -49,15 +49,15 @@
       {
         key: 'SPONSOR_SINGLE', name: 'Challenge Sponsorship', kind: 'CHALLENGE_SPONSORSHIP', pricingModel: 'PER_CHALLENGE', billingPeriod: 'ONE_TIME',
         minQty: 1, capacity: 6, booked: 2, refundDays: 0, active: true, archived: false, isDemo: true,
-        blurb: 'Bring one real, scoped problem into a term. The steward shapes it NDA-safe and matches it to campuses.',
-        includes: ['Brief shaping with the steward', 'Matched to 1–3 campuses', 'Assessment day', 'Problems-solved record'],
+        blurb: 'Bring one real, scoped problem into a term. The UMO team shapes it NDA-safe and matches it to campuses.',
+        includes: ['Brief shaping with the UMO team', 'Matched to 1–3 campuses', 'Assessment day', 'Problems-solved record'],
         versions: v1('SPONSOR_SINGLE', 250000 * L),
       },
       {
         key: 'OPEN_FREE', name: 'Open Community', kind: 'OPEN_TIER', pricingModel: 'FREE', billingPeriod: 'ONE_TIME',
         minQty: 1, capacity: null, booked: 214, refundDays: 0, active: true, archived: false, isDemo: true,
-        blurb: 'The Lexicon, public showcases, Circles and open-cohort calls. Free.',
-        includes: ['The LEAD Lexicon', 'Circles near you', 'Open-cohort challenges', 'Career-path awareness'],
+        blurb: 'The Skills Guide, public showcases, Circles and open-cohort calls. Free.',
+        includes: ['The Skills Guide', 'Circles near you', 'Open-cohort challenges', 'Career-path awareness'],
         versions: v1('OPEN_FREE', 0),
       },
     ];

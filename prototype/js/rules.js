@@ -1,4 +1,4 @@
-/* LEAD · business rules R1–R19 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
+/* LEAD · business rules R1–R22 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
   const enums = isNode ? require('./enums.js') : root.LEAD.enums;
@@ -20,12 +20,16 @@
     submission: ['Draft', 'Submitted', 'In scoring', 'Scored', 'Moderated'],
     passport_entry: ['Proposed', 'Verified', 'Shared', 'Revoked'],
     opportunity: ['Open', 'Shortlisting', 'Filled', 'Closed'],
+    learning_request: ['Open', 'Matched', 'Scheduled', 'Done', 'Closed'],
+    teaching_offer: ['Proposed', 'Approved', 'Scheduled', 'Done'],
+    open_topic: ['Proposed', 'Open', 'Published'],
   };
   /* Extra legal moves beyond "next state". */
   const EXTRA = {
     demand_signal: { Reviewed: ['Published'] }, // kept as its own theme
     passport_entry: { Shared: ['Verified', 'Revoked'], Verified: ['Revoked'] }, // unshare, revoke
     opportunity: { Open: ['Closed'], Shortlisting: ['Closed'] },
+    learning_request: { Open: ['Closed'], Matched: ['Closed'], Scheduled: ['Closed'] },
   };
 
   function canTransition(machine, from, to) {
@@ -54,7 +58,7 @@
   /* ---------- R2 Two-person approval ---------- */
   function canVerify(entry, scores, approver, criteriaCount) {
     if (entry.status !== 'Proposed') return no(`Entry is ${entry.status}, not Proposed.`);
-    if (!approver || approver.role !== 'steward') return no('Only a steward gives the second approval.');
+    if (!approver || approver.role !== 'admin') return no('Only a UMO admin gives the second approval.');
     if (approver.id === entry.assessorId) return no('The assessor cannot approve their own entry.');
     const assessed = scores.filter((s) => s.submissionId === entry.submissionId && s.assessorId === entry.assessorId);
     if (assessed.length < (criteriaCount || 1) || !assessed.every((s) => s.locked)) {
@@ -264,6 +268,69 @@
     return Object.assign(ok(), { pct: n });
   }
 
+  /* ---------- R20 Module codes: LM-<mode>-<n>, mode from a fixed list, unique ---------- */
+  function moduleCode(mode, n) { return `LM-${mode}-${n}`; }
+  function validateModuleCode(code, existing) {
+    const m = enums.MODULE_CODE_RE.exec(String(code || '').trim());
+    if (!m) return no('A module code looks like LM-SP-1: LM, a mode (SP, IL, PL or CB) and a number.');
+    if ((existing || []).includes(code)) return no(`${code} is already in use.`);
+    return ok({ mode: m[1], n: Number(m[2]) });
+  }
+
+  /* ---------- R21 Progress: any order, never backwards, done only when every lesson is done and the check is passed ---------- */
+  function markLesson(rec, mod, lessonId) {
+    const r = { done: ((rec && rec.done) || []).slice(), check: rec && rec.check ? Object.assign({}, rec.check) : null, completedAt: rec ? rec.completedAt || null : null };
+    if (mod.lessons.some((l) => l.id === lessonId) && !r.done.includes(lessonId)) r.done.push(lessonId);
+    return r;
+  }
+  function scoreCheck(mod, answers) {
+    const qs = mod.check || [];
+    const score = qs.reduce((n, q, i) => n + (Number(answers[i]) === q.answer ? 1 : 0), 0);
+    return { score, total: qs.length, passed: score >= (mod.pass || Math.ceil(qs.length * 2 / 3)) };
+  }
+  function recordCheck(rec, mod, result) {
+    const r = markLesson(rec, mod, null); // a copy
+    const prev = r.check;
+    r.check = prev && prev.passed ? prev : { score: result.score, total: result.total, passed: result.passed };
+    return r;
+  }
+  function moduleProgress(mod, rec) {
+    const lessonsDone = ((rec && rec.done) || []).filter((id) => mod.lessons.some((l) => l.id === id)).length;
+    const steps = mod.lessons.length + (mod.check && mod.check.length ? 1 : 0);
+    const checkDone = !!(rec && rec.check && rec.check.passed);
+    const doneSteps = lessonsDone + (mod.check && mod.check.length && checkDone ? 1 : 0);
+    const complete = mod.lessons.length > 0 && lessonsDone === mod.lessons.length && (!(mod.check && mod.check.length) || checkDone);
+    return { lessonsDone, steps, doneSteps, pct: steps ? Math.round((doneSteps / steps) * 100) : 0, complete, canCheck: lessonsDone === mod.lessons.length && !!(mod.check && mod.check.length) };
+  }
+
+  /* ---------- R22 Giving back: offers, requests, topics ---------- */
+  const OFFER_ROLES = ['mentor', 'industry', 'faculty', 'head'];
+  function validateOffer(o) {
+    const hours = Number(o.hours);
+    if (!Number.isInteger(hours) || hours < 1 || hours > 60) return no('Offer between 1 and 60 hours.');
+    if (!String(o.topic || '').trim()) return no('Say what you would teach.');
+    if (!enums.ModuleMode.includes(o.mode)) return no('Pick a format.');
+    if (OFFER_ROLES.includes(o.role)) return ok();
+    if (o.role === 'student') {
+      if (o.mode !== 'PL') return no('Students can lead a peer circle.');
+      if (!o.completed) return no('Finish a module first. Then you can lead a peer circle on it.');
+      return ok();
+    }
+    return no('This role cannot offer teaching hours yet.');
+  }
+  function validateRequest(o) {
+    const title = String(o.title || '').trim();
+    const count = Number(o.count);
+    if (title.length < 6 || title.length > 120) return no('Describe what you want to learn in 6 to 120 characters.');
+    if (!Number.isInteger(count) || count < 1 || count > 500) return no('Say how many people want it (1 to 500).');
+    return ok();
+  }
+  function addVote(votes, userId) {
+    if (!userId) return no('Pick a persona first.');
+    if ((votes || []).includes(userId)) return no('You already said “me too”.');
+    return ok();
+  }
+
   /* The registry the A4.2 endpoint returns: GET /api/enums. */
   function registry(plans, coupons, now) {
     const live = plans.filter((p) => !p.archived);
@@ -284,5 +351,6 @@
     lastPrice, setPrice, validatePlan,
     needsSecondApproval, validateCouponFields, createCoupon, approveCoupon, setCouponStatus,
     keyInUse, canRenameOrDelete, sellable, registry, validateWomenShare,
+    moduleCode, validateModuleCode, markLesson, scoreCheck, recordCheck, moduleProgress, OFFER_ROLES, validateOffer, validateRequest, addVote,
   };
 });

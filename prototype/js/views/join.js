@@ -136,11 +136,11 @@
     const st = S[flow];
     const period = { ANNUAL: 'a year', TERM: 'per term', ONE_TIME: 'one time' }[q.billingPeriod];
     const next = {
-      college: 'The UMO steward verifies your institution, then sets up your term slot and faculty lead.',
+      college: 'The UMO admin verifies your institution, then sets up your term slot and faculty lead.',
       industry: 'Your coordinator gets an admin dashboard. It shows seats used and Passport counts, never individual submissions or feedback.',
       path: 'Your first module opens with the next live challenge. Course content links to the UMO Design School.',
-      sponsor: 'The steward contacts your named owner to shape the brief NDA-safe and match it to campuses.',
-      open: 'Follow capabilities in the Lexicon and join a Circle near you.',
+      sponsor: 'The UMO team contacts your named owner to shape the brief NDA-safe and match it to campuses.',
+      open: 'Follow capabilities in the Skills Guide and join a Circle near you.',
     }[flow];
     const email = `To: ${st.contact || st.email} (preview only, not sent)
 Subject: Welcome to LEAD · ${q.planName}
@@ -322,13 +322,13 @@ UMO Design Foundation · LEAD`;
       requote('sponsor');
       const chs = store.loop.challenges.filter((c) => c.status !== 'Closed');
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'A10.4 · Challenge sponsorship · APPLY', title: 'Sponsor.', lede: 'Bring a real, scoped problem into a term. The steward shapes it NDA-safe and matches it to campuses.', meta: steps(st.code ? 3 : 1) })}
+        ${ui.hero({ compact: true, eyebrow: 'A10.4 · Challenge sponsorship · APPLY', title: 'Sponsor.', lede: 'Bring a real, scoped problem into a term. The UMO team shapes it NDA-safe and matches it to campuses.', meta: steps(st.code ? 3 : 1) })}
         <div class="split">
           <section class="card" style="gap:16px">
             <div class="form-grid">
               <label class="field">Company<input id="js-name" data-on="jf" data-flow="sponsor" data-k="name" value="${esc(st.name)}"></label>
               <label class="field">Contact email<input id="js-contact" type="email" data-on="jf" data-flow="sponsor" data-k="contact" value="${esc(st.contact)}"></label>
-              <label class="field">Challenge<select id="js-ch" data-on="jf" data-flow="sponsor" data-k="challenge">${chs.map((c) => `<option value="${c.id}" ${c.id === st.challenge ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}<option value="new" ${st.challenge === 'new' ? 'selected' : ''}>A new brief, shaped with the steward</option></select></label>
+              <label class="field">Challenge<select id="js-ch" data-on="jf" data-flow="sponsor" data-k="challenge">${chs.map((c) => `<option value="${c.id}" ${c.id === st.challenge ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}<option value="new" ${st.challenge === 'new' ? 'selected' : ''}>A new brief, shaped with the UMO team</option></select></label>
               <label class="field">Number of challenges<input id="js-n" type="number" min="1" data-on="jf" data-flow="sponsor" data-k="count" value="${esc(st.count)}"></label>
             </div>
             <label class="check"><input type="checkbox" disabled> Split the price with co-sponsors <span class="muted">· reserved, not built (F-AP-08)</span></label>
@@ -349,7 +349,7 @@ UMO Design Foundation · LEAD`;
       const st = S.open;
       if (st.done) return confirmCard('open');
       return `<div class="page wrap">
-        ${ui.hero({ compact: true, eyebrow: 'A10.5 · Open join · free', title: 'Explore.', lede: 'The Lexicon, public showcases, Circles near you and open-cohort calls. Free. No code needed.', meta: steps(1) })}
+        ${ui.hero({ compact: true, eyebrow: 'A10.5 · Open join · free', title: 'Explore.', lede: 'The Skills Guide, public showcases, Circles near you and open-cohort calls. Free. No code needed.', meta: steps(1) })}
         <form class="card" data-form="open-join" style="max-width:720px">
           <div class="form-grid"><label class="field">Name<input id="jo-name" name="name" value="${esc(st.name)}" required></label>
           <label class="field">Email<input id="jo-email" type="email" name="email" value="${esc(st.email)}" required></label></div>
@@ -419,7 +419,7 @@ UMO Design Foundation · LEAD`;
       }
       return su;
     });
-    if (flow === 'college') store.commit('Pending institution: steward to verify', 'organisation', su.orgId, () => ({ name: st.name, city: st.city, status: 'Pending verification' }));
+    if (flow === 'college') store.commit('Pending institution: UMO admin to verify', 'organisation', su.orgId, () => ({ name: st.name, city: st.city, status: 'Pending verification' }));
     st.done = su;
     LEAD.render();
     ui.toast('Confirmed. Nothing was charged.');

@@ -11,12 +11,14 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - Anything illustrative must say so on screen in plain words (for example “Demo count” or “Illustrative · not the person”). Do not use a “Simulated” label. The footer and persona menu keep one neutral line: “Demo only · nothing saved or charged”.
 - 1 Million Women in Design: the automatic share (default 5%) is a setting in the pricing data, never hard-coded. It comes out of the price and is never added to it. Top-up seats are optional and shown before confirm. Rules R18 and R19 live in `rules.js` and `pricing.js` with tests.
 - The homepage opens with a timed carousel. “Your path” stays folded until a role is picked.
+- Learning codes: `LM-<mode>-<n>` for a module (SP self-paced, IL instructor-led, PL peer circle, CB inside a challenge), `LP-n` for a Learning Path, `TP-n` open topic, `RQ-n` request, `OF-n` offer. Show the code on every card, step and button. Rules R20 to R22 live in `rules.js` with tests.
+- There is no UMO steward role. UMO admin runs the loop and the pricing. Never show “mock” on admin or persona labels; priced customer screens keep “Mock pricing. Not an offer.”
 - Mobile first. Dark theme is the reference design; light theme must also pass.
-- Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum).
+- Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum, R18–R22 added in rounds 4 and 5).
 - Prices, plans and coupons are data in the database, never hard-coded. Sign-up records store enumerated keys (addendum A4).
 - Mock pricing only. Every priced screen says "Mock pricing. Not an offer." Nothing is charged.
 - Look and feel priority: LEAD identity, then umo.design and umodesign.school, then ixdf.org patterns. Copy IxDF patterns only, never its logo, text, images or colours. Link to UMO Design School, UMO Mentors & Catalysts and UXIN; do not duplicate them.
-- Public pages (the homepage and the join sheet) use plain words a first-year student understands. No rule codes (R1…), no spec terms (lifecycle, gates, retention, lineage, blueprint, value exchange), no internal lens names. Keep each product name (Passport, Lexicon, Paths, Codex) and explain it where it first appears.
+- Public pages (the homepage and the join sheet) use plain words a first-year student understands. No rule codes (R1…), no spec terms (lifecycle, gates, retention, lineage, blueprint, value exchange), no internal lens names. Keep each product name (Passport, Skills Guide, Paths, Codex) and explain it where it first appears. The old name “Lexicon” is retired.
 - People photos are illustrative stock. Keep the checker treatment, the caption “Illustrative · not the person”, and the photographer credit in the footer. Never name or imply a real person.
 - Every state change writes an audit entry.
 - Small steps: finish one milestone, run tests, show the result, then stop and ask.

@@ -150,3 +150,21 @@ Final gate numbers (Madhukar Joshi, Kaladhar Bapu) · UMO as steward (Kaladhar B
 | Faculty | Dedicated session in the studio |
 
 New rules: R18 (share is 0 to 50 percent, whole or half, computed on the amount paid, round half up, zero on free plans) and R19 (top-up seats at the seat price, counted in the tally; a changed share or seat count re-quotes before confirm).
+
+
+## Round 5 additions (v0.6): Learn, one admin role, women imagery
+
+**Learn** is the first menu item and the main reason to enrol. It has a pinned start module, a shelf that changes with the persona, a filterable catalogue, and a "Teach, add and ask" section.
+
+| Code | Meaning |
+|---|---|
+| `LM-SP-n` | Learning Module, self-paced, online. LM-SP-1 is the full demo course (3 one-page lessons and a 3-question check). |
+| `LM-IL-n` | Instructor-led: taught live by a person, with seats. |
+| `LM-PL-n` | Peer circle: led by a peer. |
+| `LM-CB-n` | Inside a live challenge. |
+| `LP-n` | Learning Path: a priced bundle of modules (price comes from the plan registry). |
+| `TP-n`, `RQ-n`, `OF-n` | Open topic, request for learning, offer to teach. |
+
+Giving back: mentors, company staff, faculty and college staff offer hours; students lead a peer circle after finishing a module; anyone proposes a topic or opens a request; others add "me too"; a teacher offers; a UMO admin approves and matches. Rules: R20 module codes, R21 progress (never backwards; done needs every lesson and a 2-of-3 check), R22 offers, requests and votes.
+
+The Lexicon is now the **Skills Guide**, in plain words with four levels per skill, linked to the modules that teach it. **UMO steward** is folded into **UMO admin** (operations strip on the admin page). Not built yet: a Passport line for finished modules.

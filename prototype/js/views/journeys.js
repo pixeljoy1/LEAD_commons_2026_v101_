@@ -60,7 +60,7 @@
               <li>Real payments, billing or invoicing (a mock checkout is in)</li><li>Video calls, live chat, a social feed</li><li>Hosting course content (link out)</li>
               <li>Recommendation engines or AI matching</li><li>Real sign-in (a role switcher stands in)</li><li>1 Million Women and Design Pitch (reserved overlays)</li></ul></div>
             <div class="card"><span class="eyebrow">Decisions only people can make</span><h3>Open questions</h3><ul class="px-list">
-              <li>Final gate numbers and dates · Madhukar Joshi, Kaladhar Bapu</li><li>UMO as steward (G5) · Kaladhar Bapu</li>
+              <li>Final gate numbers and dates · Madhukar Joshi, Kaladhar Bapu</li><li>UMO as host of the loop (G5) · Kaladhar Bapu</li>
               <li>Who validates the first Passports · UMO with the first employers</li><li>Mentor economics: paid, credited, or both · UMO, sponsors</li>
               <li>Real prices; only the campus band is sourced · Madhukar Joshi, UMO</li><li>LEAD Paths sold in LEAD, via UMO Design School, or both · UMO</li>
               <li>IP terms; student data and consent under India’s data protection law · Counsel</li><li>Tax per plan type and refund windows · Finance, counsel</li></ul></div>
@@ -77,7 +77,7 @@
 
   /* ---------- access chooser ---------- */
   const ACCESS = [
-    ['Lexicon', 'R', 'R', 'R', 'R', 'R', 'RW', 'R'],
+    ['Skills Guide', 'R', 'R', 'R', 'R', 'R', 'RW', 'R'],
     ['Demand Map', 'R themes', 'R', 'R', 'RW own intakes', 'R', 'RW', 'R public'],
     ['Challenge, published', 'R own campus', 'R', 'R own campus', 'RW own', 'R assigned', 'RW', 'R open cohort'],
     ['Challenge brief, draft', '—', '—', '—', 'RW own', '—', 'RW', '—'],
@@ -106,7 +106,7 @@
         </button>`).join('')}</div>
         <section class="section">
           ${ui.sectionHead('Access · spec §9', 'Who can see and do what', '', 'R read · RW read and write · agg aggregates only · — no access. Built as if real sign-in existed, so Phase 2 only swaps the login.')}
-          <div class="table-wrap"><table><thead><tr><th>Resource</th>${['Student', 'Faculty', 'Inst. head', 'Industry', 'Mentor', 'Steward', 'Open'].map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>
+          <div class="table-wrap"><table><thead><tr><th>Resource</th>${['Student', 'Faculty', 'Inst. head', 'Industry', 'Mentor', 'UMO admin', 'Open'].map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>
             ${ACCESS.map((row) => `<tr><td><b>${esc(row[0])}</b></td>${row.slice(1).map((c) => `<td style="white-space:nowrap" class="${c === '—' ? 'muted' : ''}">${esc(c)}</td>`).join('')}</tr>`).join('')}
           </tbody></table></div>
         </section>
@@ -126,7 +126,7 @@
         const team = L.teams.find((t) => t.memberIds.includes(me.id) && t.id === 't1');
         return [{ label: 'My Passport entries', v: mine.length, d: `${mine.filter((p) => p.shared).length} shared` }, { label: 'Team decisions', v: team ? team.decisions.length : 0, d: team ? team.name : '' }, { label: 'Applications', v: L.applications.filter((a) => a.studentId === me.id).length }];
       }
-      case 'steward': return [{ label: 'Intakes to review', v: L.demandSignals.filter((d) => d.status === 'Submitted').length }, { label: 'Briefs to shape or match', v: L.challenges.filter((c) => ['Draft', 'Shaped'].includes(c.status)).length }, { label: 'Pending second approval', v: pend }];
+      case 'admin': return [{ label: 'Intakes to review', v: L.demandSignals.filter((d) => d.status === 'Submitted').length }, { label: 'Briefs to shape or match', v: L.challenges.filter((c) => ['Draft', 'Shaped'].includes(c.status)).length }, { label: 'Pending second approval', v: pend }, { label: 'Live plans', v: store.pricing.plans.filter((p) => p.active && !p.archived).length }];
       case 'industry': return [{ label: 'My intakes', v: L.demandSignals.filter((d) => d.orgId === me.orgId).length }, { label: 'My challenges', v: L.challenges.filter((c) => c.sponsorOrgId === me.orgId).length }, { label: 'Shared Passports', v: L.passports.filter((p) => rules.employerCanSee(p)).length }];
       case 'mentor': {
         const mins = L.sprints.filter((s) => s.mentorId === me.id).flatMap((s) => s.sessions.filter((x) => x.done)).reduce((a, x) => a + x.minutes, 0);
@@ -139,7 +139,6 @@
         return [{ label: 'Verified Passports · live', v: a.value, hidden: a.hidden }, { label: 'Challenges this term', v: L.matches.filter((m) => m.institutionId === me.orgId).length }, { label: 'Mock sign-ups', v: store.pricing.signups.length }];
       }
       case 'open': return [{ label: 'Capabilities followed', v: L.follows.filter((f) => f.userId === me.id).length }, { label: 'Open opportunities', v: L.opportunities.filter((o) => o.open).length }, { label: 'Public events', v: L.events.filter((e) => e.visibility === 'public').length }];
-      case 'admin': return [{ label: 'Live plans', v: store.pricing.plans.filter((p) => p.active && !p.archived).length }, { label: 'Coupons waiting', v: store.pricing.coupons.filter((c) => c.status === 'PENDING_APPROVAL').length }, { label: 'Mock sign-ups', v: store.pricing.signups.length }];
       default: return [];
     }
   }
