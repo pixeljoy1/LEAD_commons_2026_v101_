@@ -355,6 +355,7 @@
       S('SOLVE', 'Week 8', 'Hand in your work.', 'Send your deliverable, your decision log, a short reflection and a note on how you used AI.', 'submit', 'Open the submission'),
       S('VALIDATE', 'Week 9', 'Get scored by professionals.', 'Assessors score your work against a rubric you saw in advance. They do not see your name or college until they have locked their scores.', 'passports', 'See my Passport', { photo: 'story-validate' }),
       S('CONNECT', 'Ongoing', 'Meet the people.', 'Industry circles, guest sessions and assessment days sit on one shared calendar. Come to any that are public.', 'calendar', 'See the calendar', { feats: ['F-CO-01', 'F-CO-04'], handoff: ['steward'], sample: { title: 'Calendar · next 30 days', rows: [['Industry circle', 'Wed'], ['Assessment day', '14 Nov'], ['Guest session', '21 Nov']] } }),
+      S('CONNECT', 'Ongoing', 'Join a women’s circle.', 'Women in design meet every month in Bengaluru and online. Part of every paid plan funds seats for women through 1 Million Women in Design, and you can add a seat of your own.', 'women', 'See 1 Million Women', { feats: ['F-CO-01'], handoff: ['steward'] }),
       S('GET OPPORTUNITY', 'Month 3 on', 'Apply with proof.', 'Share your Passport with the employers you choose. Roles and internships list the evidence they want, and every internship has a mentor and a learning plan.', 'opportunities', 'See opportunities'),
     ],
     faculty: [
@@ -364,16 +365,19 @@
       S('MENTOR', 'Weeks 4–8', 'Sit in on mentor sessions.', 'Co-mentor with the practitioner, see what your students are told, and share notes with the team.', 'team', 'Open a team'),
       S('VALIDATE', 'Week 9', 'Help write the rubric.', 'Faculty and assessors set the scoring rubric together, so marks mean the same to both sides.', 'assess', 'See the rubric'),
       S('CONNECT', 'Ongoing', 'Meet industry on one calendar.', 'Add campus events, join industry circles and see assessment days in one place.', 'calendar', 'Open the calendar'),
+      S('CONNECT', 'Ongoing', 'Run a session for women in your studio.', 'Host or join a dedicated session for women designers. It is part of 1 Million Women in Design.', 'women', 'See the sessions', { feats: ['F-CO-01'], handoff: ['steward'] }),
     ],
     head: [
       S('IDENTIFY', 'Planning', 'See where demand and curriculum differ.', 'A gap report across your programmes shows which skills employers want that your courses do not cover yet.', 'demand', 'See the demand map'),
       S('APPLY', 'Term setup', 'Join LEAD for your institution.', 'Pick a licence by number of students, set the term slot and name a faculty lead. Prices are under Ways to join.', 'join-college', 'Start a campus licence'),
+      S('APPLY', 'At sign-up', 'Pledge seats for women students.', 'When you join, commit a number of seats for women students. Part of your fee also goes to 1 Million Women in Design.', 'join-college', 'Pledge at sign-up', { feats: [], handoff: ['steward'] }),
       S('VALIDATE', 'End of term', 'See outcomes you can defend.', 'How many Passports were validated, how many challenges finished, how many faculty hours. No student names; groups under five stay hidden.', 'impact', 'See outcomes'),
       S('GET OPPORTUNITY', 'Placement season', 'Show readiness to employers.', 'Share verified readiness with your placement cell: shortlists, interviews and offers.', 'impact', 'See readiness'),
     ],
     industry: [
       S('IDENTIFY', 'Day 1', 'Tell us what capability you need.', 'A five-minute intake: the capability, the date you need it by, and how many assessors you can offer.', 'demand', 'State a need'),
       S('APPLY', 'Weeks 1–3', 'Bring one real problem.', 'The steward shapes your brief so it is safe to share: no confidential data, sanitised examples, clear IP terms. Share the cost with other companies if you like.', 'challenges', 'Open the sponsor desk'),
+      S('APPLY', 'Weeks 1–3', 'Sponsor a women’s cohort.', 'Fund seats for a cohort of women designers on your challenge. Part of every fee also goes to 1 Million Women in Design.', 'join-sponsor', 'Sponsor a cohort', { feats: [], handoff: ['steward'] }),
       S('VALIDATE', 'Week 9', 'Score the work, blind.', 'Send an assessor to an assessment day. Names stay hidden until scores are locked.', 'assess', 'Open scoring'),
       S('CONNECT', 'Ongoing', 'Meet campuses.', 'Industry circles put your team in the room with faculty from several colleges.', 'calendar', 'See circles'),
       S('GET OPPORTUNITY', 'Month 3 on', 'Hire from evidence.', 'See shortlists with verified work attached, and a count of problems solved.', 'opportunities', 'See the shortlist'),
@@ -381,6 +385,7 @@
     mentor: [
       S('LEARN', 'Any time', 'Give a talk.', 'Offer a 45-minute session to several campuses at once.', 'calendar', 'Offer a session'),
       S('MENTOR', 'Weeks 4–8', 'Coach a team.', 'Three short sessions per team. Every hour is logged and counted.', 'sprints', 'Open my teams'),
+      S('MENTOR', 'Any time', 'Offer a session for women designers.', 'Give an office hour or a talk for women in design. It counts toward your hours and toward 1 Million Women in Design.', 'women', 'See the initiative', { feats: [], handoff: ['steward'] }),
       S('VALIDATE', 'Week 9', 'Score blind.', 'Score against the shared rubric. You never score a team you mentored.', 'assess', 'Start scoring'),
       S('CONNECT', 'Ongoing', 'Be recognised.', 'Hours and assessment days earn distinctions you can share.', 'impact', 'See my hours'),
     ],
@@ -416,7 +421,28 @@
     { label: 'Just curious? Start free', role: 'open' },
   ];
 
+  /* The homepage carousel. 'ms' is how long a leaf holds. The first leaf is a guided story that plays on its own. */
+  const leaves = [
+    { id: 'concept', kind: 'story', ms: 15000, label: 'The idea', eyebrow: 'LEAD Commons', head: 'A loop that connects classrooms and workplaces.', line: 'Watch how one real problem travels around the loop.',
+      beats: [
+        { tile: 'Classroom', cap: 'A college runs a design term.' },
+        { tile: 'Company', cap: 'A company brings a real problem to the class.' },
+        { tile: 'Mentor', cap: 'A practitioner coaches the students.' },
+        { tile: 'Passport', cap: 'Professionals score the work. The student earns a Passport.' },
+        { tile: 'Job', cap: 'Employers hire from proof. Their next problem starts the loop again.' },
+      ], primary: ['Start as a student', 'student'], second: ['See who is in LEAD', 'ecosystem'] },
+    { id: 'student', kind: 'role', ms: 7000, role: 'student', label: 'Student', photo: 'hero', head: 'Do real design work before you graduate.', line: 'Take on a live brief from a real company, get coached by a practitioner, and leave with proof employers trust.', primary: ['Join as a student', 'student'] },
+    { id: 'faculty', kind: 'role', ms: 7000, role: 'faculty', label: 'Faculty', photo: 'door-faculty', head: 'Teach with live briefs.', line: 'Bring a real company problem into your module without rewriting your course.', primary: ['Join as faculty', 'faculty'] },
+    { id: 'head', kind: 'role', ms: 7000, role: 'head', label: 'College', photo: 'door-college', head: 'Show outcomes you can defend.', line: 'See validated work, placements and faculty hours for your college. Pledge seats for women students.', primary: ['Join as a college', 'head'] },
+    { id: 'industry', kind: 'role', ms: 7000, role: 'industry', label: 'Industry', photo: 'door-industry', head: 'Find talent with proof.', line: 'Bring one real problem, score the work blind, and hire from verified evidence. Sponsor a women’s cohort.', primary: ['Join as a company', 'industry'] },
+    { id: 'mentor', kind: 'role', ms: 7000, role: 'mentor', label: 'Mentor', photo: 'door-mentor', head: 'Give back and be recognised.', line: 'Coach a team in three short sessions. Every hour is counted.', primary: ['Join as a mentor', 'mentor'] },
+    { id: 'open', kind: 'role', ms: 7000, role: 'open', label: 'Just curious', photo: 'door-open', head: 'Just curious? Start free.', line: 'Read the Lexicon, join a circle and try an open challenge.', primary: ['Start free', 'open'] },
+    { id: 'women', kind: 'women', ms: 7000, label: '1 Million Women', photo: 'women', head: 'Help reach 1 million women in design.', line: 'Part of every paid plan funds seats for women. Add a seat of your own, sponsor a cohort, or run a session.', primary: ['Join as a student', 'student'], second: ['See the initiative', 'women'] },
+  ];
+
   const faq = [
+    ['What is 1 Million Women in Design?', 'An initiative of UMO Design Foundation to help one million women into design. Part of every paid plan on LEAD funds it, and you can add seats of your own.'],
+    ['Do I pay extra for it?', 'No. The share comes out of the price you already pay. Adding a seat for a woman is optional, and you see the amount before you confirm.'],
     ['Is it free for students?', 'You can start free. An open account gives you the Lexicon, circles and open challenges. Enrolling on a Path has a price. Every price on this page is mock and not an offer.'],
     ['Does my college have to be on LEAD?', 'No. Join free first. Linking your campus unlocks the challenges that run inside your college’s term.'],
     ['What is a Passport?', 'A record of work you did on a real challenge, scored by professionals, with a link anyone can check. You decide who sees it, and you can stop sharing at any time.'],
@@ -428,5 +454,5 @@
     ['Is this a real platform?', 'This is a working prototype with made-up people and data. Nothing is saved or charged.'],
   ];
 
-  Object.assign(LEAD, { content: { stages, features, featureById, roles, roleById, evidence, gates, phases, valueKinds, actors, flows, stays, workflows, ixdf, demoByRole, demoOrder, plainPhase, plainGate, story, storyTabs, doors, heroPromises, faq } });
+  Object.assign(LEAD, { content: { stages, features, featureById, roles, roleById, evidence, gates, phases, valueKinds, actors, flows, stays, workflows, ixdf, demoByRole, demoOrder, plainPhase, plainGate, story, storyTabs, doors, heroPromises, leaves, faq } });
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -133,3 +133,20 @@ npm run build:artifact  # one self-contained HTML file in prototype/dist/
 ## 7. Decisions only people can make
 
 Final gate numbers (Madhukar Joshi, Kaladhar Bapu) · UMO as steward (Kaladhar Bapu) · who validates the first Passports (UMO with first employers) · mentor economics (UMO, sponsors) · real prices beyond the campus band (Madhukar Joshi, UMO) · whether LEAD Paths are sold in LEAD or through UMO Design School (UMO) · tax per plan type, refund windows, payment provider (finance, counsel) · IP terms and student data under India's data protection law (counsel) · coupon stacking, scholarships and gift matching (UMO, counsel).
+
+
+## Round 4 additions (v0.5)
+
+**Homepage carousel.** The first banner is a timed carousel of eight leaves: the idea (a guided story, no controls, 15 s), Student, Faculty, College, Industry, Mentor, Just curious, and 1 Million Women (7 s each). It pauses on hover, focus or any tap, has a pause button, and does not autoplay for reduced-motion users. Picking a role button unfolds "Your path" for that role below the carousel. The rest of the page does not change.
+
+**1 Million Women in Design.** Its own page (`#women`) and top-menu item ("1M Women"). It is funded two ways. (1) An automatic share of every paid plan, default 5%, one admin setting (`womenSharePct`). It comes out of the price; nobody pays extra. (2) An optional top-up, "Add a seat for a woman", at a seat price held in data (`womenSeatPrice`). A running tally counts top-up seats and the seats the share buys, toward 1,000,000. The seeded starting count is made up and says so.
+
+| Role | Link |
+|---|---|
+| Student | A "Join a women's circle" step in the path |
+| College | Seat pledge at onboarding (`join-college`) |
+| Industry | Sponsor a women's cohort of 10 seats (`join-sponsor`) |
+| Mentor | Office hour or session for women designers |
+| Faculty | Dedicated session in the studio |
+
+New rules: R18 (share is 0 to 50 percent, whole or half, computed on the amount paid, round half up, zero on free plans) and R19 (top-up seats at the seat price, counted in the tally; a changed share or seat count re-quotes before confirm).

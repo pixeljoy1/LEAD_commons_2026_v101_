@@ -182,3 +182,48 @@ test('enumerations: unknown keys are rejected; a new key is accepted at once', (
   assert.deepEqual(P.validateSignupEnums(Object.assign({}, s, { planKey: 'PATH_TEST' }), reg()), []);
   assert.deepEqual(P.validateSignupEnums(Object.assign({}, s, { couponCode: 'NOPE99' }), reg()), ['Unknown coupon code: NOPE99.']);
 });
+
+/* R18 and R19: 1 Million Women in Design */
+test('R18 default share is 5% of the amount paid, rounded half up', () => {
+  const q = P.quote({ planKey: 'INDUSTRY_TEAM', quantity: 5, orgId: 'org-w', now: NOW }, data());
+  assert.equal(q.womenSharePct, 5);
+  assert.equal(q.womenShare, 10000 * L);
+  assert.equal(q.total, 200000 * L);
+});
+
+test('R18 the share follows the discounted price and is zero on free plans', () => {
+  const q = P.quote({ planKey: 'INDUSTRY_TEAM', quantity: 5, orgId: 'org-w2', couponCode: 'FOUNDING20', now: NOW }, data());
+  assert.equal(q.womenShare, 8000 * L);
+  const f = P.quote({ planKey: 'OPEN_FREE', orgId: 'x', now: NOW }, data());
+  assert.equal(f.womenShare, 0);
+});
+
+test('R18 the share setting is validated', () => {
+  assert.equal(R.validateWomenShare(5).ok, true);
+  assert.equal(R.validateWomenShare(2.5).ok, true);
+  assert.equal(R.validateWomenShare(51).ok, false);
+  assert.equal(R.validateWomenShare(-1).ok, false);
+  assert.equal(R.validateWomenShare('').ok, false);
+  assert.equal(R.validateWomenShare(2.3).ok, false);
+});
+
+test('R19 a top-up adds seats at the seat price and is counted in the tally', () => {
+  const d = data();
+  const q = P.quote({ planKey: 'PATH_FRAMING', quantity: 1, womenSeats: 3, orgId: 'o', now: NOW }, d);
+  assert.equal(q.topUp, 3 * d.settings.womenSeatPrice);
+  assert.equal(q.total, 12000 * L + 3000 * L);
+  const su = P.buildSignup(q, {});
+  const before = P.womenTally([], d.settings).seats;
+  const after = P.womenTally([su], d.settings);
+  assert.equal(after.seats, before + 3 + Math.floor(q.womenShare / d.settings.womenSeatPrice));
+  assert.equal(after.target, 1000000);
+});
+
+test('R19 confirm notices a changed share setting', () => {
+  const d = data();
+  const q = P.quote({ planKey: 'INDUSTRY_TEAM', quantity: 2, orgId: 'o', now: NOW }, d);
+  d.settings.womenSharePct = 10;
+  const c = P.confirm(q, d, NOW + 1000);
+  assert.equal(c.ok, false);
+  assert.ok(c.diff.some((x) => x.field === 'womenShare'));
+});

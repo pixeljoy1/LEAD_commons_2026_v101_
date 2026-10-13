@@ -1,4 +1,4 @@
-/* LEAD · business rules R1–R17 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
+/* LEAD · business rules R1–R19 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
   const enums = isNode ? require('./enums.js') : root.LEAD.enums;
@@ -255,6 +255,15 @@
     return ok();
   }
 
+  /* R18 The 1 Million Women share is a whole or half percent between 0 and 50. One setting, audited. */
+  function validateWomenShare(raw) {
+    const n = Number(raw);
+    if (raw === '' || raw == null || !Number.isFinite(n)) return no('Enter a number.');
+    if (n < 0 || n > 50) return no('The share must be between 0 and 50 percent.');
+    if (Math.round(n * 2) !== n * 2) return no('Use whole or half percents.');
+    return Object.assign(ok(), { pct: n });
+  }
+
   /* The registry the A4.2 endpoint returns: GET /api/enums. */
   function registry(plans, coupons, now) {
     const live = plans.filter((p) => !p.archived);
@@ -274,6 +283,6 @@
     canScore, canContact, NDA_CHECKS, ndaSafe, canSubmit, auditEntry,
     lastPrice, setPrice, validatePlan,
     needsSecondApproval, validateCouponFields, createCoupon, approveCoupon, setCouponStatus,
-    keyInUse, canRenameOrDelete, sellable, registry,
+    keyInUse, canRenameOrDelete, sellable, registry, validateWomenShare,
   };
 });

@@ -74,7 +74,7 @@
   }
 
   function settings() {
-    return { approvalThresholdPct: 50, taxRateBps: 0, quoteTtlMinutes: 15 };
+    return { approvalThresholdPct: 50, taxRateBps: 0, quoteTtlMinutes: 15, womenSharePct: 5, womenSeatPrice: 1000 * L, womenSeatsBase: 18420, womenTarget: 1000000 };
   }
 
   function banner() {

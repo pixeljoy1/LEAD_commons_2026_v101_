@@ -6,10 +6,10 @@
 
   const slug = (s) => 'org-' + String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const S = {
-    college: { name: 'Campus D', city: 'Kochi', students: 2400, contact: 'dean@campus-d.example', code: '', quote: null, stale: null, done: null },
-    industry: { name: 'Riverbend Software', seats: 5, supervisors: 1, coordinators: 1, assessors: 2, contact: 'design-lead@riverbend.example', code: '', quote: null, stale: null, done: null },
-    path: { key: 'PATH_FRAMING', name: 'Aanya Rao', org: 'Campus A', learners: 1, eligibility: '', contact: 'aanya@student.example', code: '', quote: null, stale: null, done: null },
-    sponsor: { key: '', name: 'Northwind Bank', challenge: 'c2', count: 1, contact: 'rohan@northwind.example', code: '', quote: null, stale: null, done: null },
+    college: { name: 'Campus D', city: 'Kochi', students: 2400, contact: 'dean@campus-d.example', women: 0, code: '', quote: null, stale: null, done: null },
+    industry: { name: 'Riverbend Software', seats: 5, supervisors: 1, coordinators: 1, assessors: 2, contact: 'design-lead@riverbend.example', women: 0, code: '', quote: null, stale: null, done: null },
+    path: { key: 'PATH_FRAMING', name: 'Aanya Rao', org: 'Campus A', learners: 1, eligibility: '', contact: 'aanya@student.example', women: 0, code: '', quote: null, stale: null, done: null },
+    sponsor: { key: '', name: 'Northwind Bank', challenge: 'c2', count: 1, contact: 'rohan@northwind.example', women: 0, code: '', quote: null, stale: null, done: null },
     open: { name: 'Dev Malhotra', email: 'dev@open.example', codex: true, analytics: false, done: null },
   };
   const FLOW = { college: 'COLLEGE_ONBOARDING', industry: 'INDUSTRY_PARTNERSHIP', path: 'PATH_ENROLMENT', sponsor: 'CHALLENGE_SPONSORSHIP', open: 'OPEN_JOIN' };
@@ -26,7 +26,7 @@
 
   function inputFor(flow) {
     const st = S[flow]; const plan = planFor(flow);
-    const base = { flow: FLOW[flow], planKey: plan ? plan.key : '', couponCode: st.code, now: Date.now() };
+    const base = { flow: FLOW[flow], planKey: plan ? plan.key : '', couponCode: st.code, womenSeats: Number(st.women) || 0, now: Date.now() };
     if (flow === 'college') return Object.assign(base, { orgSize: Number(st.students), quantity: 1, orgId: slug(st.name) });
     if (flow === 'industry') return Object.assign(base, { quantity: Number(st.seats), orgId: slug(st.name) });
     if (flow === 'path') return Object.assign(base, { quantity: Number(st.learners), orgId: slug(st.org + '-' + st.name) });
@@ -67,10 +67,29 @@
       ${q.lines.map((l) => `<div class="line"><span>${esc(l.label)}</span><span>${ui.inr(l.amount)}</span></div>`).join('')}
       ${q.coupon && q.coupon.applied ? `<div class="line disc"><span>Code ${esc(q.coupon.code)} · ${q.coupon.percentOff}% off</span><span>− ${ui.inr(q.discount)}</span></div>` : ''}
       <div class="line"><span>Tax <span class="muted">· not applied in prototype</span></span><span>${ui.inr(q.tax)}</span></div>
+      ${q.womenSeats ? `<div class="line"><span>${q.womenSeats} ${q.womenSeats === 1 ? 'seat' : 'seats'} for women × ${ui.inr(q.womenSeatPrice)}</span><span>${ui.inr(q.topUp)}</span></div>` : ''}
       <div class="total"><span class="label">Total · ${esc(period)}</span><b>${ui.inr(q.total)}</b></div>
+      ${q.womenShare ? `<span class="women-note">${ui.inr(q.womenShare)} of this (${q.womenSharePct}%) goes to <a href="#women">1 Million Women in Design</a>.</span>` : ''}
       ${q.perMonthEquivalent != null ? `<span class="muted" style="font-size:13px">About ${ui.inr(q.perMonthEquivalent)} a month at list price, for comparison.</span>` : ''}
       ${q.sponsored ? ui.tag('Sponsored · fully covered', 'live') : ''}
       <span class="muted" style="font-size:12px">Price version <span class="code">${esc(q.priceVersionId)}</span> · quote valid 15 minutes</span>
+    </div>`;
+  }
+
+  /* 1 Million Women in Design: an automatic share, shown plainly, and an optional top-up of seats. */
+  const WOMEN = {
+    college: { head: 'Pledge seats for women students', hint: 'Your college commits seats for women students at onboarding.' },
+    industry: { head: 'Add a seat for a woman', hint: 'Fund seats for women learners. Optional.' },
+    path: { head: 'Add a seat for a woman', hint: 'Fund a seat for a woman on a Path. Optional.' },
+    sponsor: { head: 'Sponsor a women’s cohort', hint: 'A cohort is 10 seats. Optional.' },
+  };
+  function womenBlock(flow) {
+    const w = WOMEN[flow]; const st = S[flow];
+    const pct = store.pricing.settings.womenSharePct;
+    return `<div class="women-block"><span class="eyebrow">1 Million Women in Design</span>
+      <p style="font-size:14px">${pct}% of what you pay goes to 1 Million Women in Design. You do not pay extra for this. <a href="#women">How it works</a></p>
+      <label class="field">${esc(w.head)}<span class="hint">${esc(w.hint)} ${ui.inr(store.pricing.settings.womenSeatPrice)} a seat. Mock price.</span><input id="jw-${flow}" type="number" min="0" max="500" data-on="jf" data-flow="${flow}" data-k="women" value="${esc(st.women)}"></label>
+      ${flow === 'sponsor' ? `<div class="btn-row"><button class="btn small" type="button" data-act="women-cohort">Add a cohort of 10</button></div>` : ''}
     </div>`;
   }
 
@@ -142,7 +161,8 @@ UMO Design Foundation · LEAD`;
       <div class="split">
         <section class="card">
           <span class="eyebrow">What you joined</span>
-          ${ui.kv([['Plan', `${q.planName} · ${su.planKey}`], ['Flow', su.flow], ['Billing', su.billingPeriod], ...(su.tierKey ? [['Tier', su.tierKey]] : []), ['Quantity', String(su.quantity)], ['Price version', su.priceVersionId], ['Code', su.couponCode || 'None'], ['List', P.formatINR(su.listTotal)], ['Discount', P.formatINR(su.discount)], ['Total', P.formatINR(su.total)]])}
+          ${ui.kv([['Plan', `${q.planName} · ${su.planKey}`], ['Flow', su.flow], ['Billing', su.billingPeriod], ...(su.tierKey ? [['Tier', su.tierKey]] : []), ['Quantity', String(su.quantity)], ['Price version', su.priceVersionId], ['Code', su.couponCode || 'None'], ['List', P.formatINR(su.listTotal)], ['Discount', P.formatINR(su.discount)], ...(su.womenShare ? [['To 1 Million Women', P.formatINR(su.womenShare) + ' (' + q.womenSharePct + '%)']] : []), ...(su.womenSeats ? [['Seats for women', String(su.womenSeats)]] : []), ['Total', P.formatINR(su.total)]])}
+          <p class="muted" style="font-size:13.5px">Thank you for helping reach 1 million women in design. <a href="#women">See the tally</a>.</p>
           <p class="ink">${esc(next)}</p>
           <div class="btn-row"><button class="btn" data-act="join-again" data-flow="${flow}">Start another sign-up</button><a class="btn ghost" href="#join">All offers</a></div>
         </section>
@@ -214,6 +234,7 @@ UMO Design Foundation · LEAD`;
             </div>
             <div class="notice" id="tier-why"><span class="px"></span>${tierReason(st.students)}</div>
             <label class="check"><input type="checkbox" disabled> Extra cohorts <span class="muted">· reserved, not built</span></label>
+            ${womenBlock('college')}
             ${couponField('college')}
           </section>
           ${summaryCard('college')}
@@ -249,6 +270,7 @@ UMO Design Foundation · LEAD`;
             </div>
             <div class="notice"><span class="px"></span><span><b class="ink">${learners}</b> member seats · <b class="ink">${esc(st.supervisors)}</b> supervisor · <b class="ink">${esc(st.coordinators)}</b> coordinator (no seat) · <b class="ink">${esc(st.assessors)}</b> assessor seats, not priced</span></div>
             <div class="msg info">Privacy: your admins see seats used and Passport counts. They never see individual submissions or feedback (R3, R4).</div>
+            ${womenBlock('industry')}
             ${couponField('industry')}
           </section>
           ${summaryCard('industry')}
@@ -279,6 +301,7 @@ UMO Design Foundation · LEAD`;
               <label class="field">Learners<span class="hint">1 for an individual</span><input id="jp-n" type="number" min="1" data-on="jf" data-flow="path" data-k="learners" value="${esc(st.learners)}"></label>
               <label class="field">Email<input id="jp-contact" type="email" data-on="jf" data-flow="path" data-k="contact" value="${esc(st.contact)}"></label>
             </div>
+            ${womenBlock('path')}
             ${couponField('path')}
             ${String(st.code).toUpperCase().startsWith('STUDENT') ? `<label class="field">Eligibility note<span class="hint">Student check is reserved (P2). Tell us your institution and expected graduation date.</span><textarea id="jp-elig" data-on="jf" data-flow="path" data-k="eligibility">${esc(st.eligibility)}</textarea></label>` : ''}
           </section>
@@ -309,6 +332,7 @@ UMO Design Foundation · LEAD`;
               <label class="field">Number of challenges<input id="js-n" type="number" min="1" data-on="jf" data-flow="sponsor" data-k="count" value="${esc(st.count)}"></label>
             </div>
             <label class="check"><input type="checkbox" disabled> Split the price with co-sponsors <span class="muted">· reserved, not built (F-AP-08)</span></label>
+            ${womenBlock('sponsor')}
             ${couponField('sponsor')}
           </section>
           ${summaryCard('sponsor')}
@@ -400,6 +424,7 @@ UMO Design Foundation · LEAD`;
     LEAD.render();
     ui.toast('Confirmed. Nothing was charged.');
   };
+  LEAD.act['women-cohort'] = () => { S.sponsor.women = (Number(S.sponsor.women) || 0) + 10; S.sponsor.stale = null; LEAD.render({ keepScroll: true }); };
   LEAD.act['join-again'] = (el) => { const st = S[el.dataset.flow]; st.done = null; st.code = ''; st.quote = null; st.stale = null; LEAD.render(); };
 
   LEAD.forms['open-join'] = (fd) => {

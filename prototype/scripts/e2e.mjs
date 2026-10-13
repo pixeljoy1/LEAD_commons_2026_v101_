@@ -45,15 +45,17 @@ await page.goto(BASE + '#model'); // old link: must land on the homepage
 await page.waitForSelector('.eco-canvas svg');
 
 /* ---------- crawl: every route × every role ---------- */
-const ROUTES = ['home', 'model', 'verdict', 'choose', 'lexicon', 'lexicon-problem-framing', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'calendar', 'provisions', 'audit',
+const ROUTES = ['home', 'model', 'verdict', 'choose', 'lexicon', 'lexicon-problem-framing', 'demand', 'challenges', 'challenge-c1', 'challenge-c3', 'team', 'team-t1', 'sprints', 'submit', 'assess', 'passports', 'passport-LEAD-7K2Q-NW', 'opportunities', 'impact', 'women', 'calendar', 'provisions', 'audit',
   'join', 'join-college', 'join-industry', 'join-path', 'join-path-PATH_DECISIONS', 'join-sponsor', 'join-open', 'admin', 'admin-plans'];
+const simulated = [];
 const ROLES = ['student', 'faculty', 'head', 'industry', 'mentor', 'steward', 'open', 'admin'];
 for (const r of ROLES) {
   await as(page, r);
   await go(page, 'w-' + r);
-  for (const t of ROUTES) await go(page, t);
+  for (const t of ROUTES) { await go(page, t); if (await page.evaluate(() => /Simulated/i.test(document.body.innerText))) simulated.push(`${r}:${t}`); }
 }
-ok('Crawl: no script errors on 36 routes × 8 roles', errors.length === 0, errors.slice(0, 5).join(' | '));
+ok('Crawl: no script errors on 37 routes × 8 roles', errors.length === 0, errors.slice(0, 5).join(' | '));
+ok('The word “Simulated” appears nowhere', simulated.length === 0, simulated.slice(0, 5).join(', '));
 
 /* ---------- S9: access rules per role ---------- */
 await as(page, 'open'); await go(page, 'team-t1');
@@ -92,12 +94,44 @@ const homeText = await page.evaluate(() => document.querySelector('main').textCo
 const banned = ['Lifecycle', 'Retention', 'Blueprint', 'Lineage', 'Value exchange', 'IxDF', 'v0.2', 'Chair', 'Wider Audience', 'Venn', 'Loop v0'];
 const hits = banned.filter((w) => homeText.includes(w)).concat(/\bgates?\b/i.test(homeText) ? ['gate'] : []);
 ok('Home: no internal jargon in the page body', hits.length === 0, hits.join(', '));
-const heads = await page.locator('main h1, main h2').allTextContents();
-ok('Home: plain section headings in order', ['Do real design work before you graduate.', 'Your path', 'Find your door', 'Who is in LEAD', 'What everyone gives and gets', 'Why people stay', 'Seven ways people work together', 'Ways to join and what they cost', 'Where LEAD is today', 'Built on what already works', 'Everything, in detail', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
-ok('Home: student path shows all eight stages with current names', (await page.locator('#path .beat .eyebrow').allTextContents()).map((t) => t.split('·')[1].trim()).join(',') === 'IDENTIFY,LEARN,APPLY,MENTOR,SOLVE,VALIDATE,CONNECT,GET OPPORTUNITY');
+const heads = await page.locator('main section:not(.car) h2').allTextContents();
+ok('Home: plain section headings in order (Your path stays folded)', ['Find your door', 'Who is in LEAD', 'What everyone gives and gets', 'Why people stay', 'Seven ways people work together', 'Ways to join and what they cost', 'Where LEAD is today', 'Built on what already works', 'Everything, in detail', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
+ok('Carousel: eight leaves, the guided story first, one h1', await page.locator('#car .leaf').count() === 8 && await page.locator('#car .leaf:not([hidden]) .sb').count() === 1 && await page.locator('main h1').count() === 1);
+ok('Carousel: the story has five captions and no controls inside it', await page.locator('#car .sb-cap').count() === 5 && await page.locator('#car .sb button').count() === 0);
+ok('Path: folded until a role is picked', await page.locator('#path').count() === 0);
+await page.click('#car .leaf:not([hidden]) [data-act="path-role"][data-role="student"]');
+await page.waitForSelector('#path');
+ok('Path: picking “Start as a student” unfolds the student path below', await page.locator('#path').isVisible() && (await page.locator('#path .beat .eyebrow').count()) === 9);
+ok('Home: student path shows the stages with current names', (await page.locator('#path .beat .eyebrow').allTextContents()).map((t) => t.split('·')[1].trim()).join(',') === 'IDENTIFY,LEARN,APPLY,MENTOR,SOLVE,VALIDATE,CONNECT,CONNECT,GET OPPORTUNITY');
+ok('Home: student path has the women step', await page.locator('#path .beat:has-text("Join a women") [data-act="as"]').count() === 1);
 await page.click('[data-act="path-tab"][data-role="faculty"]');
 ok('Home: persona tab swaps the story', (await page.locator('#path .beat h3').first().textContent()).startsWith('See what your syllabus leaves out'));
 await page.click('[data-act="path-tab"][data-role="student"]');
+await page.click('[data-act="path-close"]');
+ok('Path: close folds it again', await page.locator('#path').count() === 0);
+/* carousel timing */
+await page.click('[data-act="car-go"][data-i="1"]');
+ok('Carousel: a dot jumps to a leaf', (await page.evaluate(() => document.querySelector('#car .leaf:not([hidden])').dataset.i)) === '1');
+await page.mouse.move(5, 5);
+await page.click('[data-act="car-pause"]'); await page.click('[data-act="car-pause"]');
+await page.mouse.move(5, 5); await page.evaluate(() => document.activeElement && document.activeElement.blur && document.activeElement.blur());
+await page.waitForFunction(() => document.querySelector('#car .leaf:not([hidden])').dataset.i === '2', null, { timeout: 11000 }).then(() => ok('Carousel: advances by itself after about 7 seconds', true), () => ok('Carousel: advances by itself after about 7 seconds', false));
+await page.hover('#car .leaf:not([hidden])');
+ok('Carousel: hover pauses the timer', await page.evaluate(() => getComputedStyle(document.querySelector('#car .car-bar i')).animationPlayState) === 'paused');
+await page.mouse.move(5, 5);
+await page.click('[data-act="car-pause"]');
+const held = await page.evaluate(() => document.querySelector('#car .leaf:not([hidden])').dataset.i);
+await page.mouse.move(5, 5); await page.waitForTimeout(500);
+ok('Carousel: pause button holds the leaf', await page.evaluate(() => getComputedStyle(document.querySelector('#car .car-bar i')).animationPlayState) === 'paused' && held != null);
+await page.click('[data-act="car-pause"]');
+await page.click('[data-act="car-go"][data-i="7"]');
+ok('Carousel: the 1 Million Women leaf links to its page', await page.locator('#car .leaf:not([hidden]) [data-go="women"]').count() === 1);
+const reducedPage = await ctx.newPage();
+await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
+await reducedPage.goto(BASE + '#home'); await reducedPage.waitForSelector('#car');
+await reducedPage.waitForTimeout(1500);
+ok('Carousel: reduced motion shows all story captions and no moving bar', await reducedPage.evaluate(() => getComputedStyle(document.querySelector('#car .car-bar i')).opacity === '0' && [...document.querySelectorAll('#car .sb-cap')].every((c) => getComputedStyle(c).opacity === '1')));
+await reducedPage.close();
 
 await page.evaluate(() => document.querySelectorAll('img').forEach((i) => { i.loading = 'eager'; }));
 await page.waitForTimeout(600);
@@ -105,23 +139,23 @@ const imgs = await page.evaluate(() => { const l = [...document.querySelectorAll
 ok('Home: every photo loads and carries its caption', imgs.n >= 11 && imgs.ok === imgs.n && imgs.caps === imgs.figs, JSON.stringify(imgs));
 const credits = await page.evaluate(() => document.querySelectorAll('.foot-about a').length);
 ok('Home: footer credits every photographer', credits === 11, `${credits} credits`);
-ok('Home: simulated numbers are labelled', await page.locator('.strip .tag.sim').count() === 1);
+
 ok('Home: six doors, each with Join', await page.locator('.door').count() === 6 && await page.locator('.door [data-act="sheet"]').count() === 6);
 
 /* join sheet */
-await page.click('.home-hero [data-act="sheet"]');
+await page.click('.head-join');
 ok('Sheet: opens on the student routes', await page.locator('.sheet').isVisible() && (await page.locator('.sheet .opt').count()) === 3 && (await page.locator('[data-act="sheet-role"][aria-pressed="true"]').textContent()) === 'Student');
 await page.keyboard.press('Escape');
 ok('Sheet: Escape closes it and returns focus', await page.locator('.sheet').count() === 0 && await page.evaluate(() => document.activeElement.getAttribute('data-act') === 'sheet'));
-await page.click('.home-hero [data-act="sheet"]');
+await page.click('.head-join');
 await page.locator('.sheet .opt:has-text("free account")').click();
 ok('Sheet: student free account goes to the open sign-up', page.url().endsWith('#join-open'));
 await go(page, 'home');
-await page.click('.home-hero [data-act="sheet"]');
+await page.click('.head-join');
 await page.locator('.sheet .opt:has-text("Enrol on a Path")').click();
 ok('Sheet: student Path goes to path enrolment', page.url().includes('#join-path'));
 await go(page, 'home');
-await page.click('.home-hero [data-act="sheet"]');
+await page.click('.head-join');
 await page.locator('.sheet .opt:has-text("Link my campus")').click();
 await page.locator('.sheet [data-campus="campus-b"]').click();
 ok('Sheet: linking a campus signs in as a student there', (await page.evaluate(() => LEAD.store.me().name)) === 'Tara Bose' && page.url().endsWith('#challenges'));
@@ -332,9 +366,35 @@ const said = await tab2.locator('#sum-industry >> text=Price updated.').count();
 const total = await tab2.evaluate(() => document.querySelector('#q-industry').textContent);
 ok('S15 after the admin pauses the coupon, the open quote shows the new total and asks again', said === 1 && !total.includes('20% off'));
 
+/* ---------- S21–S24: 1 Million Women in Design ---------- */
+await page.evaluate(() => LEAD.store.resetDemo());
+await as(page, 'head'); await go(page, 'join-college');
+await page.waitForSelector('#q-college .total');
+const tot0 = await page.evaluate(() => LEAD.store.pricing.settings.womenSharePct);
+ok('S21 the quote says 5% goes to 1 Million Women, at no extra cost', tot0 === 5 && (await page.locator('#q-college .women-note').textContent()).includes('5%'));
+const before21 = await page.evaluate(() => LEAD.pricing.womenTally(LEAD.store.pricing.signups, LEAD.store.pricing.settings).seats);
+await page.fill('#jw-college', '3'); await page.waitForTimeout(450);
+ok('S21 pledging 3 seats adds them to the quote as a line', (await page.locator('#q-college >> text=3 seats for women').count()) === 1);
+await page.click('#go-college'); await page.waitForTimeout(200);
+const rec = await page.evaluate(() => { const s = LEAD.store.pricing.signups[0]; return { seats: s.womenSeats, share: s.womenShare, top: s.topUp }; });
+const after21 = await page.evaluate(() => LEAD.pricing.womenTally(LEAD.store.pricing.signups, LEAD.store.pricing.settings).seats);
+ok('S22 the sign-up record keeps the share and seats, and the tally rises', rec.seats === 3 && rec.share > 0 && rec.top === 300000 && after21 >= before21 + 3, JSON.stringify(rec));
+await go(page, 'women');
+ok('S22 the 1 Million Women page shows the tally and the role cards', await page.locator('#women-tally').count() === 1 && await page.locator('main article:has-text("Pledge seats")').count() === 1 && await page.locator('nav a[href="#women"]').count() === 1);
+await go(page, 'join-sponsor'); await as(page, 'industry'); await go(page, 'join-sponsor');
+await page.click('[data-act="women-cohort"]');
+ok('S23 sponsor can add a women’s cohort of 10 seats', await page.locator('#jw-sponsor').inputValue() === '10' && (await page.locator('#q-sponsor >> text=10 seats for women').count()) === 1);
+await tab2.goto(BASE + '#join-industry'); await tab2.waitForSelector('#q-industry .women-note');
+await as(page, 'admin'); await go(page, 'admin');
+await page.fill('#ws-pct', '80'); await page.click('form[data-form="women-share"] button[type="submit"]');
+ok('S24 admin cannot set a share above 50%', (await page.locator('#ws-pct:invalid').count()) === 1 && await page.evaluate(() => LEAD.store.pricing.settings.womenSharePct) === 5);
+await page.fill('#ws-pct', '10'); await page.click('form[data-form="women-share"] button[type="submit"]');
+await tab2.waitForFunction(() => { const n = document.querySelector('#q-industry .women-note'); return n && n.textContent.includes('10%'); }, null, { timeout: 6000 }).then(() => ok('S24 a new share reaches an open sign-up in another tab', true), () => ok('S24 a new share reaches an open sign-up in another tab', false));
+ok('S24 the share change is in the audit log', await page.evaluate(() => LEAD.store.pricing.audit.some((a) => /Million Women share/.test(a.action))));
+
 /* ---------- screenshots and layout ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
-const SHOTS = ['home', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'lexicon'];
+const SHOTS = ['home', 'women', 'verdict', 'w-student', 'challenge-c1', 'team-t1', 'assess', 'passports', 'impact', 'join', 'join-college', 'admin', 'lexicon'];
 const roleFor = { 'w-student': 'student', 'team-t1': 'student', assess: 'mentor', passports: 'steward', admin: 'admin', impact: 'steward', 'join-college': 'head' };
 for (const scheme of ['dark', 'light']) {
   const c = await browser.newContext({ viewport: { width: 1360, height: 900 }, colorScheme: scheme });
@@ -360,7 +420,7 @@ for (const r of ['steward', 'student', 'admin']) {
   }
 }
 ok('Mobile 390px: no horizontal page scroll', wide.length === 0, wide.slice(0, 8).join(' '));
-for (const s of ['home', 'join-college', 'w-student', 'admin']) { if (roleFor[s]) await as(mp, roleFor[s]); await go(mp, s); await mp.waitForTimeout(250); await mp.screenshot({ path: `${shots}/mobile-${s}.png`, fullPage: false }); }
+for (const s of ['home', 'women', 'join-college', 'w-student', 'admin']) { if (roleFor[s]) await as(mp, roleFor[s]); await go(mp, s); await mp.waitForTimeout(250); await mp.screenshot({ path: `${shots}/mobile-${s}.png`, fullPage: false }); }
 
 ok('No script errors in any scenario', errors.length === 0, errors.slice(0, 5).join(' | '));
 await browser.close();

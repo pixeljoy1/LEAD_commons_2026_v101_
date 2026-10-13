@@ -672,3 +672,51 @@ body.sheet-open { overflow: hidden; }
 .door-body .tag { white-space: normal; line-height: 1.35; }
 
 .sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: nowrap; }
+
+/* ---------- homepage carousel (round 4) ---------- */
+.car { padding-bottom: 14px; gap: 14px; }
+.car-stage { display: grid; min-height: 0; }
+.leaf { display: grid; gap: 20px; align-items: center; grid-template-columns: minmax(0, 1fr); }
+.leaf[hidden] { display: none; }
+.leaf-main { display: grid; gap: 16px; align-content: start; }
+.leaf-h { font-size: clamp(30px, 4.6vw, 54px); max-width: 16ch; line-height: 1.04; }
+.leaf-aside { min-width: 0; }
+.leaf .lede { font-size: clamp(16px, 1.6vw, 19px); color: var(--ink); max-width: 52ch; }
+@media (min-width: 960px) { .leaf { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 40px; min-height: 400px; } }
+@media (max-width: 959px) { .leaf-aside { order: -1; } .leaf-role .hero-ph, .leaf-women .hero-ph { --ar: 16 / 8; } }
+.car-bar { height: 6px; background: repeating-linear-gradient(90deg, var(--panel-2) 0 10px, transparent 10px 12px); }
+.car-bar i { display: block; height: 100%; background: repeating-linear-gradient(90deg, var(--ink) 0 10px, transparent 10px 12px); animation: car-fill var(--ms, 7000ms) linear forwards; }
+@keyframes car-fill { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.car.paused .car-bar i, .car.paused .sb-cap, .car.paused .sb-tile { animation-play-state: paused; }
+.car-ctrl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.car-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.car-tabs .chip { padding: 6px 10px; font-size: 12px; }
+@media (max-width: 640px) { .car-tabs { display: none; } .car-ctrl { justify-content: center; } }
+
+/* guided story */
+.sb { display: grid; gap: 16px; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--panel); padding: 18px; }
+.sb-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.sb-tile { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 10px 2px; border: 1px solid var(--line); background: var(--panel-2); color: var(--body); font-size: 11px; animation: tile-on .5s ease both; animation-delay: calc(var(--i) * 3s); }
+.sb-tile .pxnum { font-size: 22px; }
+.sb-tile b { font: 500 10px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; overflow-wrap: anywhere; }
+@keyframes tile-on { from { background: var(--panel-2); color: var(--body); } to { background: var(--ink); color: var(--bg); border-color: var(--ink); } }
+.sb-caps { display: grid; min-height: 84px; align-items: center; }
+.sb-cap { grid-area: 1 / 1; display: flex; gap: 12px; align-items: center; margin: 0; font: 500 clamp(17px, 2vw, 22px)/1.25 var(--f-display); color: var(--ink); opacity: 0; animation: cap-in 3s ease both; animation-delay: calc(var(--i) * 3s); }
+.sb-cap .pxnum { font-size: 40px; flex: none; }
+@keyframes cap-in { 0% { opacity: 0; transform: translateY(8px); } 10%, 88% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.sb-loop { margin: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .car-bar i { animation: none; opacity: 0; }
+  .sb-tile { animation: none; }
+  .sb-caps { min-height: 0; gap: 10px; }
+  .sb-cap { grid-area: auto; animation: none; opacity: 1; }
+}
+
+/* progressive path */
+.path-open { scroll-margin-top: 90px; }
+@media (prefers-reduced-motion: no-preference) { .path-open { animation: unfold .45s ease; } @keyframes unfold { from { opacity: 0; transform: translateY(-14px); } } }
+
+/* 1 Million Women */
+.women-block { display: grid; gap: 8px; border: 1px dashed var(--line); border-radius: var(--r-m); padding: 14px; background: var(--panel-2); }
+.women-note { font-size: 13px; color: var(--ink); border-left: 3px solid var(--red); padding-left: 8px; }
+.women-tally { max-width: 640px; }

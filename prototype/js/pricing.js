@@ -234,7 +234,13 @@
     const taxable = listTotal - discount;
     const taxRateBps = settings.taxRateBps || 0;
     const tax = roundHalfUp(taxable * taxRateBps, 10000);
-    const total = Math.max(0, taxable + tax);
+    /* 1 Million Women in Design (R18, R19): a share of what the payer pays, plus an optional top-up of seats. */
+    const sharePct = Number.isFinite(Number(settings.womenSharePct)) ? Number(settings.womenSharePct) : 0;
+    const womenShare = unitPrice === 0 ? 0 : roundHalfUp(taxable * Math.round(sharePct * 100), 10000);
+    const seatPrice = settings.womenSeatPrice == null ? 0 : settings.womenSeatPrice;
+    const womenSeats = Math.max(0, Math.min(500, Math.floor(Number(input.womenSeats) || 0)));
+    const topUp = womenSeats * seatPrice;
+    const total = Math.max(0, taxable + tax) + topUp;
     const ttl = (settings.quoteTtlMinutes || 15) * 60000;
 
     const lines = [];
@@ -261,6 +267,11 @@
       discount,
       taxRateBps,
       tax,
+      womenSharePct: sharePct,
+      womenShare,
+      womenSeats,
+      womenSeatPrice: seatPrice,
+      topUp,
       total,
       coupon: couponResult ? {
         code: normaliseCode(code),
@@ -277,7 +288,7 @@
     };
   }
 
-  const COMPARED = ['listTotal', 'discount', 'tax', 'total', 'priceVersionId', 'couponCode'];
+  const COMPARED = ['listTotal', 'discount', 'tax', 'womenShare', 'topUp', 'total', 'priceVersionId', 'couponCode'];
 
   /*
    * confirm(previousQuote, data, now) → re-runs the quote on current data (A8.2, R15).
@@ -320,6 +331,9 @@
       listTotal: q.listTotal,
       discount: q.discount,
       tax: q.tax,
+      womenShare: q.womenShare || 0,
+      womenSeats: q.womenSeats || 0,
+      topUp: q.topUp || 0,
       total: q.total,
       status: 'CONFIRMED_MOCK',
       sponsored: q.sponsored,
@@ -344,7 +358,24 @@
     return errors;
   }
 
+  /* R19: the running tally. Every sign-up adds its top-up seats and the seats its automatic share buys. */
+  function womenTally(signups, settings) {
+    const st = settings || {};
+    const seatPrice = st.womenSeatPrice || 0;
+    let seats = st.womenSeatsBase || 0;
+    let sharePaise = 0;
+    (signups || []).forEach((s) => {
+      seats += s.womenSeats || 0;
+      sharePaise += s.womenShare || 0;
+    });
+    const fromShare = seatPrice > 0 ? Math.floor(sharePaise / seatPrice) : 0;
+    const total = seats + fromShare;
+    const target = st.womenTarget || 1000000;
+    return { seats: total, fromShare, target, pct: Math.min(100, (total / target) * 100) };
+  }
+
   return {
+    womenTally,
     roundHalfUp, formatINR, rupeesToPaise, formatDate, unitWord, toMs,
     currentVersion, isPriced, tierFor, remaining, percentBooked, fromPrice,
     findCoupon, effectiveCouponStatus, appliesTo, appliesText, validateCoupon,

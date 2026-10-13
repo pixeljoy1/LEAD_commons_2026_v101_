@@ -17,5 +17,7 @@
     P('door-mentor', 'assets/photos/door-mentor.jpg', 'Two people talk while looking at a laptop', 'KOBU Agency', 'kobuagency', '7okkFhxrxNw'),
     P('door-open', 'assets/photos/door-open.jpg', 'A young woman learns on her laptop at home', 'Good Faces', 'goodfacesagency', 'gy5SlRW9OGA'),
   ];
-  LEAD.photos = { list, bySlot: Object.fromEntries(list.map((p) => [p.slot, p])) };
+  const bySlot = Object.fromEntries(list.map((p) => [p.slot, p]));
+  bySlot.women = bySlot['door-open'];
+  LEAD.photos = { list, bySlot };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

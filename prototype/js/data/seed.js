@@ -189,6 +189,9 @@
       { id: 'e4', title: 'Assessment day · Reduce drop-off in onboarding', at: '2026-11-14T09:30', kind: 'Assessment day', host: 'campus-a', visibility: 'campus', where: 'Campus A' },
       { id: 'e5', title: 'Guest session · Defending a decision', at: '2026-11-21T15:00', kind: 'Guest session', host: 'umo', visibility: 'public', where: 'Online' },
       { id: 'e6', title: 'Circle · Bengaluru', at: '2026-10-28T18:30', kind: 'Circle', host: 'umo', visibility: 'public', where: 'Bengaluru' },
+      { id: 'e8', title: 'Women in Design circle · Bengaluru', at: '2026-11-05T18:30', kind: 'Circle', host: 'umo', visibility: 'public', where: 'Bengaluru', women: true },
+      { id: 'e9', title: 'Faculty session · Running a studio where women lead', at: '2026-11-12T15:00', kind: 'Guest session', host: 'umo', visibility: 'public', where: 'Online', women: true },
+      { id: 'e10', title: 'Mentor hour for women designers · open office', at: '2026-11-19T17:00', kind: 'Guest session', host: 'umo', visibility: 'public', where: 'Online', women: true },
       { id: 'e7', title: '90-day review · gates G3, G4', at: '2026-12-18T11:00', kind: 'Sync', host: 'umo', visibility: 'public', where: 'Online' },
     ];
 

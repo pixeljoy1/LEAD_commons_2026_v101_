@@ -10,6 +10,7 @@
     ['calendar', 'Community'],
     ['opportunities', 'Opportunities'],
     ['impact', 'Impact'],
+    ['women', '1M Women'],
   ];
   const NAV_MATCH = {
     lexicon: ['lexicon', 'demand'], challenges: ['challenges', 'challenge', 'team', 'sprints', 'submit', 'assess'],
@@ -97,7 +98,7 @@
           <li><a href="https://umodesign.school" target="_blank" rel="noopener">UMO Design School</a></li>
           <li><a href="https://umodesign.school" target="_blank" rel="noopener">UMO Design Grads</a></li>
           <li><a href="https://umo.design" target="_blank" rel="noopener">UXI Conf</a></li>
-          <li><a href="https://umo.design" target="_blank" rel="noopener">WiDesign Fest</a></li></ul></div>
+          <li><a href="https://umo.design" target="_blank" rel="noopener">WiDesign Fest</a></li><li><a href="#women">1 Million Women in Design</a></li></ul></div>
         <div><h4>Support</h4><ul>
           <li><a href="#join-open">Volunteer</a></li><li><a href="#w-mentor">Become a mentor</a></li>
           <li><a href="#join-industry">Partner with us</a></li><li><a href="#provisions">Provisions board</a></li></ul></div>
@@ -111,7 +112,7 @@
         <p>People photos are illustrative stock from Unsplash. They do not show members of LEAD. Photographers: ${LEAD.photos.list.map((p) => `<a href="${p.link}" target="_blank" rel="noopener">${esc(p.by)}</a>`).join(', ')}.</p>
       </details>
       <div class="foot-base">
-        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.4 · Synthetic data only. No real people or student data.</span></span>
+        <span class="row">${ui.tag('Demo only · nothing saved or charged', 'sim')}<span>UMO Design Foundation · LEAD · Prototype v0.5 · Synthetic data only. No real people or student data.</span></span>
         <span class="uxi"><span>With</span><span class="logo-tile"><img src="../public/brand/UXINDIA_logo.png" alt="UXINDIA, Design Leadership Week 2026" width="523" height="102"></span></span>
       </div>
     </div></footer>`;

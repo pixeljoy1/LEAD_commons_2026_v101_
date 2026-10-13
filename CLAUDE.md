@@ -8,7 +8,9 @@ Full spec: docs/SPEC.md and docs/SPEC-ADDENDUM-01.md (the addendum wins on confl
 - Do not build Phase 2 or Phase 3 features (section 2, and any feature marked P1 or P2 in section 6) unless the user says the gates have passed.
 - UMO is the dominant brand on every screen. UXINDIA appears small, in the footer. Never use the words "SFIA" or "LUMA" in product copy.
 - Plain words. Short sentences. No filler, no emojis, no marketing language. Strategy stays sharp; jargon goes.
-- Anything simulated or illustrative must say so on screen.
+- Anything illustrative must say so on screen in plain words (for example “Demo count” or “Illustrative · not the person”). Do not use a “Simulated” label. The footer and persona menu keep one neutral line: “Demo only · nothing saved or charged”.
+- 1 Million Women in Design: the automatic share (default 5%) is a setting in the pricing data, never hard-coded. It comes out of the price and is never added to it. Top-up seats are optional and shown before confirm. Rules R18 and R19 live in `rules.js` and `pricing.js` with tests.
+- The homepage opens with a timed carousel. “Your path” stays folded until a role is picked.
 - Mobile first. Dark theme is the reference design; light theme must also pass.
 - Business rules live in /src/lib/rules as pure functions with unit tests (rules R1–R8 in the spec, R9–R17 in the addendum).
 - Prices, plans and coupons are data in the database, never hard-coded. Sign-up records store enumerated keys (addendum A4).

@@ -6,7 +6,7 @@
   const { esc } = ui;
   const M = () => LEAD.modelParts;
 
-  const home = { tab: 'student' };
+  const home = { tab: null, leaf: 0, hold: false };
   const roleChip = (id) => `<span class="chip">${esc(ui.roleName(id))}</span>`;
   const MODE_PLAIN = { Replicate: 'Borrowed', Adapt: 'Adapted', New: 'New here' };
 
@@ -22,22 +22,55 @@
     return ui.sectionHead('', title, right, sub);
   }
 
-  /* ---------- 1. hero ---------- */
+  /* ---------- 1. hero: a timed carousel. Picking a leaf unfolds "Your path" below. ---------- */
+  const reduced = () => !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const roleOf = (r) => content.storyTabs.find((t) => t.role === r);
+  const doorOf = (r) => content.doors.find((d) => d.role === r);
+
+  function leafStory(l) {
+    return `<div class="leaf-main"><span class="eyebrow">${esc(l.eyebrow)}</span><h1 class="leaf-h" id="home-title">${esc(l.head)}</h1>
+        <p class="lede">${esc(l.line)}</p>
+        <div class="btn-row"><button class="btn primary big" data-act="path-role" data-role="${l.primary[1]}">${esc(l.primary[0])}</button><button class="btn big" data-act="scroll" data-id="${l.second[1]}">${esc(l.second[0])}</button></div></div>
+      <div class="leaf-aside"><div class="sb" aria-label="How the loop works" role="group">
+        <ol class="sb-tiles" aria-hidden="true">${l.beats.map((b, i) => `<li class="sb-tile" style="--i:${i}"><span class="pxnum">${i + 1}</span><b>${esc(b.tile)}</b></li>`).join('')}</ol>
+        <div class="sb-caps" aria-live="off">${l.beats.map((b, i) => `<p class="sb-cap" style="--i:${i}"><span class="pxnum">${i + 1}</span>${esc(b.cap)}</p>`).join('')}</div>
+        <p class="sb-loop tiny muted">Then the loop starts again.</p></div></div>`;
+  }
+
+  function leafRole(l) {
+    const d = l.role ? doorOf(l.role) : null;
+    return `<div class="leaf-main"><span class="eyebrow">${esc(l.label)}</span><h2 class="leaf-h">${esc(l.head)}</h2>
+        <p class="lede">${esc(l.line)}</p>
+        ${d ? `<ul class="px-list">${d.can.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
+        <div class="btn-row"><button class="btn primary big" data-act="path-role" data-role="${l.primary[1]}">${esc(l.primary[0])}</button>${l.second ? `<button class="btn big" data-go="${l.second[1]}">${esc(l.second[0])}</button>` : ''}</div></div>
+      <div class="leaf-aside">${photo(l.photo, { cls: 'hero-ph' })}</div>`;
+  }
+
+  function leafWomen(l) {
+    const t = P.womenTally(store.pricing.signups, store.pricing.settings);
+    return `<div class="leaf-main"><span class="eyebrow">An initiative of UMO Design Foundation</span><h2 class="leaf-h">${esc(l.head)}</h2>
+        <p class="lede">${esc(l.line)}</p>
+        <div class="stack" style="gap:6px"><span class="tnum ink"><b>${t.seats.toLocaleString('en-IN')}</b> of ${t.target.toLocaleString('en-IN')} seats funded</span>${ui.meter(Math.max(1, Math.round(t.pct)), { px: true })}<span class="muted tiny">Demo count.</span></div>
+        <div class="btn-row"><button class="btn primary big" data-go="women">${esc(l.second[0])}</button><button class="btn big" data-act="path-role" data-role="${l.primary[1]}">${esc(l.primary[0])}</button></div></div>
+      <div class="leaf-aside">${photo(l.photo, { cls: 'hero-ph' })}</div>`;
+  }
+
   function hero() {
-    return `<section class="hero home-hero has-aside" aria-labelledby="home-title">
+    const L = content.leaves;
+    const cur = Math.min(home.leaf, L.length - 1);
+    return `<section class="hero home-hero car" id="car" aria-roledescription="carousel" aria-label="What LEAD offers each role" data-n="${L.length}">
       <span class="dots tr" aria-hidden="true"></span><span class="dots bl" aria-hidden="true"></span>
-      <div class="hero-main">
-        <h1 id="home-title">Do real design work before you graduate.</h1>
-        <p class="lede">Take on a live brief from a real company, get coached by a practitioner, and leave with proof employers trust.</p>
-        <div class="btn-row"><button class="btn primary big" data-act="sheet" data-role="student">Join as a student</button><button class="btn big" data-act="scroll" data-id="path">See your path</button></div>
-        <div class="stack" style="gap:8px"><span class="label">LEAD also lets you</span>
-          <div class="row" role="group" aria-label="Other ways to take part">${content.heroPromises.map((h) => `<button class="chip" data-act="path-role" data-role="${h.role}">${esc(h.label)}</button>`).join('')}</div></div>
+      <div class="car-stage" aria-live="off">${L.map((l, i) => `<div class="leaf leaf-${l.kind} ${i === cur ? 'on' : ''}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${L.length}: ${esc(l.label)}" data-i="${i}" ${i === cur ? '' : 'hidden'} style="--ms:${l.ms}ms">${l.kind === 'story' ? leafStory(l) : l.kind === 'women' ? leafWomen(l) : leafRole(l)}</div>`).join('')}</div>
+      <div class="car-bar" aria-hidden="true"><i style="--ms:${L[cur].ms}ms"></i></div>
+      <div class="car-ctrl" role="group" aria-label="Carousel controls">
+        <button class="icon-btn" data-act="car-prev" aria-label="Previous">&#8592;</button>
+        <button class="icon-btn" data-act="car-pause" aria-label="${home.hold ? 'Play' : 'Pause'}" aria-pressed="${home.hold}">${home.hold ? '&#9654;' : '&#10074;&#10074;'}</button>
+        <button class="icon-btn" data-act="car-next" aria-label="Next">&#8594;</button>
+        <div class="car-tabs" role="group" aria-label="Pick a slide">${L.map((l, i) => `<button class="chip" data-act="car-go" data-i="${i}" aria-pressed="${i === cur}">${esc(l.label)}</button>`).join('')}</div>
       </div>
-      <div class="hero-aside">${photo('hero', { cls: 'hero-ph', eager: true })}</div>
     </section>
-    <div class="strip" role="group" aria-label="What LEAD has produced, simulated numbers">
+    <div class="strip" role="group" aria-label="What LEAD has produced">
       <div><b>3</b><span>live challenges</span></div><div><b>1</b><span>real problem solved</span></div><div><b>38</b><span>verified Passports</span></div><div><b>62</b><span>mentor hours</span></div>
-      ${ui.simTag()}
     </div>`;
   }
 
@@ -66,13 +99,14 @@
   }
 
   function path() {
+    if (!home.tab) return '';
     const tab = content.storyTabs.find((t) => t.role === home.tab) || content.storyTabs[0];
     const steps = content.story[tab.role];
-    return `<section class="section" id="path" aria-labelledby="path-h">
-      <div class="section-head"><div><h2 id="path-h">Your path</h2><p class="muted">${esc(tab.lede)}</p></div></div>
+    return `<section class="section path-open" id="path" aria-labelledby="path-h" tabindex="-1">
+      <div class="section-head"><div><h2 id="path-h">Your path</h2><p class="muted">${esc(tab.lede)}</p></div><button class="btn small ghost" data-act="path-close">Close the path</button></div>
       <div class="row" role="group" aria-label="Show the path for">${content.storyTabs.map((t) => `<button class="chip" data-act="path-tab" data-role="${t.role}" aria-pressed="${t.role === tab.role}">${esc(t.label)}</button>`).join('')}</div>
       <ol class="story" aria-label="${esc(tab.label)} path">${steps.map((s) => beat(tab.role, s)).join('')}</ol>
-      <div class="btn-row"><button class="btn primary" data-act="sheet" data-role="${tab.role}">Join as ${tab.role === 'head' ? 'a college' : (tab.role === 'open' ? 'an open learner' : 'a ' + tab.label.toLowerCase())}</button></div>
+      <div class="btn-row"><button class="btn primary" data-act="sheet" data-role="${tab.role}">Join as ${tab.role === 'head' ? 'a college' : (tab.role === 'open' ? 'an open learner' : (tab.role === 'faculty' ? 'faculty' : 'a ' + tab.label.toLowerCase()))}</button><a class="btn ghost" href="#women">1 Million Women in Design</a></div>
     </section>`;
   }
 
@@ -199,18 +233,68 @@
   LEAD.views.home = {
     title: () => '',
     render() {
-      return `<div class="page wrap">${hero()}${path()}${doors()}${who()}${gives()}${stay()}${together()}${plans()}${today()}${builtOn()}${detail()}${questions()}${closing()}</div>`;
+      return `<div class="page wrap">${hero()}<div id="path-slot">${path()}</div>${doors()}${who()}${gives()}${stay()}${together()}${plans()}${today()}${builtOn()}${detail()}${questions()}${closing()}</div>`;
     },
+    after() { wireCarousel(); },
     onPricing() {
       const el = document.getElementById('offers');
       if (el) { el.innerHTML = M().offerings(); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
     },
   };
 
-  const scrollTo = (id) => { const t = document.getElementById(id); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const scrollTo = (id) => { const t = document.getElementById(id); if (t) t.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); };
+
+  /* ---------- carousel controller. The bar's CSS animation is the timer: when it ends, the next leaf shows. ---------- */
+  const car = { hover: false, focus: false };
+  const carEl = () => document.getElementById('car');
+  const holding = () => home.hold || car.hover || car.focus;
+  function applyHold() {
+    const c = carEl(); if (!c) return;
+    c.classList.toggle('paused', holding());
+    c.classList.toggle('still', reduced());
+    const pb = c.querySelector('[data-act="car-pause"]');
+    if (pb) { pb.setAttribute('aria-pressed', String(home.hold)); pb.setAttribute('aria-label', home.hold ? 'Play' : 'Pause'); pb.innerHTML = home.hold ? '&#9654;' : '&#10074;&#10074;'; }
+  }
+  function showLeaf(i) {
+    const c = carEl(); if (!c) return;
+    const L = content.leaves; const n = L.length;
+    home.leaf = ((i % n) + n) % n;
+    c.querySelectorAll('.leaf').forEach((el) => { const on = Number(el.dataset.i) === home.leaf; el.hidden = !on; el.classList.toggle('on', on); });
+    c.querySelectorAll('[data-act="car-go"]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === home.leaf)));
+    const bar = c.querySelector('.car-bar i');
+    if (bar) { bar.style.setProperty('--ms', L[home.leaf].ms + 'ms'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; }
+    applyHold();
+  }
+  function wireCarousel() {
+    const c = carEl(); if (!c) return;
+    applyHold();
+    const bar = c.querySelector('.car-bar i');
+    if (bar) bar.addEventListener('animationend', () => { if (!reduced()) showLeaf(home.leaf + 1); });
+    c.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { car.hover = true; applyHold(); } });
+    c.addEventListener('pointerleave', () => { car.hover = false; applyHold(); });
+    c.addEventListener('focusin', () => { car.focus = true; applyHold(); });
+    c.addEventListener('focusout', (e) => { if (!c.contains(e.relatedTarget)) { car.focus = false; applyHold(); } });
+    /* any tap holds the slide until the person presses play */
+    c.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse' && !home.hold) { home.hold = true; applyHold(); } });
+  }
+
+  function openPath(role) {
+    home.tab = role;
+    const slot = document.getElementById('path-slot');
+    if (!slot) { LEAD.render({ keepScroll: true }); return; }
+    slot.innerHTML = path();
+    scrollTo('path');
+    const h = document.getElementById('path-h'); if (h) setTimeout(() => h.focus && h.setAttribute('tabindex', '-1'), 0);
+  }
+
   Object.assign(LEAD.act, {
-    'path-tab'(el) { home.tab = el.getAttribute('data-role'); LEAD.render({ keepScroll: true }); },
-    'path-role'(el) { home.tab = el.getAttribute('data-role'); LEAD.render({ keepScroll: true }); scrollTo('path'); },
+    'path-tab'(el) { openPath(el.getAttribute('data-role')); },
+    'path-role'(el) { openPath(el.getAttribute('data-role')); },
+    'path-close'() { home.tab = null; const slot = document.getElementById('path-slot'); if (slot) slot.innerHTML = ''; scrollTo('car'); },
+    'car-go'(el) { showLeaf(Number(el.getAttribute('data-i'))); },
+    'car-next'() { showLeaf(home.leaf + 1); },
+    'car-prev'() { showLeaf(home.leaf - 1); },
+    'car-pause'() { home.hold = !home.hold; applyHold(); },
     scroll(el) { scrollTo(el.getAttribute('data-id')); },
     'phase-map'(el) { M().st.phase = el.getAttribute('data-id'); LEAD.render({ keepScroll: true }); scrollTo('ecosystem'); },
   });

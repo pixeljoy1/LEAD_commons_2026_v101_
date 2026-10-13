@@ -89,6 +89,18 @@
     </form>`;
   }
 
+  function womenCard() {
+    const st = store.pricing.settings; const t = P.womenTally(store.pricing.signups, st);
+    return `<form class="card" data-form="women-share" style="gap:12px;max-width:640px">
+      <div class="form-grid">
+        <label class="field">Share of every paid plan (%)<span class="hint">0 to 50. Whole or half percents.</span><input id="ws-pct" type="number" step="0.5" min="0" max="50" name="pct" value="${esc(st.womenSharePct)}" required ${dis()}></label>
+        <div class="stack" style="gap:4px"><span class="label">Tally</span><b class="ink tnum">${t.seats.toLocaleString('en-IN')} of ${t.target.toLocaleString('en-IN')} seats</b><span class="muted tiny">Seat price for top-ups: ${ui.inr(st.womenSeatPrice)}</span></div>
+      </div>
+      <div class="btn-row"><button class="btn primary" type="submit" ${dis()}>Save share</button><a class="btn ghost" href="#women">See the public page</a></div>
+      ${noteFor('women')}
+    </form>`;
+  }
+
   function signups() {
     const su = store.pricing.signups.slice(0, 8);
     return `<div class="table-wrap"><table><thead><tr><th>When</th><th>Organisation</th><th>Plan</th><th>Version</th><th>Code</th><th class="num">Total</th></tr></thead><tbody>
@@ -119,7 +131,11 @@
           </div>
         </section>
         <section class="section">
-          ${ui.sectionHead('03', 'Recent sign-ups', `<span class="muted" style="font-size:13px">${pr.signups.length} in total</span>`)}
+          ${ui.sectionHead('03', '1 Million Women in Design', '', 'One setting. This share of every paid sign-up goes to the initiative. The payer sees it and pays nothing extra.')}
+          ${womenCard()}
+        </section>
+        <section class="section">
+          ${ui.sectionHead('04', 'Recent sign-ups', `<span class="muted" style="font-size:13px">${pr.signups.length} in total</span>`)}
           ${signups()}
         </section>
       </div>`;
@@ -154,6 +170,16 @@
     if (!canWrite()) return;
     const p = store.plan(el.dataset.key); const before = clone(p);
     store.pricingCommit(p.active ? 'Plan switched off' : 'Plan switched on', 'plan', p.key, before, (s) => { const x = s.plans.find((y) => y.key === p.key); x.active = !x.active; return x; });
+  };
+
+  LEAD.forms['women-share'] = (fd) => {
+    if (!canWrite()) return;
+    const res = rules.validateWomenShare(fd.get('pct'));
+    if (!res.ok) { say('women', res.reason, 'err'); LEAD.render({ keepScroll: true }); return; }
+    const before = { womenSharePct: store.pricing.settings.womenSharePct };
+    store.pricingCommit('1 Million Women share set', 'setting', 'womenSharePct', before, (p) => { p.settings.womenSharePct = res.pct; return { womenSharePct: res.pct }; });
+    say('women', `Saved. ${res.pct}% of every paid plan now goes to 1 Million Women in Design.`);
+    LEAD.render({ keepScroll: true });
   };
 
   LEAD.forms['coupon-new'] = (fd) => {

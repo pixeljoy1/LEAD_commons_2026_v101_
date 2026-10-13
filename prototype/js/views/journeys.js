@@ -183,7 +183,7 @@
             }).join('')}</div>
           </section>
           <aside class="stack" style="gap:16px">
-            ${ui.simFrame(j.screen.title, `<h4>${esc(j.screen.title)}</h4>${ui.kv(j.screen.rows)}<button class="btn small primary" data-go="${esc(j.route)}">${esc(j.screen.cta)}</button><span class="label" style="color:var(--red)">Simulated · illustrative data</span>`)}
+            ${ui.simFrame(j.screen.title, `<h4>${esc(j.screen.title)}</h4>${ui.kv(j.screen.rows)}<button class="btn small primary" data-go="${esc(j.route)}">${esc(j.screen.cta)}</button>`)}
             <div class="access">
               <div><span class="label">Sees</span><ul class="px-list">${r.sees.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
               <div><span class="label">Can do</span><ul class="px-list yes">${r.can.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>

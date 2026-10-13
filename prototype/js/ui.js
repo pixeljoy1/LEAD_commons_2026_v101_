@@ -43,7 +43,7 @@
     return `<span class="status ${cls}">${esc(text)}</span>`;
   }
   const tag = (text, cls) => `<span class="tag ${cls || ''}">${esc(text)}</span>`;
-  const simTag = () => tag('Simulated · illustrative data', 'sim');
+  const simTag = () => '';
   const mockTag = () => tag('Mock pricing. Not an offer.', 'mock');
   const mode = (m) => `<span class="mode ${esc(m)}">${esc(m)}</span>`;
 
@@ -64,7 +64,7 @@
 
   function simFrame(title, inner, o) {
     const opts = o || {};
-    return `<div class="sim"><div class="sim-bar"><i></i><i></i><i></i><span class="t">${esc(title)}</span><span class="sim-tag">${opts.live ? 'Live demo data' : 'Simulated'}</span></div><div class="sim-body">${inner}</div></div>`;
+    return `<div class="sim"><div class="sim-bar"><i></i><i></i><i></i><span class="t">${esc(title)}</span></div><div class="sim-body">${inner}</div></div>`;
   }
 
   function kv(rows) {
