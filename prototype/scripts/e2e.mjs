@@ -558,7 +558,7 @@ ok('S22 the 1 Million Women page shows the tally and the role cards', await page
 await go(page, 'join-sponsor'); await as(page, 'industry'); await go(page, 'join-sponsor');
 await page.click('[data-act="women-cohort"]');
 ok('S23 sponsor can add a women’s cohort of 10 seats', await page.locator('#jw-sponsor').inputValue() === '10' && (await page.locator('#q-sponsor >> text=10 seats for women').count()) === 1);
-await tab2.goto(BASE + '#join-industry'); await tab2.click('[data-act="pkg-choose"] >> nth=0'); await tab2.waitForSelector('#q-industry .women-note');
+await tab2.goto(BASE + '#join-industry'); if (await tab2.locator('[data-act="pkg-choose"]').count()) await tab2.click('[data-act="pkg-choose"] >> nth=0'); await tab2.waitForSelector('#q-industry .women-note');
 await as(page, 'admin'); await go(page, 'admin');
 await page.fill('#ws-pct', '80'); await page.click('form[data-form="women-share"] button[type="submit"]');
 ok('S24 admin cannot set a share above 50%', (await page.locator('#ws-pct:invalid').count()) === 1 && await page.evaluate(() => LEAD.store.pricing.settings.womenSharePct) === 5);
