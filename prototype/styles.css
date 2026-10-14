@@ -828,3 +828,14 @@ fieldset.q legend { padding: 0 6px; }
 .eco-filter .label { margin-right: 2px; }
 .eco-use { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; color: var(--ink); }
 .eco-use b { font: 400 16px/1 var(--f-pixel); border: 1px solid var(--line); background: var(--panel-2); padding: 3px 6px; border-radius: 4px; margin-right: 6px; }
+
+/* Design Jobs: browse as table or cards, apply dialog */
+.jobs-table td.act { white-space: nowrap; text-align: right; }
+.jobs-table .pill-list { flex-wrap: wrap; }
+.jobs-table td { vertical-align: top; }
+.job-card { align-content: start; }
+.job-foot { display: flex; justify-content: flex-end; align-items: center; margin-top: auto; }
+.job-dlg { z-index: 91; }
+.progress-line { display: flex; gap: 6px; flex-wrap: wrap; font: 500 11px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+.progress-line span { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.progress-line span.on { border-color: var(--umo-blue); color: var(--ink); }

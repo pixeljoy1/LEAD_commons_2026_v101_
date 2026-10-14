@@ -1,4 +1,4 @@
-/* LEAD · business rules R1–R26 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
+/* LEAD · business rules R1–R27 and state machines (spec §8.6, §9.1; addendum A13). Pure functions. */
 (function (root, factory) {
   const isNode = typeof module === 'object' && module.exports;
   const enums = isNode ? require('./enums.js') : root.LEAD.enums;
@@ -104,6 +104,17 @@
     const done = new Set(doneCodes || []);
     const next = codes.find((c) => !done.has(c)) || null;
     return { total: codes.length, doneCount: codes.filter((c) => done.has(c)).length, nextCode: next, complete: next === null && codes.length > 0, position: next ? codes.indexOf(next) + 1 : codes.length };
+  }
+
+  /* ---------- R27 Only the right login can apply, and only once ---------- */
+  /* job: { lane, open }. who: { signedIn, role, applied }. Roles and internships take students and open learners; open-cohort calls take open learners. */
+  function applyRoles(job) { return job && (job.lane === 'cohort' || job.open) ? ['open'] : ['student', 'open']; }
+  function canApply(job, who) {
+    const needs = applyRoles(job);
+    if (!who || !who.signedIn) return no('Sign in to apply.', { why: 'signedOut', needs });
+    if (!needs.includes(who.role)) return no('This login cannot apply to this job.', { why: 'wrongLogin', needs });
+    if (who.applied) return no('You have already applied to this job.', { why: 'applied', needs });
+    return ok({ needs });
   }
 
   /* ---------- R4 Small groups stay hidden ---------- */
@@ -388,7 +399,7 @@
 
   return {
     MACHINES, canTransition, transition,
-    identitiesVisible, canVerify, employerCanSee, referralVisible, confirmReferral, driveReply, canCloseDrive, MIN_GROUP, aggregate,
+    identitiesVisible, canVerify, employerCanSee, applyRoles, canApply, referralVisible, confirmReferral, driveReply, canCloseDrive, MIN_GROUP, aggregate,
     canScore, canContact, NDA_CHECKS, ndaSafe, canSubmit, auditEntry,
     lastPrice, setPrice, validatePlan,
     needsSecondApproval, validateCouponFields, createCoupon, approveCoupon, setCouponStatus,

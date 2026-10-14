@@ -259,7 +259,9 @@ ok('Design Jobs: each persona sees its own lanes first, tagged Yours', ordOk);
 await as(page, 'industry'); await goRaw(page, 'jobs');
 await page.fill('#po-title', 'Visual designer'); await page.click('form[data-form="post-op"] button[type="submit"]');
 await as(page, 'student'); await goRaw(page, 'jobs');
-await page.locator('[data-lane="role"] .job-panel[data-panel="responds"] article:has-text("Visual designer") button[type="submit"]').click();
+await page.locator('#jobs-cards [data-job] :text("Visual designer")').first().waitFor();
+await page.locator('#jobs-cards .job-card:has-text("Visual designer") [data-act="job-apply"]').click();
+await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]');
 await as(page, 'industry'); await goRaw(page, 'jobs');
 ok('Design Jobs: industry opens a role, a student applies, industry sees the applicant', await page.locator('[data-lane="role"] [data-panel="responds"] >> text=Aanya Rao').count() >= 1);
 await as(page, 'head'); await goRaw(page, 'jobs');
@@ -285,7 +287,8 @@ ok('Design Jobs: a referral stays hidden from the employer until the student con
 await as(page, 'admin'); await goRaw(page, 'jobs');
 await page.click('form[data-form="post-cohort"] button[type="submit"]');
 await as(page, 'open'); await goRaw(page, 'jobs');
-await page.locator('[data-lane="cohort"] [data-panel="responds"] [data-act="op-open-apply"]').first().click();
+await page.locator('#jobs-cards .job-card:has-text("Open cohort") [data-act="job-apply"]').first().click();
+await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]');
 ok('Design Jobs: the admin opens a cohort call and an open learner applies', await page.evaluate(() => LEAD.store.loop.opportunities.some((o) => o.lane === 'cohort' && o.id !== 'op4') && LEAD.store.loop.audit.some((a) => /Open-cohort call opened/.test(a.action))));
 await page.evaluate(() => LEAD.store.resetDemo());
 await as(page, 'student');
@@ -677,6 +680,44 @@ ok('S31 no steward role anywhere on the page', !oldRoles);
 
 /* ---------- screenshots and layout ---------- */
 await page.evaluate(() => LEAD.store.resetDemo());
+
+
+/* ---------- round 12: Design Jobs as table or cards, login-checked Apply ---------- */
+await page.evaluate(() => LEAD.store.resetDemo()); await page.evaluate(() => LEAD.store.signOut()); await goRaw(page, 'jobs');
+const nJobs = await page.locator('#jobs-cards .job-card').count();
+const nBtn = await page.locator('#jobs-cards [data-act="job-apply"]').count();
+ok('Design Jobs: cards by default, with an Apply button on each open listing', nJobs >= 7 && nBtn >= 6 && await page.locator('[data-act="jobs-view"][data-k="cards"][aria-pressed="true"]').count() === 1, `${nJobs} cards · ${nBtn} buttons`);
+await page.click('[data-act="jobs-view"][data-k="table"]');
+ok('Design Jobs: the table has one row per listing, the same buttons, and no sideways page scroll', await page.locator('#jobs-table tbody tr').count() === nJobs && await page.locator('#jobs-table [data-act="job-apply"]').count() === nBtn && await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+await page.locator('#jobs-table tr:has-text("Associate product designer"), #jobs-table tbody tr').first().locator('[data-act="job-apply"]').first().click();
+ok('Apply: signed out is warned and offered the right logins, and nothing is created', await page.locator('#job-warn').count() === 1 && (await page.locator('#job-dialog').innerText()).includes('Student or Open learner') && await page.locator('#job-dialog [data-act="job-switch"]').count() === 2);
+const appsBefore = await page.evaluate(() => LEAD.store.loop.applications.length);
+await page.keyboard.press('Escape');
+await as(page, 'industry'); await goRaw(page, 'jobs');
+await page.locator('[data-act="job-apply"]').first().click();
+ok('Apply: an Industry login is warned and cannot apply', (await page.locator('#job-warn').innerText()).includes('Industry') && await page.locator('[data-act="job-submit"]').count() === 0 && await page.evaluate(() => LEAD.store.loop.applications.length) === appsBefore);
+await page.keyboard.press('Escape');
+await as(page, 'student'); await goRaw(page, 'jobs');
+await page.click('[data-act="jobs-view"][data-k="cards"]');
+await page.locator('#jobs-cards .job-card:has-text("Service design intern") [data-act="job-apply"]').click();
+ok('Apply: a student sees the three-step workflow, starting at Review', await page.locator('#job-dialog .stepper span.on').count() === 1 && (await page.locator('#jd-title').textContent()).includes('Review'));
+await page.click('[data-act="job-dlg-next"]');
+await page.click('#job-dialog form button[type="submit"]');
+ok('Apply: details need consent before submit', await page.locator('[data-act="job-submit"]').count() === 0);
+await page.locator('#jd-consent').check(); await page.fill('#jd-note', 'I framed this problem on my live project.'); await page.click('#job-dialog form button[type="submit"]');
+await page.click('[data-act="job-submit"]');
+ok('Apply: submitting records the application and the card shows Applied', await page.locator('#job-done').count() === 1 && await page.evaluate(() => LEAD.store.loop.applications.some((a) => a.opportunityId === 'op3' && a.studentId === 's1' && a.note.includes('framed')) && LEAD.store.loop.audit.some((a) => /Application sent/.test(a.action))));
+await page.click('[data-act="job-dlg-close"] >> nth=0');
+ok('Apply: the listing now says Applied and the progress sits under Who responds', await page.locator('#jobs-cards .job-card:has-text("Service design intern") [data-applied]').count() === 1 && await page.locator('[data-myapp] .progress-line').count() >= 1);
+await page.locator('#jobs-cards .job-card:has-text("Open cohort") [data-act="job-apply"]').first().click();
+ok('Apply: a student cannot apply to an open-cohort call', (await page.locator('#job-warn').innerText()).includes('Open learner'));
+await page.keyboard.press('Escape');
+await page.locator('#jobs-cards .job-card:has-text("Open cohort") [data-act="job-apply"]').first().click();
+await page.click('[data-act="job-switch"][data-role="open"]');
+ok('Apply: switching to Open learner continues to Review for the same job', (await page.locator('#jd-title').textContent()).includes('Review') && (await page.locator('#job-dialog').innerText()).includes('Open cohort'));
+await page.keyboard.press('Escape');
+await page.evaluate(() => LEAD.store.resetDemo());
+await as(page, 'student');
 
 /* ---------- round 10: Community, persona-led Learn, clean text, clean footer ---------- */
 await as(page, 'student'); await goRaw(page, 'community');

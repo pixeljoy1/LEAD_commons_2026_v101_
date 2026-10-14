@@ -140,3 +140,17 @@ test('R25 a drive reply goes Pending to Accepted or Declined; only the college c
   assert.equal(R.canCloseDrive(drive, 'campus-a').ok, true);
   assert.equal(R.canCloseDrive({ orgId: 'campus-a', status: 'Closed' }, 'campus-a').ok, false);
 });
+
+test('R27 only the right login can apply, and only once', () => {
+  const role = { id: 'op1', lane: 'role', open: false }; const call = { id: 'op4', lane: 'cohort', open: true };
+  const w = (r, applied) => ({ signedIn: true, role: r, applied: !!applied });
+  assert.deepEqual(R.applyRoles(role), ['student', 'open']);
+  assert.deepEqual(R.applyRoles(call), ['open']);
+  assert.equal(R.canApply(role, { signedIn: false, role: 'open' }).why, 'signedOut');
+  assert.equal(R.canApply(role, w('student')).ok, true);
+  assert.equal(R.canApply(role, w('open')).ok, true);
+  for (const r of ['industry', 'faculty', 'mentor', 'head', 'admin']) assert.equal(R.canApply(role, w(r)).why, 'wrongLogin', r);
+  assert.equal(R.canApply(call, w('student')).why, 'wrongLogin');
+  assert.equal(R.canApply(call, w('open')).ok, true);
+  assert.equal(R.canApply(role, w('student', true)).why, 'applied');
+});

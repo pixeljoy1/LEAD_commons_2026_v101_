@@ -262,8 +262,55 @@
   const REF_STATUS = { Waiting: 'Waiting for the student', Confirmed: 'Confirmed by the student', Declined: 'Declined by the student' };
   const INDUSTRY_ORGS = ['northwind', 'harbor', 'lumen'];
 
+  /* The apply dialog: wrong or missing login is warned first; the right login gets Review, Your details, Submit. */
+  function jobDialog(listings, signed, r, myApps, pe, u) {
+    const d = jv.dlg; if (!d) return '';
+    const o = listings.find((x) => x.id === d.id); if (!o) return '';
+    const D = L();
+    const check = rules.canApply(Object.assign({ lane: o.lane || (o.open ? 'cohort' : 'role') }, o), { signedIn: signed, role: r, applied: myApps.some((a) => a.opportunityId === o.id) });
+    const close = '<button class="icon-btn" data-act="job-dlg-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+    const wrap = (inner) => `<div class="sheet-back" data-act="job-dlg-close"></div><section class="sheet job-dlg" role="dialog" aria-modal="true" aria-labelledby="jd-title" id="job-dialog">${inner}</section>`;
+    const strip = (n) => `<div class="stepper" aria-label="Steps">${['Review', 'Your details', 'Submit'].map((s, i) => `<span class="${i < n ? 'on' : ''}">${String(i + 1).padStart(2, '0')} ${s}</span>`).join('')}</div>`;
+    if (!check.ok && d.step !== 4) {
+      const who = signed ? `You are signed in as <b class="ink">${esc(WHO_LABEL[r])}</b>. ` : '';
+      const msg = check.why === 'applied' ? 'You have already applied to this job. Your progress is under Who responds.' : `${who}Applications for <b class="ink">${esc(o.title)}</b> need a <b class="ink">${esc(needsText(check.needs))}</b> login.`;
+      return wrap(`<div class="sheet-top"><div class="stack" style="gap:4px"><span class="eyebrow">${check.why === 'signedOut' ? 'Sign in to apply' : check.why === 'applied' ? 'Already applied' : 'Wrong login'}</span><h2 id="jd-title" style="font-size:clamp(22px,3vw,28px)">${check.why === 'signedOut' ? 'Sign in first.' : check.why === 'applied' ? 'You have applied.' : 'This login cannot apply.'}</h2></div>${close}</div>
+        <div class="msg ${check.why === 'applied' ? 'info' : 'warn'}" role="alert" id="job-warn"><span>${msg}</span></div>
+        ${check.why === 'applied' ? '' : `<p class="muted" style="font-size:13.5px">Demo only. Switching signs you in as a made-up person. ${esc(o.title)} is kept open for you.</p>
+        <div class="btn-row">${check.needs.map((x) => `<button class="btn primary" data-act="job-switch" data-role="${x}" data-id="${o.id}">${signed ? 'Switch to' : 'Sign in as'} ${esc(WHO_LABEL[x])}</button>`).join('')}<button class="btn ghost" data-act="job-dlg-close">Not now</button></div>`}`);
+    }
+    if (d.step === 4) {
+      return wrap(`<div class="sheet-top"><div class="stack" style="gap:4px"><span class="eyebrow">Application sent</span><h2 id="jd-title" style="font-size:clamp(22px,3vw,28px)">Applied.</h2></div>${close}</div>
+        <div class="msg ok" id="job-done"><span>Your application for <b class="ink">${esc(o.title)}</b> at ${esc(ui.orgName(o.orgId))} is in. The company sees only what you chose to share.</span></div>
+        <div class="progress-line"><span class="on">Applied</span><span>In review</span><span>Shortlisted</span><span>Outcome</span></div>
+        <div class="btn-row"><button class="btn primary" data-act="job-dlg-close">Back to Design Jobs</button></div>`);
+    }
+    const head = (n, t) => `<div class="sheet-top"><div class="stack" style="gap:4px"><span class="eyebrow">Apply · ${esc(WHO_LABEL[r])}</span><h2 id="jd-title" style="font-size:clamp(22px,3vw,28px)">${t}</h2></div>${close}</div>${strip(n)}`;
+    if (d.step === 1) {
+      const lc = o.kind === 'internship' ? D.learningContracts.find((x) => x.id === o.learningContractId) : null;
+      return wrap(`${head(1, 'Review the job')}<div class="stack" style="gap:8px"><span class="label">${esc(ui.orgName(o.orgId))} · ${esc(o.kind)}</span><b class="ink" style="font-size:18px">${esc(o.title)}</b><div class="pill-list">${o.caps.map((c) => `<span class="chip">${esc(ui.capName(c))}</span>`).join('')}</div>${lc ? `<span class="muted" style="font-size:13.5px">Learning contract · mentor ${esc(lc.mentor)} · ${esc(lc.duration)} · ${esc(lc.stipend)}</span>` : ''}${o.note ? `<span class="muted" style="font-size:13.5px">${esc(o.note)}</span>` : ''}</div>
+        <div class="btn-row"><button class="btn primary" data-act="job-dlg-next">Continue</button><button class="btn ghost" data-act="job-dlg-close">Cancel</button></div>`);
+    }
+    if (d.step === 2) {
+      const mineE = r === 'student' ? pe(u.id) : [];
+      return wrap(`${head(2, 'Your details')}<form class="stack" data-form="job-details">
+        ${r === 'student' ? `<span class="label">Attach Passport entries</span>${mineE.map((p) => `<label class="check"><input type="checkbox" name="pe" value="${p.id}" ${d.pe.includes(p.id) || (!d.touched && true) ? 'checked' : ''}> ${esc(ui.capName(p.capSlug))} · ${LEVELS[p.level - 1]} ${p.shared ? ui.tag('Shared', 'live') : ui.tag('Not shared', 'sim')}</label>`).join('') || '<p class="muted" style="font-size:13px">No verified entries yet. You can still apply.</p>'}<span class="muted" style="font-size:12.5px">The company sees an entry only if you share it.</span>` : ''}
+        <label class="field">A short note to the company<textarea id="jd-note" name="note" placeholder="Two lines on why this job">${esc(d.note)}</textarea></label>
+        <label class="check"><input type="checkbox" name="consent" id="jd-consent" ${d.consent ? 'checked' : ''}> I agree to share my application with ${esc(ui.orgName(o.orgId))}.</label>
+        <div class="btn-row"><button class="btn primary" type="submit">Continue</button><button class="btn" type="button" data-act="job-dlg-back">Back</button></div></form>`);
+    }
+    const names = r === 'student' ? d.pe.map((id) => { const p = D.passports.find((x) => x.id === id); return p ? ui.capName(p.capSlug) : ''; }).filter(Boolean) : [];
+    return wrap(`${head(3, 'Check and submit')}<div class="stack" style="gap:6px">${ui.kv([['Job', o.title], ['Company', ui.orgName(o.orgId)], ['Applying as', WHO_LABEL[r]], ...(r === 'student' ? [['Passport entries', names.length ? names.join(', ') : 'None attached']] : []), ['Note', d.note || 'None']])}</div>
+      <div class="btn-row"><button class="btn primary" data-act="job-submit">Submit application</button><button class="btn" data-act="job-dlg-back">Back</button></div>`);
+  }
+
+  const jv = { fmt: 'cards', dlg: null };
+  const WHO_LABEL = { student: 'Student', open: 'Open learner', industry: 'Industry', faculty: 'Faculty', mentor: 'Mentor', head: 'College', admin: 'UMO admin' };
+  const needsText = (needs) => needs.map((x) => WHO_LABEL[x]).join(' or ');
+
   LEAD.views.jobs = {
     title: () => 'Design Jobs',
+    after() { if (jv.dlg) { const b = document.querySelector('#job-dialog textarea, #job-dialog .btn.primary, #job-dialog button'); if (b && !document.getElementById('job-dialog').contains(document.activeElement)) b.focus(); } },
     render() {
       const signed = store.session.signedIn; const r = signed ? role() : null; const u = signed ? me() : null;
       const D = L(); const ops = D.opportunities;
@@ -284,9 +331,15 @@
       const capSelect = (id) => `<label class="field">Capability<select id="${id}" name="cap">${D.capabilities.map((c) => `<option value="${c.slug}">${esc(c.name)}</option>`).join('')}</select></label>`;
 
       /* ---- lane 1: roles and internships ---- */
+      function myApplicationsList(jobs) {
+        const mine = myApps.filter((a) => jobs.some((o) => o.id === a.opportunityId));
+        return mine.map((a) => { const o = ops.find((x) => x.id === a.opportunityId); const stage = progressOf(a); const steps = ['Applied', 'In review', 'Shortlisted', 'Outcome']; const at = stage === 'In review' ? 1 : stage === 'Shortlisted' ? 2 : 3;
+          return `<article class="item" data-myapp="${a.id}"><b class="ink">${esc(o.title)}</b><span class="muted tiny">${esc(ui.orgName(o.orgId))} · applied ${esc(ui.fmtDate(a.at))}</span><div class="progress-line">${steps.map((t, i) => `<span class="${i <= at ? 'on' : ''}">${esc(i === 3 && at === 3 ? stage : t)}</span>`).join('')}</div></article>`; }).join('') || note('You have not applied yet. Use Apply under Browse jobs.');
+      }
+
       function laneRole(l) {
         const roles = ops.filter((o) => laneOf(o) === 'role').sort((a, b) => (is('industry') && b.orgId === u.orgId) - (is('industry') && a.orgId === u.orgId));
-        const opens = roles.map((o) => row(o)).join('') || note('No roles yet.');
+        const opens = note(is('industry') ? 'Your roles are listed under Browse jobs, marked Yours.' : 'Open roles are listed under Browse jobs, with an Apply button on each.');
         const post = is('industry') ? `<form class="stack" data-form="post-op"><span class="eyebrow">Open a role</span>
           <label class="field">Title<input id="po-title" name="title" value="Junior service designer" required></label>
           <div class="form-grid"><label class="field">Kind<select id="po-kind" name="kind"><option value="internship">Internship</option><option value="role">Role</option></select></label>${capSelect('po-cap')}</div>
@@ -309,15 +362,8 @@
                 ${out ? ui.status(out.result) : ''}</div></div>`;
             }).join('') || note('No applicants yet.')}</article>`;
           }).join('') || note('You have no open roles yet.');
-        } else if (is('student')) {
-          const apps = D.applications.filter((a) => a.studentId === u.id); const mineE = pe(u.id);
-          resp = roles.map((o) => {
-            const ap = apps.find((a) => a.opportunityId === o.id);
-            return `<article class="item"><b class="ink">${esc(o.title)}</b>${ap ? `<div class="notice">Applied ${ui.fmtDate(ap.at)} · ${ap.shortlisted ? '<b class="ink">Shortlisted</b>' : 'In review'}${(D.outcomes.find((x) => x.applicationId === ap.id) || {}).result ? ' · outcome recorded' : ''}</div>`
-              : `<form class="stack" data-form="apply" data-id="${o.id}"><span class="label">Attach Passport entries</span>${mineE.map((p) => `<label class="check"><input type="checkbox" name="pe" value="${p.id}" checked> ${esc(ui.capName(p.capSlug))} · ${LEVELS[p.level - 1]} ${p.shared ? ui.tag('Shared', 'live') : ui.tag('Not shared', 'sim')}</label>`).join('') || '<p class="muted" style="font-size:13px">No verified entries yet.</p>'}<span class="muted" style="font-size:12.5px">The employer sees an entry only if you share it.</span><button class="btn primary" type="submit">Apply</button></form>`}</article>`;
-          }).join('');
-        } else if (is('open')) {
-          resp = roles.map((o) => `<article class="item"><b class="ink">${esc(o.title)}</b>${D.applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The UMO team replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`}</article>`).join('');
+        } else if (is('student', 'open')) {
+          resp = myApplicationsList(roles);
         } else {
           resp = note(signed ? 'Students and open learners apply with a Passport.' : 'Students and open learners apply here, with a Passport.') + `<div class="btn-row">${signin('student', 'a student', 'apply')}${signin('open', 'an open learner', 'apply')}</div>`;
         }
@@ -348,10 +394,10 @@
       /* ---- lane 3: open-cohort calls ---- */
       function laneCohort(l) {
         const calls = ops.filter((o) => laneOf(o) === 'cohort');
-        const opens = calls.map((o) => row(o, `<span class="muted" style="font-size:13px">${esc(o.note || '')}</span>`)).join('') || note('No calls yet.');
+        const opens = note('Open-cohort calls are listed under Browse jobs, with an Apply button on each.');
         const post = is('admin') ? `<form class="stack" data-form="post-cohort"><span class="eyebrow">Open a cohort call</span><label class="field">Title<input id="pc-title" name="title" value="Open cohort · Decision-log project" required></label>${capSelect('pc-cap')}<button class="btn primary" type="submit">Open the call</button></form>` : note(signed ? 'UMO admin opens these.' : 'UMO opens these. ') + signin('admin', 'UMO admin', 'open a call');
         let resp;
-        if (is('open')) resp = calls.map((o) => `<article class="item"><b class="ink">${esc(o.title)}</b>${D.applications.some((a) => a.opportunityId === o.id && a.studentId === u.id) ? '<div class="notice">Applied. The UMO team replies within a week.</div>' : `<button class="btn primary" data-act="op-open-apply" data-id="${o.id}">Apply</button>`}</article>`).join('');
+        if (is('open')) resp = myApplicationsList(calls);
         else if (is('admin')) resp = calls.map((o) => { const apps = D.applications.filter((a) => a.opportunityId === o.id); return `<article class="item"><b class="ink">${esc(o.title)}</b><span class="label">Applicants · ${apps.length}</span>${apps.map((a) => `<div class="row between"><span>${esc(ui.nameOf(a.studentId))}</span><span class="muted tiny">${esc(ui.fmtDate(a.at))}</span></div>`).join('') || note('No applicants yet.')}</article>`; }).join('');
         else resp = note('Open learners apply to these calls. Free.') + `<div class="btn-row">${signin('open', 'an open learner', 'apply')}</div>`;
         return [panel('opens', l.opens, opens + post), panel('responds', l.responds, resp)];
@@ -383,6 +429,27 @@
         return [panel('opens', l.opens, opens), panel('responds', l.responds, resp)];
       }
 
+      /* ---- Browse jobs: every role, internship and open-cohort call, as a table or as cards, with Apply on each ---- */
+      const listings = ops.filter((o) => ['role', 'cohort'].includes(laneOf(o)));
+      const myApps = signed ? D.applications.filter((a) => a.studentId === u.id) : [];
+      const appliedTo = (o) => myApps.find((a) => a.opportunityId === o.id);
+      const progressOf = (a) => { const out = D.outcomes.find((x) => x.applicationId === a.id); return out && out.result !== 'None' ? out.result : out ? 'Not selected' : a.shortlisted ? 'Shortlisted' : 'In review'; };
+      const kindLabel = (o) => (laneOf(o) === 'cohort' ? 'Open-cohort call' : o.kind === 'internship' ? 'Internship' : 'Role');
+      const applyBtn = (o) => { const a = appliedTo(o); return a ? `<span class="tag live" data-applied="${o.id}">Applied · ${esc(progressOf(a))}</span>` : o.status === 'Closed' || o.status === 'Filled' ? `<span class="muted tiny">Closed</span>` : `<button class="btn small primary" data-act="job-apply" data-id="${o.id}">Apply</button>`; };
+      const skills = (o) => o.caps.map((c) => `<span class="chip">${esc(ui.capName(c))}</span>`).join('');
+      const jobsTable = `<div class="table-wrap"><table class="jobs-table" id="jobs-table"><thead><tr><th>Type</th><th>Job</th><th>Company</th><th>Skills</th><th>Status</th><th>Who can apply</th><th><span class="sr">Action</span></th></tr></thead><tbody>${listings.map((o) => `<tr data-job="${o.id}"><td>${esc(kindLabel(o))}</td><td><b class="ink">${esc(o.title)}</b>${signed && is('industry') && o.orgId === u.orgId ? ' ' + ui.tag('Yours', 'info') : ''}</td><td>${esc(ui.orgName(o.orgId))}</td><td><div class="pill-list">${skills(o)}</div></td><td>${ui.status(o.status)}</td><td class="muted">${esc(needsText(rules.applyRoles(Object.assign({ lane: laneOf(o) }, o))))}</td><td class="act">${applyBtn(o)}</td></tr>`).join('')}</tbody></table></div>`;
+      const jobsCards = `<div class="grid g3" id="jobs-cards">${listings.map((o) => `<article class="card tight job-card" data-job="${o.id}">
+        <div class="row between"><span class="label">${esc(kindLabel(o))}</span>${ui.status(o.status)}</div>
+        <h3 style="font-size:18px">${esc(o.title)}</h3><span class="muted tiny">${esc(ui.orgName(o.orgId))}${signed && is('industry') && o.orgId === u.orgId ? ' · Yours' : ''}</span>
+        <div class="pill-list">${skills(o)}</div>
+        <span class="muted tiny">Who can apply: ${esc(needsText(rules.applyRoles(Object.assign({ lane: laneOf(o) }, o))))}</span>
+        <div class="job-foot">${applyBtn(o)}</div></article>`).join('')}</div>`;
+      const browse = `<section class="section" id="jobs-browse" aria-label="Browse jobs">
+        <div class="row between"><div class="stack" style="gap:2px"><h2 style="font-size:clamp(20px,3vw,26px);margin:0">Browse jobs</h2><span class="muted tiny">${listings.filter((o) => laneOf(o) === 'role' && o.status === 'Open').length} open roles · ${listings.filter((o) => laneOf(o) === 'cohort').length} open-cohort call${listings.filter((o) => laneOf(o) === 'cohort').length === 1 ? '' : 's'} · ${myApps.length} of your applications</span></div>
+          <div class="row" role="group" aria-label="Format"><button class="chip" data-act="jobs-view" data-k="cards" aria-pressed="${jv.fmt === 'cards'}">Cards</button><button class="chip" data-act="jobs-view" data-k="table" aria-pressed="${jv.fmt === 'table'}">Table</button></div></div>
+        ${jv.fmt === 'table' ? jobsTable : jobsCards}</section>`;
+      const dialog = jobDialog(listings, signed, r, myApps, pe, u);
+
       const build = { role: laneRole, drive: laneDrive, cohort: laneCohort, referral: laneReferral };
       const order = signed ? LANE_ORDER[r] : ['role', 'drive', 'cohort', 'referral'];
       const lanes = order.map((id) => LANES.find((x) => x.id === id)).map((l) => {
@@ -394,12 +461,20 @@
       }).join('');
       const intro = signed ? JOBS_LINE[r] : 'Four ways a design job starts. In each one, one side opens it and the other side responds. Sign in as a role to take part.';
       return `<div class="page wrap">${ui.hero({ compact: true, eyebrow: 'Design Jobs', title: 'Design Jobs.', lede: intro, meta: ui.simTag() })}
-        ${lanes}
+        ${browse}
+        ${lanes}${dialog}
         <div class="notice"><span class="px cyan"></span><span>Looking for any design job? <a href="https://uxin.co" target="_blank" rel="noopener">UXIN</a> carries general jobs. LEAD lists only evidence-backed roles.</span></div></div>`;
     },
   };
 
   const appById = (id) => L().applications.find((a) => a.id === id);
+  LEAD.forms['job-details'] = (fd) => {
+    const d = jv.dlg; if (!d) return;
+    if (!fd.get('consent')) { ui.toast('Agree to share your application to continue.'); d.consent = false; d.note = String(fd.get('note') || ''); LEAD.render({ keepScroll: true }); return; }
+    d.note = String(fd.get('note') || '').trim(); d.pe = fd.getAll('pe'); d.touched = true; d.consent = true; d.step = 3;
+    LEAD.render({ keepScroll: true });
+  };
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && jv.dlg) { jv.dlg = null; LEAD.render({ keepScroll: true }); } });
   LEAD.forms.apply = (fd, form) => {
     const a = { id: uid('ap'), opportunityId: form.dataset.id, studentId: me().id, passportIds: fd.getAll('pe'), shortlisted: false, at: Date.now() };
     store.commit('Applied', 'application', a.id, () => { L().applications.push(a); return a; });
@@ -454,6 +529,21 @@
       const a = { id: uid('ap'), opportunityId: el.dataset.id, studentId: me().id, passportIds: [], shortlisted: false, at: Date.now() };
       store.commit('Application sent', 'application', a.id, () => { L().applications.push(a); return a; });
       ui.toast('Applied.');
+    },
+    'jobs-view'(el) { jv.fmt = el.dataset.k; LEAD.render({ keepScroll: true }); },
+    'job-apply'(el) { jv.dlg = { id: el.dataset.id, step: 1, note: '', pe: [], touched: false, consent: false }; LEAD.render({ keepScroll: true }); },
+    'job-dlg-close'() { jv.dlg = null; LEAD.render({ keepScroll: true }); },
+    'job-dlg-next'() { if (jv.dlg) { jv.dlg.step = 2; LEAD.render({ keepScroll: true }); } },
+    'job-dlg-back'() { if (jv.dlg) { jv.dlg.step = Math.max(1, jv.dlg.step - 1); LEAD.render({ keepScroll: true }); } },
+    'job-switch'(el) { const id = el.dataset.id; store.setRole(el.dataset.role); jv.dlg = { id, step: 1, note: '', pe: [], touched: false, consent: false }; LEAD.render({ keepScroll: true }); },
+    'job-submit'() {
+      const d = jv.dlg; if (!d) return;
+      const o = L().opportunities.find((x) => x.id === d.id);
+      const chk = rules.canApply(Object.assign({ lane: o.lane || (o.open ? 'cohort' : 'role') }, o), { signedIn: store.session.signedIn, role: role(), applied: L().applications.some((a) => a.opportunityId === o.id && a.studentId === me().id) });
+      if (!chk.ok) { ui.toast(chk.reason); return; }
+      const a = { id: uid('ap'), opportunityId: o.id, studentId: me().id, passportIds: role() === 'student' ? d.pe : [], note: d.note, shortlisted: false, at: Date.now() };
+      store.commit('Application sent', 'application', a.id, () => { L().applications.push(a); return a; });
+      jv.dlg.step = 4; LEAD.render({ keepScroll: true });
     },
     'drive-reply'(el) {
       const d = L().drives.find((x) => x.id === el.dataset.id); const rp = d && d.replies.find((x) => x.orgId === me().orgId);
