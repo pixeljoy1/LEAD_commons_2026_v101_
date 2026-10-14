@@ -223,3 +223,8 @@ The signed-in persona's own lanes come first, tagged Yours. Signed out shows all
 ## Round 11 (v1.1): a tighter homepage map
 
 "What is in it for you" now takes less vertical space: one filter row, the map, and a single right-hand pane that explains how to read and use it. The four-step "When does this work?" panel is gone, as are the "Where LEAD is today" and "Everything, in detail" sections. "Why people stay" is now "What keeps you here". The map drawing is unchanged.
+
+
+## Round 12 (v1.2): Design Jobs as a table or cards, with a login-checked Apply
+
+Roles, internships and open-cohort calls are listed under **Browse jobs**, as Cards or as a Table, with an Apply button on each. Apply checks the login first (R27): signed out gets a sign-in prompt, the wrong login gets a warning and the right logins to switch to, and nothing is created. A Student or Open learner (Open learner only for cohort calls) goes through Review, Your details (Passport entries or a note, and consent) and Submit. The listing then reads Applied, and progress shows under Who responds.
