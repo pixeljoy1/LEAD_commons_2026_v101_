@@ -313,6 +313,10 @@
     after() { if (jv.dlg) { const b = document.querySelector('#job-dialog textarea, #job-dialog .btn.primary, #job-dialog button'); if (b && !document.getElementById('job-dialog').contains(document.activeElement)) b.focus(); } },
     render() {
       const signed = store.session.signedIn; const r = signed ? role() : null; const u = signed ? me() : null;
+      /* An open apply dialog never follows you to another page or another login. */
+      const sig = `${signed}:${store.session.role}:${store.session.userId}`;
+      if (jv.dlg && (LEAD.prevView !== LEAD.curView || (jv.dlg.sig && jv.dlg.sig !== sig))) jv.dlg = null;
+      if (jv.dlg && !jv.dlg.sig) jv.dlg.sig = sig;
       const D = L(); const ops = D.opportunities;
       const laneOf = (o) => o.lane || (o.open ? 'cohort' : 'role');
       const viewer = u ? { role: r, id: u.id, orgId: u.orgId } : null;
@@ -535,7 +539,7 @@
     'job-dlg-close'() { jv.dlg = null; LEAD.render({ keepScroll: true }); },
     'job-dlg-next'() { if (jv.dlg) { jv.dlg.step = 2; LEAD.render({ keepScroll: true }); } },
     'job-dlg-back'() { if (jv.dlg) { jv.dlg.step = Math.max(1, jv.dlg.step - 1); LEAD.render({ keepScroll: true }); } },
-    'job-switch'(el) { const id = el.dataset.id; store.setRole(el.dataset.role); jv.dlg = { id, step: 1, note: '', pe: [], touched: false, consent: false }; LEAD.render({ keepScroll: true }); },
+    'job-switch'(el) { const id = el.dataset.id; store.setRole(el.dataset.role); jv.dlg = { id, step: 1, note: '', pe: [], touched: false, consent: false, sig: `true:${store.session.role}:${store.session.userId}` }; LEAD.render({ keepScroll: true }); },
     'job-submit'() {
       const d = jv.dlg; if (!d) return;
       const o = L().opportunities.find((x) => x.id === d.id);
