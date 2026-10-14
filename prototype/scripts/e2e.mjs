@@ -261,7 +261,7 @@ await page.fill('#po-title', 'Visual designer'); await page.click('form[data-for
 await as(page, 'student'); await goRaw(page, 'jobs');
 await page.locator('#jobs-cards [data-job] :text("Visual designer")').first().waitFor();
 await page.locator('#jobs-cards .job-card:has-text("Visual designer") [data-act="job-apply"]').click();
-await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]');
+await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]'); await page.click('[data-act="job-dlg-close"] >> nth=0');
 await as(page, 'industry'); await goRaw(page, 'jobs');
 ok('Design Jobs: industry opens a role, a student applies, industry sees the applicant', await page.locator('[data-lane="role"] [data-panel="responds"] >> text=Aanya Rao').count() >= 1);
 await as(page, 'head'); await goRaw(page, 'jobs');
@@ -288,7 +288,7 @@ await as(page, 'admin'); await goRaw(page, 'jobs');
 await page.click('form[data-form="post-cohort"] button[type="submit"]');
 await as(page, 'open'); await goRaw(page, 'jobs');
 await page.locator('#jobs-cards .job-card:has-text("Open cohort") [data-act="job-apply"]').first().click();
-await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]');
+await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]'); await page.click('[data-act="job-dlg-close"] >> nth=0');
 ok('Design Jobs: the admin opens a cohort call and an open learner applies', await page.evaluate(() => LEAD.store.loop.opportunities.some((o) => o.lane === 'cohort' && o.id !== 'op4') && LEAD.store.loop.audit.some((a) => /Open-cohort call opened/.test(a.action))));
 await page.evaluate(() => LEAD.store.resetDemo());
 await as(page, 'student');
