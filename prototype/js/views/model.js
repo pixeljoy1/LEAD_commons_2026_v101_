@@ -88,17 +88,6 @@
     return `<button class="btn primary" data-act="as" data-role="${a.role}" data-to="admin">See the admin screens</button>`;
   }
 
-  /* Four steps, in time order. Replaces the old tab bar. Same underlying phases. */
-  function stepper() {
-    return `<div class="card when" id="when">
-      <span class="eyebrow">When does this work?</span>
-      <ol class="when-steps" role="group" aria-label="When does this work?">${content.phases.map((p, i) => {
-        const pp = content.plainPhase[p.id];
-        return `<li><button class="when-step" data-act="eco-phase" data-id="${p.id}" aria-pressed="${p.id === st.phase}"><span class="when-n">${i + 1}</span><span><b>${esc(pp.label)}</b><small>${esc(pp.meaning)}</small></span></button></li>`;
-      }).join('')}</ol>
-    </div>`;
-  }
-
   function detail() {
     const sel = st.sel;
     if (sel && sel.type === 'flow') {
@@ -110,7 +99,6 @@
         <h3>${esc(f.label)}</h3>
         <p class="ink"><b>${esc(A.label)}</b> → <b>${esc(B.label)}</b></p>
         <p>${esc(f.detail)}</p>
-        <div class="stack" style="gap:8px"><span class="label">When it works</span>${phaseRow(f)}</div>
         <div class="btn-row">${A.role ? `<button class="btn small" data-act="as" data-role="${A.role}" data-to="w-${A.role}">Walk as ${esc(A.label)}</button>` : ''}${B.role ? `<button class="btn small" data-act="as" data-role="${B.role}" data-to="w-${B.role}">Walk as ${esc(B.label)}</button>` : ''}</div>
       </div>`;
     }
@@ -123,7 +111,7 @@
       return `<div class="card detail">
         <div class="row between"><span class="eyebrow">${esc(a.group)}</span><button class="btn small ghost" data-act="eco-clear">Clear</button></div>
         <h3>${esc(a.label)}</h3>
-        ${s.why ? `<div class="stack" style="gap:4px"><span class="label">Why they stay</span><p class="ink">${esc(s.why)}</p></div>` : ''}
+        ${s.why ? `<div class="stack" style="gap:4px"><span class="label">What keeps them here</span><p class="ink">${esc(s.why)}</p></div>` : ''}
         ${s.quote ? `<p class="quote" style="font-size:15px">${esc(s.quote)}</p>` : ''}
         <div class="grid g2" style="gap:10px">
           <div class="stack" style="gap:6px"><span class="label">What they give</span><p>${esc(s.gives || '')}</p></div>
@@ -136,23 +124,15 @@
         ${a.href ? `<a class="btn" href="${a.href}" target="_blank" rel="noopener">Open ${esc(a.label)}</a>` : ''}
       </div>`;
     }
-    const counts = { real: 0, sim: 0, manual: 0, none: 0, reserved: 0 };
-    content.flows.forEach((f) => { counts[f.phase[st.phase]] += 1; });
-    const works = counts.real + counts.sim + counts.manual;
-    const later = counts.none + counts.reserved;
-    const pp = content.plainPhase[st.phase];
-    const parts = [counts.real ? `${counts.real} live` : '', counts.manual ? `${counts.manual} done by hand` : '', counts.sim ? `${counts.sim} work in the demo` : ''].filter(Boolean).join(' · ');
     return `<div class="card detail">
-      <span class="eyebrow">How to read this</span>
-      <p>Each box is a group of people. Each line is something one group gives another. <b class="ink">Not sure where you fit? Pick any box.</b></p>
-      <div class="legend" style="display:grid;gap:8px">
+      <span class="eyebrow">How to read and use this</span>
+      <ol class="eco-use"><li><b>1</b> Tap a group to see what it gives and gets.</li><li><b>2</b> Tap a line to read one exchange.</li><li><b>3</b> Follow it to the next group.</li></ol>
+      <p class="ink">Each box is a group of people. Each line is something one group gives another. <b>Not sure where you fit? Pick any box.</b></p>
+      <div class="legend" style="display:grid;gap:6px">
         <span><span class="sw" style="color:var(--ink)"></span>Works today</span>
-        <span><span class="sw d" style="color:var(--ink)"></span>Done by hand today, with people and spreadsheets</span>
+        <span><span class="sw d" style="color:var(--ink)"></span>Done by hand, with people and spreadsheets</span>
         <span><span class="sw p" style="color:var(--ink)"></span>You can try it in this demo</span>
-        <span class="muted">Faint line: planned for later</span>
       </div>
-      <p class="ink" id="eco-count"><b>${esc(pp.label)}:</b> ${works} of ${content.flows.length} exchanges work. ${later} ${later === 1 ? 'is' : 'are'} planned for later.</p>
-      ${parts ? `<p class="muted" style="font-size:13px">${esc(parts)}</p>` : ''}
     </div>`;
   }
 
@@ -201,16 +181,15 @@
         <div class="grid" style="gap:8px;font-size:14px">
           <div><span class="label">What they give</span><p>${esc(s.gives)}</p></div>
           <div><span class="label">What they get</span><p>${esc(s.gets)}</p></div>
-          <div><span class="label">Why they stay</span><p class="ink">${esc(s.why)}</p></div>
+          <div><span class="label">What keeps them here</span><p class="ink">${esc(s.why)}</p></div>
         </div>
       </button>`;
     }).join('');
   }
 
-  LEAD.modelParts = { st, svg, detail, stepper, matrix, phaseTable, offerings, stayCards, STATE_LABEL, STATE_CLS };
+  LEAD.modelParts = { st, svg, detail, matrix, phaseTable, offerings, stayCards, STATE_LABEL, STATE_CLS };
 
   Object.assign(LEAD.act, {
-    'eco-phase'(el) { st.phase = el.getAttribute('data-id'); LEAD.render({ keepScroll: true }); },
     'eco-kind'(el) {
       const id = el.getAttribute('data-id');
       if (!id) st.kinds.clear(); else if (st.kinds.has(id)) st.kinds.delete(id); else st.kinds.add(id);

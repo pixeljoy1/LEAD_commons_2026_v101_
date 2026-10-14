@@ -131,12 +131,9 @@
   function who() {
     const m = M();
     return `<section class="section" id="ecosystem" aria-label="What is in it for you">
-      ${heading('What is in it for you', 'Every group in LEAD gives something and gets something back. Tap your group to see both. Tap a line to see one exchange.')}
-      <ol class="eco-steps" aria-label="How to use the map"><li><b>1</b> Tap a group</li><li><b>2</b> See what it gives and gets</li><li><b>3</b> Follow a line to the next group</li></ol>
-      <div class="stack" style="gap:8px"><span class="label">Show only what moves between groups</span>
-        <div class="row" role="group" aria-label="Show only what moves between groups">${content.valueKinds.map((k) => `<button class="chip" data-act="eco-kind" data-id="${k.id}" aria-pressed="${m.st.kinds.has(k.id)}" title="${esc(k.note)}" aria-label="${esc(k.label)}: ${esc(k.note)}"><span class="vk vk-${k.id}"></span>${esc(k.label)}</button>`).join('')}${m.st.kinds.size ? '<button class="chip" data-act="eco-kind" data-id="">Show all</button>' : ''}</div>
-        <span class="muted tiny" id="eco-hint">${m.st.kinds.size ? esc([...m.st.kinds].map((id) => content.valueKinds.find((k) => k.id === id).note).join(' · ')) : 'Pick one or more to dim the rest of the lines.'}</span></div>
-      <div class="eco"><div class="eco-canvas">${m.svg()}</div><div class="eco-side">${m.stepper()}<div id="eco-detail">${m.detail()}</div></div></div>
+      ${heading('What is in it for you', 'Every group gives something and gets something back. Tap your group, then a line.')}
+      <div class="row eco-filter" role="group" aria-label="Show only what moves between groups"><span class="label">Show only</span>${content.valueKinds.map((k) => `<button class="chip" data-act="eco-kind" data-id="${k.id}" aria-pressed="${m.st.kinds.has(k.id)}" title="${esc(k.note)}" aria-label="${esc(k.label)}: ${esc(k.note)}"><span class="vk vk-${k.id}"></span>${esc(k.label)}</button>`).join('')}</div>
+      <div class="eco"><div class="eco-canvas">${m.svg()}</div><div class="eco-side"><div id="eco-detail">${m.detail()}</div></div></div>
     </section>`;
   }
 
@@ -149,8 +146,8 @@
   }
 
   function stay() {
-    return `<section class="section" aria-label="Why people stay">
-      ${heading('Why people stay', 'A group stays only if it gets at least as much as it gives. Each card says what a group gives, what it gets, and why it keeps coming back.')}
+    return `<section class="section" aria-label="What keeps you here">
+      ${heading('What keeps you here', 'A group stays only if it gets at least as much as it gives. Each card shows what a group gives, what it gets, and why it is worth it.')}
       <div class="grid g4">${M().stayCards()}</div>
     </section>`;
   }
@@ -174,23 +171,6 @@
     </section>`;
   }
 
-  /* ---------- 9. today ---------- */
-  function today() {
-    return `<section class="section" id="today" aria-label="Where LEAD is today">
-      ${heading('Where LEAD is today', 'LEAD grows in four steps. Each step starts only when the one before has proved itself.')}
-      <div class="grid g4">${content.phases.map((p) => `<article class="card"><span class="eyebrow">${esc(content.plainPhase[p.id].when)}</span><h3>${esc(content.plainPhase[p.id].label)}</h3><p style="font-size:14px">${esc(content.plainPhase[p.id].blurb)}</p>
-        <button class="btn small ghost" data-act="phase-map" data-id="${p.id}">Show on the map</button></article>`).join('')}</div>
-    </section>`;
-  }
-
-  /* ---------- 10–11. lineage and detail ---------- */
-  function detail() {
-    return `<section class="section" aria-label="Everything, in detail">
-      ${heading('Everything, in detail', 'For partners and the board: every exchange, and how it runs at each step.')}
-      <details class="more"><summary>Show all ${content.flows.length} exchanges</summary><div style="margin-top:12px">${M().phaseTable()}</div></details>
-    </section>`;
-  }
-
   /* ---------- 12–13. questions and the last word ---------- */
   function questions() {
     return `<section class="section" id="faq" aria-label="Questions people ask">
@@ -209,7 +189,7 @@
   LEAD.views.home = {
     title: () => '',
     render() {
-      return `<div class="page wrap">${hero()}<div id="path-slot">${path()}</div>${doors()}${who()}${gives()}${stay()}${together()}${plans()}${today()}${detail()}${questions()}${closing()}</div>`;
+      return `<div class="page wrap">${hero()}<div id="path-slot">${path()}</div>${doors()}${who()}${gives()}${stay()}${together()}${plans()}${questions()}${closing()}</div>`;
     },
     after() { wireCarousel(); },
     onPricing() {
@@ -272,6 +252,5 @@
     'car-prev'() { showLeaf(home.leaf - 1); },
     'car-pause'() { home.hold = !home.hold; applyHold(); },
     scroll(el) { scrollTo(el.getAttribute('data-id')); },
-    'phase-map'(el) { M().st.phase = el.getAttribute('data-id'); LEAD.render({ keepScroll: true }); scrollTo('ecosystem'); },
   });
 })(typeof globalThis !== 'undefined' ? globalThis : this);

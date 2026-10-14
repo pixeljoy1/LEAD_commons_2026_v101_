@@ -823,3 +823,8 @@ fieldset.q legend { padding: 0 6px; }
 .seq-n { font-size: 28px; min-width: 24px; }
 .seq-step .btn { align-self: center; }
 @media (max-width: 640px) { .seq-step { grid-template-columns: auto 1fr; } .seq-step .btn { grid-column: 1 / -1; } }
+
+.eco-filter { gap: 6px 8px; align-items: center; }
+.eco-filter .label { margin-right: 2px; }
+.eco-use { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; color: var(--ink); }
+.eco-use b { font: 400 16px/1 var(--f-pixel); border: 1px solid var(--line); background: var(--panel-2); padding: 3px 6px; border-radius: 4px; margin-right: 6px; }

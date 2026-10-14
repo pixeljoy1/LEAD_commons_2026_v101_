@@ -218,3 +218,8 @@ The signed-in persona's own lanes come first, tagged Yours. Signed out shows all
 **Learn follows the persona.** Each of the seven roles has its own ordered sequence of modules. Step 1 is LM-SP-1 for everyone. The first unfinished step is "Your next step" (R26). Module pages say "Step n of N for <role>", and the lessons in LM-SP-1 carry a short note for the role.
 
 **Removed.** The Verdict, Choose a role and Provisions pages, the workshop evidence table and "what the room adds" text, spec codes in headings, and the five-checks card on the homepage. The footer keeps links, photo credits and the small UXINDIA logo.
+
+
+## Round 11 (v1.1): a tighter homepage map
+
+"What is in it for you" now takes less vertical space: one filter row, the map, and a single right-hand pane that explains how to read and use it. The four-step "When does this work?" panel is gone, as are the "Where LEAD is today" and "Everything, in detail" sections. "Why people stay" is now "What keeps you here". The map drawing is unchanged.

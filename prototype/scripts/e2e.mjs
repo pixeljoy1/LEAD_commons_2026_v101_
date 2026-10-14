@@ -105,7 +105,7 @@ const banned = ['Lifecycle', 'Retention', 'Blueprint', 'Lineage', 'Value exchang
 const hits = banned.filter((w) => homeText.includes(w)).concat(/\bgates?\b/i.test(homeText) ? ['gate'] : []);
 ok('Home: no internal jargon in the page body', hits.length === 0, hits.join(', '));
 const heads = await page.locator('main section:not(.car) h2').allTextContents();
-ok('Home: plain section headings in order (Your path stays folded)', ['Find your door', 'What is in it for you', 'What everyone gives and gets', 'Why people stay', 'Seven ways people work together', 'Ways to join and what they cost', 'Where LEAD is today', 'Everything, in detail', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
+ok('Home: plain section headings in order (Your path stays folded)', ['Find your door', 'What is in it for you', 'What everyone gives and gets', 'What keeps you here', 'Seven ways people work together', 'Ways to join and what they cost', 'Questions people ask', 'Ready to start?'].every((h, i) => heads[i] === h), heads.join(' | '));
 ok('Carousel: eight leaves, the guided story first, one h1', await page.locator('#car .leaf').count() === 8 && await page.locator('#car .leaf:not([hidden]) .sb').count() === 1 && await page.locator('main h1').count() === 1);
 ok('Carousel: the story has five captions and no controls inside it', await page.locator('#car .sb-cap').count() === 5 && await page.locator('#car .sb button').count() === 0);
 ok('Path: folded until a role is picked', await page.locator('#path').count() === 0);
@@ -574,24 +574,16 @@ ok('S24 the share change is in the audit log', await page.evaluate(() => LEAD.st
 
 /* ---------- S32: "What is in it for you" ---------- */
 await go(page, 'home');
-ok('S32 the big time tab bar is gone, a four-step control sits in the side panel', await page.locator('#ecosystem .phases').count() === 0 && await page.locator('#when .when-step').count() === 4);
-ok('S32 time steps have plain names', (await page.locator('#when .when-step b').allTextContents()).join('|') === 'Today, by hand|In this demo|Next: first pilots|Later: the full platform');
-ok('S32 three numbered steps explain the map', await page.locator('.eco-steps li').count() === 3);
+ok('S32 one right-hand pane explains how to read and use the map, with no time-step panel', await page.locator('#ecosystem .eco-side .card').count() === 1 && await page.locator('#when, .when-step, .eco-steps').count() === 0 && await page.locator('#eco-detail .eco-use li').count() === 3 && (await page.locator('#eco-detail').innerText()).includes('How to read and use this'));
 const chipNames = (await page.locator('#ecosystem [data-act="eco-kind"] >> nth=0').count()) ? await page.locator('#ecosystem [data-act="eco-kind"]').allTextContents() : [];
 ok('S32 value chips use the plain names', chipNames.map((t) => t.trim()).join('|') === 'Money|Real problems|Skills and learning|Proof of work|Jobs and hiring|Hours given|Credit and thanks|Privacy and consent', chipNames.join('|'));
-const c1 = await page.locator('#eco-count').textContent();
-await page.click('#when .when-step:nth-child(1)', { force: true }).catch(() => null);
-await page.click('[data-act="eco-phase"][data-id="v0"]');
-const c0 = await page.locator('#eco-count').textContent();
-ok('S32 the count sentence follows the step', c1.includes('In this demo') && c0.includes('Today, by hand') && c1 !== c0, `${c1} | ${c0}`);
-await page.click('[data-act="eco-phase"][data-id="p1"]');
 await page.click('#ecosystem [data-act="eco-kind"][data-id="money"]');
 const dimmed = await page.locator('#ecosystem .eco-flow.dim').count();
 ok('S32 a chip dims the other lines', dimmed > 0 && dimmed < await page.locator('#ecosystem .eco-flow').count());
 await page.click('#ecosystem [data-act="eco-kind"][data-id=""]');
 await page.click('#ecosystem .eco-node[data-id="student"]');
 const panel = await page.locator('#eco-detail').innerText();
-ok('S32 a group shows what it gives, gets and why it stays', /What they give/i.test(panel) && /What they get/i.test(panel) && /Why they stay/i.test(panel) && /Goes out to others/i.test(panel) && /Comes in from others/i.test(panel));
+ok('S32 a group shows what it gives, gets and why it stays', /What they give/i.test(panel) && /What they get/i.test(panel) && /What keeps them here/i.test(panel) && /Goes out to others/i.test(panel) && /Comes in from others/i.test(panel));
 await page.click('#eco-detail [data-act="path-role"][data-role="student"]');
 ok('S32 “See the Student path” unfolds Your path', await page.locator('#path').isVisible());
 await page.click('[data-act="path-close"]');
