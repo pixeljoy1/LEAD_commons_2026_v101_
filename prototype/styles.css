@@ -368,7 +368,7 @@ button.st:hover { background: var(--panel-2); }
 .loop-wrap .loop { border-radius: var(--r-m) var(--r-m) 0 0; }
 
 /* ---------- tables ---------- */
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--panel); }
+.table-wrap { position: relative; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-m); background: var(--panel); }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { font: 500 11px/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--panel); }
 td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--body); }
@@ -839,3 +839,5 @@ fieldset.q legend { padding: 0 6px; }
 .progress-line { display: flex; gap: 6px; flex-wrap: wrap; font: 500 11px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
 .progress-line span { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
 .progress-line span.on { border-color: var(--umo-blue); color: var(--ink); }
+
+.section > *, .page > * { min-width: 0; }
