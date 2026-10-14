@@ -574,7 +574,7 @@ ok('S24 the share change is in the audit log', await page.evaluate(() => LEAD.st
 
 /* ---------- S32: "What is in it for you" ---------- */
 await go(page, 'home');
-ok('S32 one right-hand pane explains how to read and use the map, with no time-step panel', await page.locator('#ecosystem .eco-side .card').count() === 1 && await page.locator('#when, .when-step, .eco-steps').count() === 0 && await page.locator('#eco-detail .eco-use li').count() === 3 && (await page.locator('#eco-detail').innerText()).includes('How to read and use this'));
+ok('S32 one right-hand pane explains how to read and use the map, with no time-step panel', await page.locator('#ecosystem .eco-side .card').count() === 1 && await page.locator('#when, .when-step, .eco-steps').count() === 0 && await page.locator('#eco-detail .eco-use li').count() === 3 && /how to read and use this/i.test(await page.locator('#eco-detail').innerText()));
 const chipNames = (await page.locator('#ecosystem [data-act="eco-kind"] >> nth=0').count()) ? await page.locator('#ecosystem [data-act="eco-kind"]').allTextContents() : [];
 ok('S32 value chips use the plain names', chipNames.map((t) => t.trim()).join('|') === 'Money|Real problems|Skills and learning|Proof of work|Jobs and hiring|Hours given|Credit and thanks|Privacy and consent', chipNames.join('|'));
 await page.click('#ecosystem [data-act="eco-kind"][data-id="money"]');

@@ -132,7 +132,7 @@
     const m = M();
     return `<section class="section" id="ecosystem" aria-label="What is in it for you">
       ${heading('What is in it for you', 'Every group gives something and gets something back. Tap your group, then a line.')}
-      <div class="row eco-filter" role="group" aria-label="Show only what moves between groups"><span class="label">Show only</span>${content.valueKinds.map((k) => `<button class="chip" data-act="eco-kind" data-id="${k.id}" aria-pressed="${m.st.kinds.has(k.id)}" title="${esc(k.note)}" aria-label="${esc(k.label)}: ${esc(k.note)}"><span class="vk vk-${k.id}"></span>${esc(k.label)}</button>`).join('')}</div>
+      <div class="row eco-filter" role="group" aria-label="Show only what moves between groups"><span class="label">Show only</span>${content.valueKinds.map((k) => `<button class="chip" data-act="eco-kind" data-id="${k.id}" aria-pressed="${m.st.kinds.has(k.id)}" title="${esc(k.note)}" aria-label="${esc(k.label)}: ${esc(k.note)}"><span class="vk vk-${k.id}"></span>${esc(k.label)}</button>`).join('')}${m.st.kinds.size ? '<button class="chip" data-act="eco-kind" data-id="">Show all</button>' : ''}</div>
       <div class="eco"><div class="eco-canvas">${m.svg()}</div><div class="eco-side"><div id="eco-detail">${m.detail()}</div></div></div>
     </section>`;
   }
