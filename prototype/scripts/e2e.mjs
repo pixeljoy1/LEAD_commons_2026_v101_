@@ -261,7 +261,7 @@ await page.fill('#po-title', 'Visual designer'); await page.click('form[data-for
 await as(page, 'student'); await goRaw(page, 'jobs');
 await page.locator('#jobs-cards [data-job] :text("Visual designer")').first().waitFor();
 await page.locator('#jobs-cards .job-card:has-text("Visual designer") [data-act="job-apply"]').click();
-await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]'); await page.click('[data-act="job-dlg-close"] >> nth=0');
+await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]'); await page.click('#job-dialog .icon-btn[data-act="job-dlg-close"]');
 await as(page, 'industry'); await goRaw(page, 'jobs');
 ok('Design Jobs: industry opens a role, a student applies, industry sees the applicant', await page.locator('[data-lane="role"] [data-panel="responds"] >> text=Aanya Rao').count() >= 1);
 await as(page, 'head'); await goRaw(page, 'jobs');
@@ -288,7 +288,7 @@ await as(page, 'admin'); await goRaw(page, 'jobs');
 await page.click('form[data-form="post-cohort"] button[type="submit"]');
 await as(page, 'open'); await goRaw(page, 'jobs');
 await page.locator('#jobs-cards .job-card:has-text("Open cohort") [data-act="job-apply"]').first().click();
-await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]'); await page.click('[data-act="job-dlg-close"] >> nth=0');
+await page.click('[data-act="job-dlg-next"]'); await page.locator('#jd-consent').check(); await page.click('#job-dialog form button[type="submit"]'); await page.click('[data-act="job-submit"]'); await page.click('#job-dialog .icon-btn[data-act="job-dlg-close"]');
 ok('Design Jobs: the admin opens a cohort call and an open learner applies', await page.evaluate(() => LEAD.store.loop.opportunities.some((o) => o.lane === 'cohort' && o.id !== 'op4') && LEAD.store.loop.audit.some((a) => /Open-cohort call opened/.test(a.action))));
 await page.evaluate(() => LEAD.store.resetDemo());
 await as(page, 'student');
@@ -707,7 +707,7 @@ ok('Apply: details need consent before submit', await page.locator('[data-act="j
 await page.locator('#jd-consent').check(); await page.fill('#jd-note', 'I framed this problem on my live project.'); await page.click('#job-dialog form button[type="submit"]');
 await page.click('[data-act="job-submit"]');
 ok('Apply: submitting records the application and the card shows Applied', await page.locator('#job-done').count() === 1 && await page.evaluate(() => LEAD.store.loop.applications.some((a) => a.opportunityId === 'op3' && a.studentId === 's1' && a.note.includes('framed')) && LEAD.store.loop.audit.some((a) => /Application sent/.test(a.action))));
-await page.click('[data-act="job-dlg-close"] >> nth=0');
+await page.click('#job-dialog .icon-btn[data-act="job-dlg-close"]');
 ok('Apply: the listing now says Applied and the progress sits under Who responds', await page.locator('#jobs-cards .job-card:has-text("Service design intern") [data-applied]').count() === 1 && await page.locator('[data-myapp] .progress-line').count() >= 1);
 await page.locator('#jobs-cards .job-card:has-text("Open cohort") [data-act="job-apply"]').first().click();
 ok('Apply: a student cannot apply to an open-cohort call', (await page.locator('#job-warn').innerText()).includes('Open learner'));
